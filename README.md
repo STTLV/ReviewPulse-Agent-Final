@@ -7,7 +7,7 @@ Proyecto del curso Inteligencia Artificial, Universidad Tecnológica de Bolívar
 **Aplicación pública verificada:** https://reviewpulse-agent-sttlv.streamlit.app/
 **Repositorio de entrega (STTLV):** https://github.com/STTLV/ReviewPulse-Agent-Final
 **Integrantes:** Ellen Nicole Ordoñez Chavez y Sara Bastidas Triana.
-**Implementación inicial:** desarrollada por Ellen con apoyo de Claude. **Auditoría, pruebas y correcciones finales:** realizadas por el equipo con apoyo de ChatGPT.
+**Implementación inicial:** desarrollada por el grupo con apoyo de Claude. **Auditoría, pruebas y correcciones finales:** realizadas por el equipo con apoyo de ChatGPT.
 **Evidencias de las 60 corridas:** https://drive.google.com/drive/folders/1CnpElJThx8Cf-WtnUxzvz43CeNVsFXdq?usp=drive_link
 
 > **Importante:** la aplicación usa reseñas generadas por el simulador, no las API de TripAdvisor ni Google.
