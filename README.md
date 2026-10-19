@@ -6,7 +6,9 @@ Proyecto del curso Inteligencia Artificial, Universidad Tecnológica de Bolívar
 
 **Aplicación pública verificada:** https://reviewpulse-agent-sttlv.streamlit.app/
 **Repositorio de entrega (STTLV):** https://github.com/STTLV/ReviewPulse-Agent-Final
-**Base del código desarrollada por Ellen:** https://github.com/Ellen-01/reviewpulse-agent
+**Integrantes:** Ellen Nicole Ordoñez Chavez y Sara Bastidas Triana.
+**Implementación inicial:** desarrollada por Ellen con apoyo de Claude. **Auditoría, pruebas y correcciones finales:** realizadas por el equipo con apoyo de ChatGPT.
+**Evidencias de las 60 corridas:** https://drive.google.com/drive/folders/1CnpElJThx8Cf-WtnUxzvz43CeNVsFXdq?usp=drive_link
 
 > **Importante:** la aplicación usa reseñas generadas por el simulador, no las API de TripAdvisor ni Google.
 > El guardado en SQLite y la generación de reportes se verifican en tiempo simulado;
@@ -26,7 +28,7 @@ mezclarlo con entornos de otros proyectos.
 
 ```bash
 git clone https://github.com/STTLV/ReviewPulse-Agent-Final.git
-cd reviewpulse-agent
+cd ReviewPulse-Agent-Final
 python -m venv .venv
 source .venv/bin/activate        # en Windows: .venv\Scripts\activate
 pip install -r requirements.txt
@@ -57,7 +59,8 @@ paquete separado **`ReviewPulse_Ellen_Evidencias_60_Corridas.zip`**, que contien
 histórica previa al arreglo de SQLite: 60 logs JSONL, bases SQLite, reportes y bandejas.
 Las métricas, el modelo y los umbrales de dicha evidencia coinciden con esta versión.
 Este paquete **no** equivale a afirmar que se repitieron las 60 corridas tras el arreglo.
-Adjuntar el ZIP de evidencia a la entrega docente, no solamente este repositorio.
+El ZIP histórico se comparte mediante la carpeta pública de Google Drive enlazada arriba y
+en el informe final; **la plataforma académica solo permite entregar dos archivos PDF**.
 No sustituya la batería oficial con `--rapido`.
 
 **Resultados de la batería documentada:** M1 no se cumple (polaridad 81 % en el conjunto de control), M2 no se cumple (52 % de incidentes detectados en 24 h), M3 y M4 sí en simulación (100 % de reportes locales generados a tiempo, 3,1 % de falsas alertas). El análisis está en la sección 9.7 del documento.
@@ -90,14 +93,14 @@ en Windows sin `PermissionError [WinError 32]`. Las pruebas en `tests/` verifica
 
 ## Documentación académica
 
-El **documento PDF definitivo** y la **bitácora de uso de IA** se entregan como archivos
-académicos por separado, después de validación de las dos integrantes. No confundir el
-PDF antiguo de trabajo con el PDF ajustado de la entrega: debe contener la sección
-**9.9 Enlaces**, con el nuevo GitHub y la aplicación pública, y presentar las metas SMART
-cumplidas e incumplidas con sus limitaciones reales.
+El **informe final** y la **bitácora de uso de IA** ya se entregaron por separado en
+formato PDF en el aula virtual, de acuerdo con la restricción de dos archivos. El informe
+incluye la sección **9.9 Enlaces** y distingue las medidas SMART cumplidas y no cumplidas.
 
-Los logs históricos detallados están en `ReviewPulse_Ellen_Evidencias_60_Corridas.zip`
-(paquete de evidencia adjunto a la entrega; no alojado en este repositorio).
+La carpeta `docs/` conserva los diagramas y archivos técnicos de trabajo; **no es la
+versión definitiva del informe ni de la bitácora presentada al docente**. Los registros
+históricos detallados se conservan en `ReviewPulse_Ellen_Evidencias_60_Corridas.zip`,
+disponible en la [carpeta pública de Google Drive](https://drive.google.com/drive/folders/1CnpElJThx8Cf-WtnUxzvz43CeNVsFXdq?usp=drive_link), no en este repositorio.
 
 ## Despliegue en Streamlit Community Cloud
 
@@ -105,8 +108,8 @@ Los logs históricos detallados están en `ReviewPulse_Ellen_Evidencias_60_Corri
 **Repositorio de origen del despliegue:** https://github.com/STTLV/ReviewPulse-Agent-Final (rama `main`).
 
 Se desplegó desde Streamlit Community Cloud, archivo principal `app/streamlit_app.py`,
-Python 3.13, scikit-learn 1.9.1. El repositorio puede mantenerse privado mientras
-la aplicación sea pública para su evaluación.
+Python 3.13, scikit-learn 1.9.1. El repositorio y la aplicación son públicos
+para que el docente pueda consultar el código y ejecutar la demostración.
 
 **Comprobación comunicada por el equipo, 19/10/2026:** acceso en incógnito sin iniciar sesión;
 menús *Resumen*, *Reseñas del hotel* (incluidos filtros), *Resumen por semana* y *Probar una reseña*;
@@ -122,7 +125,7 @@ estadística completa de 60 corridas que respalda los valores SMART.
    pulsar *Ejecutar desde cero* y revisar la alerta, el reporte y las fases del registro.
 4. Repetir con `E11`, semilla `11`, para evidenciar fallos de plataformas y alerta tardía.
 5. Abrir la pestaña *Resultados de las pruebas* para consultar M1–M4; descargar o revisar
-   `salidas/pruebas/tabla_resultados.md` y el ZIP histórico de corridas adjunto a la entrega.
+   `salidas/pruebas/tabla_resultados.md` y la evidencia histórica en Google Drive.
 
 ## Estructura
 
@@ -147,7 +150,7 @@ pruebas/
 datos/                 conjuntos de evaluación manual y modelo entrenado
 config/config.json     umbrales de decisión que fija el gerente
 app/streamlit_app.py   interfaz
-docs/                  diagramas UML, matriz de decisión, guion del video, bitácora de IA
+docs/                  diagramas UML, matriz de decisión y archivos técnicos de trabajo
 ```
 
 ## Dónde está el ciclo percepción → decisión → acción
