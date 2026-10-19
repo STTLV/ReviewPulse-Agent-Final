@@ -1,0 +1,61 @@
+escenario,nombre,tipo,semilla,segundos,incidentes_relevantes,detectados_24h,detectados_tarde,latencia_media_h,alertas_total,alertas_vp,alertas_fp,fp_detalle,semanas_cerradas,reportes_a_tiempo,latencia_reporte_max_h,reportes_incompletos,resenas_clasificadas,resenas_descartadas,exactitud_polaridad_flujo,exactitud_tema_flujo,revision_manual,log
+E01,E01 Operación estable,normal,11,3.01,0,0,0,,0,0,0,,14,14,12.0,0,489,21,0.9325153374233128,0.9529652351738241,35,salidas/pruebas/corridas/E01_s11/log_ejecucion.jsonl
+E01,E01 Operación estable,normal,22,2.85,0,0,0,,0,0,0,,14,14,12.0,0,472,34,0.9322033898305084,0.9427966101694916,33,salidas/pruebas/corridas/E01_s22/log_ejecucion.jsonl
+E01,E01 Operación estable,normal,33,2.85,0,0,0,,0,0,0,,14,14,12.0,0,496,22,0.9314516129032258,0.9274193548387096,41,salidas/pruebas/corridas/E01_s33/log_ejecucion.jsonl
+E01,E01 Operación estable,normal,44,2.68,0,0,0,,0,0,0,,14,14,12.0,0,476,34,0.9516806722689075,0.9516806722689075,35,salidas/pruebas/corridas/E01_s44/log_ejecucion.jsonl
+E01,E01 Operación estable,normal,55,2.95,0,0,0,,0,0,0,,14,14,12.0,0,481,25,0.9459459459459459,0.9480249480249481,31,salidas/pruebas/corridas/E01_s55/log_ejecucion.jsonl
+E02,E02 Incidente de limpieza,normal,11,2.74,1,1,0,12.0,1,1,0,,14,14,12.0,0,486,21,0.9279835390946503,0.9567901234567902,37,salidas/pruebas/corridas/E02_s11/log_ejecucion.jsonl
+E02,E02 Incidente de limpieza,normal,22,2.78,1,1,0,12.0,1,1,0,,14,14,12.0,0,472,34,0.9322033898305084,0.9427966101694916,32,salidas/pruebas/corridas/E02_s22/log_ejecucion.jsonl
+E02,E02 Incidente de limpieza,normal,33,2.76,1,0,0,,0,0,0,,14,14,12.0,0,501,21,0.9261477045908184,0.936127744510978,43,salidas/pruebas/corridas/E02_s33/log_ejecucion.jsonl
+E02,E02 Incidente de limpieza,normal,44,2.5,1,1,0,12.0,1,1,0,,14,14,12.0,0,439,31,0.9544419134396356,0.9498861047835991,32,salidas/pruebas/corridas/E02_s44/log_ejecucion.jsonl
+E02,E02 Incidente de limpieza,normal,55,2.87,1,0,0,,0,0,0,,14,14,12.0,0,481,25,0.9501039501039501,0.9459459459459459,31,salidas/pruebas/corridas/E02_s55/log_ejecucion.jsonl
+E03,E03 Dos incidentes,normal,11,2.73,2,1,0,12.0,1,1,0,,14,14,12.0,0,489,25,0.9447852760736196,0.950920245398773,31,salidas/pruebas/corridas/E03_s11/log_ejecucion.jsonl
+E03,E03 Dos incidentes,normal,22,3.07,2,1,0,12.0,1,1,0,,14,14,12.0,0,468,34,0.9423076923076923,0.9572649572649573,28,salidas/pruebas/corridas/E03_s22/log_ejecucion.jsonl
+E03,E03 Dos incidentes,normal,33,3.01,2,1,0,12.0,1,1,0,,14,14,12.0,0,487,20,0.9363449691991786,0.9260780287474333,39,salidas/pruebas/corridas/E03_s33/log_ejecucion.jsonl
+E03,E03 Dos incidentes,normal,44,2.77,2,2,0,12.0,2,2,0,,14,14,12.0,0,450,30,0.9444444444444444,0.9488888888888889,36,salidas/pruebas/corridas/E03_s44/log_ejecucion.jsonl
+E03,E03 Dos incidentes,normal,55,2.94,2,2,0,12.0,2,2,0,,14,14,12.0,0,470,24,0.9446808510638298,0.951063829787234,33,salidas/pruebas/corridas/E03_s55/log_ejecucion.jsonl
+E04,E04 Temporada alta,limite,11,3.81,0,0,0,,0,0,0,,14,14,12.0,0,704,32,0.9460227272727273,0.9431818181818182,50,salidas/pruebas/corridas/E04_s11/log_ejecucion.jsonl
+E04,E04 Temporada alta,limite,22,3.71,0,0,0,,1,0,1,s11-ubicacion,14,14,12.0,0,696,50,0.9267241379310345,0.9511494252873564,49,salidas/pruebas/corridas/E04_s22/log_ejecucion.jsonl
+E04,E04 Temporada alta,limite,33,3.38,0,0,0,,0,0,0,,14,14,12.0,0,707,32,0.9448373408769448,0.9321074964639321,53,salidas/pruebas/corridas/E04_s33/log_ejecucion.jsonl
+E04,E04 Temporada alta,limite,44,3.33,0,0,0,,0,0,0,,14,14,12.0,0,678,48,0.9380530973451328,0.9513274336283186,57,salidas/pruebas/corridas/E04_s44/log_ejecucion.jsonl
+E04,E04 Temporada alta,limite,55,3.47,0,0,0,,0,0,0,,14,14,12.0,0,726,36,0.9366391184573003,0.9421487603305785,55,salidas/pruebas/corridas/E04_s55/log_ejecucion.jsonl
+E05,E05 Incidente moderado,limite,11,2.85,1,1,0,12.0,1,1,0,,14,14,12.0,0,492,17,0.9369918699186992,0.9573170731707317,38,salidas/pruebas/corridas/E05_s11/log_ejecucion.jsonl
+E05,E05 Incidente moderado,limite,22,3.05,1,1,0,12.0,1,1,0,,14,14,12.0,0,473,33,0.9323467230443975,0.9429175475687104,32,salidas/pruebas/corridas/E05_s22/log_ejecucion.jsonl
+E05,E05 Incidente moderado,limite,33,2.96,1,0,0,,0,0,0,,14,14,12.0,0,473,24,0.9302325581395349,0.9260042283298098,42,salidas/pruebas/corridas/E05_s33/log_ejecucion.jsonl
+E05,E05 Incidente moderado,limite,44,3.17,1,0,0,,0,0,0,,14,14,12.0,0,476,34,0.9474789915966386,0.9495798319327731,36,salidas/pruebas/corridas/E05_s44/log_ejecucion.jsonl
+E05,E05 Incidente moderado,limite,55,2.84,1,0,0,,0,0,0,,14,14,12.0,0,479,25,0.9498956158663883,0.9457202505219207,31,salidas/pruebas/corridas/E05_s55/log_ejecucion.jsonl
+E06,E06 Variación leve,limite,11,2.97,0,0,0,,0,0,0,,14,14,12.0,0,489,21,0.9325153374233128,0.9550102249488752,35,salidas/pruebas/corridas/E06_s11/log_ejecucion.jsonl
+E06,E06 Variación leve,limite,22,3.01,0,0,0,,0,0,0,,14,14,12.0,0,472,34,0.9322033898305084,0.9427966101694916,33,salidas/pruebas/corridas/E06_s22/log_ejecucion.jsonl
+E06,E06 Variación leve,limite,33,3.33,0,0,0,,0,0,0,,14,14,12.0,0,502,26,0.9302788844621513,0.9282868525896414,41,salidas/pruebas/corridas/E06_s33/log_ejecucion.jsonl
+E06,E06 Variación leve,limite,44,3.27,0,0,0,,0,0,0,,14,14,12.0,0,476,34,0.9516806722689075,0.9516806722689075,35,salidas/pruebas/corridas/E06_s44/log_ejecucion.jsonl
+E06,E06 Variación leve,limite,55,3.1,0,0,0,,0,0,0,,14,14,12.0,0,481,25,0.9459459459459459,0.9480249480249481,31,salidas/pruebas/corridas/E06_s55/log_ejecucion.jsonl
+E07,E07 Volumen bajo,limite,11,1.31,1,0,0,,0,0,0,,14,14,12.0,0,147,9,0.9591836734693877,0.9183673469387755,16,salidas/pruebas/corridas/E07_s11/log_ejecucion.jsonl
+E07,E07 Volumen bajo,limite,22,1.47,1,0,0,,0,0,0,,14,14,12.0,0,168,10,0.9761904761904762,0.9702380952380952,9,salidas/pruebas/corridas/E07_s22/log_ejecucion.jsonl
+E07,E07 Volumen bajo,limite,33,1.39,1,0,0,,0,0,0,,14,14,12.0,0,185,5,0.9621621621621622,0.9459459459459459,17,salidas/pruebas/corridas/E07_s33/log_ejecucion.jsonl
+E07,E07 Volumen bajo,limite,44,1.44,1,0,0,,0,0,0,,14,14,12.0,0,146,11,0.9452054794520548,0.9246575342465754,9,salidas/pruebas/corridas/E07_s44/log_ejecucion.jsonl
+E07,E07 Volumen bajo,limite,55,1.3,1,0,0,,0,0,0,,14,14,12.0,0,160,9,0.93125,0.9625,14,salidas/pruebas/corridas/E07_s55/log_ejecucion.jsonl
+E08,E08 Ironía alta,limite,11,2.79,1,1,0,12.0,1,1,0,,14,14,12.0,0,484,20,0.9462809917355371,0.9524793388429752,38,salidas/pruebas/corridas/E08_s11/log_ejecucion.jsonl
+E08,E08 Ironía alta,limite,22,2.89,1,1,0,12.0,1,1,0,,14,14,12.0,0,484,34,0.9421487603305785,0.9338842975206612,37,salidas/pruebas/corridas/E08_s22/log_ejecucion.jsonl
+E08,E08 Ironía alta,limite,33,2.71,1,1,0,12.0,1,1,0,,14,14,12.0,0,512,29,0.939453125,0.947265625,33,salidas/pruebas/corridas/E08_s33/log_ejecucion.jsonl
+E08,E08 Ironía alta,limite,44,2.45,1,1,0,12.0,1,1,0,,14,14,12.0,0,442,27,0.9615384615384616,0.9547511312217195,18,salidas/pruebas/corridas/E08_s44/log_ejecucion.jsonl
+E08,E08 Ironía alta,limite,55,2.7,1,1,0,12.0,1,1,0,,14,14,12.0,0,477,26,0.9371069182389937,0.9475890985324947,34,salidas/pruebas/corridas/E08_s55/log_ejecucion.jsonl
+E09,E09 Entradas inválidas,falla,11,2.46,1,0,0,,0,0,0,,14,14,12.0,0,353,138,0.9235127478753541,0.9490084985835694,27,salidas/pruebas/corridas/E09_s11/log_ejecucion.jsonl
+E09,E09 Entradas inválidas,falla,22,2.76,1,1,0,12.0,1,1,0,,14,14,12.0,0,372,114,0.9489247311827957,0.9596774193548387,17,salidas/pruebas/corridas/E09_s22/log_ejecucion.jsonl
+E09,E09 Entradas inválidas,falla,33,2.43,1,1,0,12.0,1,1,0,,14,14,12.0,0,362,127,0.9530386740331491,0.930939226519337,36,salidas/pruebas/corridas/E09_s33/log_ejecucion.jsonl
+E09,E09 Entradas inválidas,falla,44,2.67,1,1,0,12.0,1,1,0,,14,14,12.0,0,384,109,0.9348958333333334,0.9635416666666666,28,salidas/pruebas/corridas/E09_s44/log_ejecucion.jsonl
+E09,E09 Entradas inválidas,falla,55,3.2,1,1,0,12.0,1,1,0,,14,14,12.0,0,374,144,0.9438502673796791,0.9411764705882353,34,salidas/pruebas/corridas/E09_s55/log_ejecucion.jsonl
+E10,E10 TripAdvisor caído,falla,11,3.58,1,1,0,24.0,1,1,0,,14,14,24.0,1,458,20,0.9323144104803494,0.9432314410480349,36,salidas/pruebas/corridas/E10_s11/log_ejecucion.jsonl
+E10,E10 TripAdvisor caído,falla,22,3.22,1,1,0,24.0,1,1,0,,14,14,24.0,1,478,37,0.9497907949790795,0.9476987447698745,36,salidas/pruebas/corridas/E10_s22/log_ejecucion.jsonl
+E10,E10 TripAdvisor caído,falla,33,3.28,1,1,0,24.0,1,1,0,,14,14,24.0,1,494,25,0.9311740890688259,0.9251012145748988,39,salidas/pruebas/corridas/E10_s33/log_ejecucion.jsonl
+E10,E10 TripAdvisor caído,falla,44,3.37,1,1,0,24.0,1,1,0,,14,14,24.0,1,457,28,0.9452954048140044,0.9518599562363238,36,salidas/pruebas/corridas/E10_s44/log_ejecucion.jsonl
+E10,E10 TripAdvisor caído,falla,55,2.94,1,1,0,24.0,1,1,0,,14,14,24.0,1,480,26,0.9479166666666666,0.95,30,salidas/pruebas/corridas/E10_s55/log_ejecucion.jsonl
+E11,E11 Todas las plataformas caídas,falla,11,2.64,1,0,1,,1,1,0,,14,14,24.0,2,487,20,0.9301848049281314,0.9589322381930184,36,salidas/pruebas/corridas/E11_s11/log_ejecucion.jsonl
+E11,E11 Todas las plataformas caídas,falla,22,2.59,1,0,1,,1,1,0,,14,14,24.0,2,473,33,0.9344608879492601,0.9429175475687104,32,salidas/pruebas/corridas/E11_s22/log_ejecucion.jsonl
+E11,E11 Todas las plataformas caídas,falla,33,2.49,1,0,1,,1,1,0,,14,14,24.0,2,472,25,0.934322033898305,0.9300847457627118,38,salidas/pruebas/corridas/E11_s33/log_ejecucion.jsonl
+E11,E11 Todas las plataformas caídas,falla,44,2.48,1,0,1,,1,1,0,,14,14,24.0,2,439,31,0.9544419134396356,0.9544419134396356,31,salidas/pruebas/corridas/E11_s44/log_ejecucion.jsonl
+E11,E11 Todas las plataformas caídas,falla,55,2.56,1,0,1,,1,1,0,,14,14,24.0,2,483,23,0.9440993788819876,0.9503105590062112,37,salidas/pruebas/corridas/E11_s55/log_ejecucion.jsonl
+E12,E12 Arranque en frío,falla,11,3.34,1,0,0,,0,0,0,,14,14,12.0,0,477,32,0.9350104821802935,0.9580712788259959,34,salidas/pruebas/corridas/E12_s11/log_ejecucion.jsonl
+E12,E12 Arranque en frío,falla,22,2.81,1,0,0,,0,0,0,,14,14,12.0,0,483,31,0.9461697722567288,0.9420289855072463,33,salidas/pruebas/corridas/E12_s22/log_ejecucion.jsonl
+E12,E12 Arranque en frío,falla,33,2.83,1,0,0,,0,0,0,,14,14,12.0,0,498,23,0.9618473895582329,0.9477911646586346,32,salidas/pruebas/corridas/E12_s33/log_ejecucion.jsonl
+E12,E12 Arranque en frío,falla,44,2.77,1,0,0,,0,0,0,,14,14,12.0,0,477,33,0.9706498951781971,0.9475890985324947,38,salidas/pruebas/corridas/E12_s44/log_ejecucion.jsonl
+E12,E12 Arranque en frío,falla,55,2.56,1,0,0,,0,0,0,,14,14,12.0,0,477,29,0.9475890985324947,0.949685534591195,32,salidas/pruebas/corridas/E12_s55/log_ejecucion.jsonl

@@ -1,0 +1,12 @@
+{
+  "fijados_el": "2026-10-15T00:40:49-05:00",
+  "nota": "Umbrales fijados antes de ejecutar las pruebas a partir de la sección 7 del diseño. No se modifican después de ver resultados.",
+  "M1_exactitud_polaridad": 0.85,
+  "M1_exactitud_tema": 0.85,
+  "M1_rechazo_entradas_invalidas": 0.95,
+  "M2_deteccion_24h": 0.90,
+  "M3_reportes_a_tiempo": 1.00,
+  "M4_falsos_positivos_max": 0.10,
+  "repeticiones": 5,
+  "semillas": [11, 22, 33, 44, 55]
+}

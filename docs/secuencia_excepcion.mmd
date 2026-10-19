@@ -1,0 +1,35 @@
+sequenceDiagram
+    autonumber
+    participant P as Agente: Percepción<br/>percibir()
+    participant D as Agente: Decisión<br/>decidir() + planificar()
+    participant A as Agente: Acción<br/>actuar()
+    participant E as Entorno<br/>TripAdvisor / Google (simulador)
+    participant R as Repositorio histórico (SQLite)
+    participant N as Notificador
+    actor G as Gerente
+
+    Note over P,E: Lunes 12:00, semana 8 cerrada hace 12 h, TripAdvisor caído
+    P->>E: consultar("TripAdvisor", cursor, ahora)
+    E--xP: PlataformaNoDisponible
+    P->>E: consultar("Google", cursor, ahora)
+    E-->>P: reseñas nuevas
+    P->>D: Percepcion(disponibilidad = {TripAdvisor: false, Google: true})
+    D->>D: hechos sin "puede_cerrar" → la meta de reporte no tiene plan
+    D-->>A: Plan[limpiar, clasificar, actualizar] + motivo "esperar reintento"
+    A->>A: esperar (log: ACCION esperar)
+    loop reintento cada 6 h mientras quede plazo
+        P->>E: consultar("TripAdvisor", …)
+        alt la plataforma volvió
+            E-->>P: reseñas acumuladas
+            D-->>A: Plan completo con datos completos
+        else sigue caída y es el último ciclo antes de 24 h
+            E--xP: PlataformaNoDisponible
+            D->>D: ultimo_ciclo → agrega "puede_cerrar"
+            D-->>A: Plan completo con datos_incompletos
+            A->>R: comparar historial con lo disponible
+            A->>R: guardarReporte(incompleto = true)
+            A->>N: alerta solo si la evidencia parcial es significativa
+            N-->>G: reporte marcado "Datos incompletos"
+        end
+    end
+    Note over A,R: Si después llegan reseñas tardías, reevaluar_semanas_tardias() puede emitir una alerta "tardía"

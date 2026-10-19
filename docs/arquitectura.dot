@@ -1,0 +1,32 @@
+digraph G {
+  rankdir=TB; nodesep=0.35; ranksep=0.55;
+  node [shape=box, style="rounded,filled", fontname="Helvetica", fontsize=11, fillcolor="#FFFFFF", color="#3B5B92"];
+  edge [fontname="Helvetica", fontsize=9, color="#555555"];
+
+  subgraph cluster_env { label="Entorno (simulador: entorno.py)"; style="rounded,dashed"; color="#888888"; fontname="Helvetica";
+    TA [label="TripAdvisor\n(conector)"]; GO [label="Google\n(conector)"]; HOTEL [label="Estado oculto del hotel\n(incidentes, volumen)", fillcolor="#F2F2F2"]; }
+  HOTEL -> TA [style=dashed]; HOTEL -> GO [style=dashed];
+
+  subgraph cluster_agent { label="ReviewPulseAgent (agente.py)"; style="rounded"; color="#3B5B92"; fontname="Helvetica-Bold";
+    PER [label="Percepción\npercibir()\n[IBM 1]", fillcolor="#E3ECF8"];
+    PRE [label="Limpieza y validación\npreprocesamiento.py", fillcolor="#E3ECF8"];
+    EST [label="Estado interno\nMemoriaTrabajo + RepositorioHistorico\nmemoria.py  [IBM 3]", fillcolor="#FFF4D6"];
+    PLA [label="Planificador de metas\nplanificador.py (BFS)\n[IBM 2]", fillcolor="#E6F4EA"];
+    DEC [label="Razonamiento\n_evaluar_semana(): binomial + delta + mínimo\n[IBM 4]", fillcolor="#E6F4EA"];
+    ACT [label="Acción\nactuar()\n[IBM 5]", fillcolor="#FDE7E7"];
+  }
+  MOD [label="Modelo de sentimiento\nmodelo.py + lexico.py\n(herramienta externa)", fillcolor="#F2F2F2"];
+  DB [label="SQLite\nmemoria.db", shape=cylinder, fillcolor="#FFF4D6"];
+  NOT [label="Notificador\nactuadores.py [IBM 6]", fillcolor="#FDE7E7"];
+  REP [label="Generador de reporte\nactuadores.py [IBM 6]", fillcolor="#FDE7E7"];
+  CFG [label="config.json / Streamlit\n(umbrales del gerente)", fillcolor="#F2F2F2"];
+  GER [label="Gerente", shape=oval, fillcolor="#FFFFFF"];
+  LOG [label="Bitácora\nlog_ejecucion.jsonl", shape=note, fillcolor="#FFFFFF"];
+
+  TA -> PER [label="reseñas"]; GO -> PER [label="reseñas"]; CFG -> PER [label="umbrales"];
+  EST -> PER [label="semanas pendientes"];
+  PER -> PLA [label="Percepcion"]; PLA -> ACT [label="plan"]; ACT -> PRE; ACT -> MOD [label="predecir()"]; MOD -> ACT [label="prob."];
+  ACT -> DEC; DEC -> EST [dir=both]; EST -> DB [dir=both];
+  ACT -> NOT; ACT -> REP; NOT -> GER [label="alerta"]; REP -> GER [label="resumen"];
+  PER -> LOG [style=dotted]; PLA -> LOG [style=dotted]; ACT -> LOG [style=dotted];
+}

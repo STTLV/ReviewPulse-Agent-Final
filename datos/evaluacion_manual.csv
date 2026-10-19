@@ -1,0 +1,41 @@
+id,texto,tema,polaridad
+M01,"Llegamos y el cuarto olía delicioso, todo relimpio, hasta el control del televisor estaba desinfectado.",limpieza,positiva
+M02,"Las toallas grises de tanto uso y una mancha rara en la cortina. Deben mejorar el aseo urgente.",limpieza,negativa
+M03,"El aseo bien, normalito, como en cualquier hotel de la zona.",limpieza,neutra
+M04,"Me impresionó lo limpio del baño, ni una gota de agua en el espejo.",limpieza,positiva
+M05,"Había moho en el techo del baño y el tapete estaba mojado y sucio.",limpieza,negativa
+M06,"Arreglaban la habitación cada día y quedaba todo organizado y limpio.",limpieza,positiva
+M07,"Sábanas con olor a guardado y polvo en la mesa de noche.",limpieza,negativa
+M08,"Limpieza promedio, nada que reprochar pero tampoco para resaltar.",limpieza,neutra
+M09,"La piscina estaba verde, no nos pudimos bañar en ella. Muy sucia.",limpieza,negativa
+M10,"Todo pulcro y ordenado, las zonas húmedas muy bien mantenidas.",limpieza,positiva
+S01,"Don Carlos en recepción fue un amor, nos guardó las maletas y nos consiguió transporte.",servicio,positiva
+S02,"La señora de recepción nos habló feo y no nos quiso cambiar de habitación.",servicio,negativa
+S03,"El personal hizo lo que tenía que hacer, sin mayor interacción.",servicio,neutra
+S04,"Nos celebraron el cumpleaños con un postre sorpresa, qué atención tan bonita.",servicio,positiva
+S05,"Pedimos ayuda tres veces y nunca nos respondieron, muy mala atención.",servicio,negativa
+S06,"Los muchachos del restaurante siempre con una sonrisa y muy rápidos.",servicio,positiva
+S07,"Nos tocó esperar casi una hora para que nos entregaran la habitación y nadie se disculpó.",servicio,negativa
+S08,"La atención fue cumplida, ni más ni menos.",servicio,neutra
+S09,"El botones nos trató con desprecio cuando le pedimos ayuda.",servicio,negativa
+S10,"Muy amables en todo momento, resolvieron un problema con la reserva en minutos.",servicio,positiva
+U01,"Salir del hotel y tener la playa al frente no tiene precio, la ubicación es lo mejor.",ubicacion,positiva
+U02,"La zona es peligrosa, nos advirtieron no salir de noche.",ubicacion,negativa
+U03,"Queda a unos quince minutos en carro de los sitios turísticos.",ubicacion,neutra
+U04,"Caminando llegas al centro histórico, a los restaurantes y a los bares. Ubicación inmejorable.",ubicacion,positiva
+U05,"Al lado hay una obra en construcción y desde las seis de la mañana es puro ruido.",ubicacion,negativa
+U06,"Muy cerca de todo, la estación de bus y el centro comercial a una cuadra.",ubicacion,positiva
+U07,"Queda en las afueras y cada taxi nos salía carísimo, mal ubicado.",ubicacion,negativa
+U08,"El sector es normal, residencial, sin mucho para hacer cerca.",ubicacion,neutra
+U09,"No hay nada cerca y la calle está llena de huecos y basura.",ubicacion,negativa
+U10,"Lo mejor del hotel es lo bien ubicado que está, frente al malecón.",ubicacion,positiva
+P01,"Por lo que pagamos nos fue súper bien, desayuno incluido y habitación amplia.",precio,positiva
+P02,"Al hacer check-out nos aparecieron cobros que nadie nos había mencionado.",precio,negativa
+P03,"El valor de la noche está como en todos los hoteles parecidos.",precio,neutra
+P04,"Encontramos una oferta increíble, pagamos la mitad de lo que cuesta normalmente.",precio,positiva
+P05,"Es muy costoso para lo que ofrecen, hay hoteles mejores por menos plata.",precio,negativa
+P06,"Precio accesible y te dan muchísimo por lo que cuesta.",precio,positiva
+P07,"Nos cobraron el parqueadero carísimo y el desayuno aparte, no vale la pena.",precio,negativa
+P08,"Pagamos lo que decía la reserva, ni más ni menos.",precio,neutra
+P09,"Una estafa, el precio subió al llegar y no respetaron la tarifa reservada.",precio,negativa
+P10,"Excelente precio, económico y muy completo.",precio,positiva

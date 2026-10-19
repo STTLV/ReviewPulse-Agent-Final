@@ -1,0 +1,41 @@
+id,texto,tema,polaridad
+H01,"Cuando entramos al cuarto había una cucaracha caminando por la pared, pedimos cambio y el otro también estaba sucio.",limpieza,negativa
+H02,"Las sábanas blanquísimas y el baño reluciente, se nota el cuidado en el aseo.",limpieza,positiva
+H03,"El cuarto estaba limpio, como era de esperarse, nada fuera de lo común.",limpieza,neutra
+H04,"Tuve que pedir papel higiénico dos veces y nunca repusieron las toallas.",limpieza,negativa
+H05,"Muy aseado todo, desde el lobby hasta la terraza.",limpieza,positiva
+H06,"La alfombra tenía manchas y olía a cigarrillo viejo.",limpieza,negativa
+H07,"Las zonas comunes las mantienen limpias, eso sí lo destaco.",limpieza,positiva
+H08,"En cuanto a limpieza, cumplieron sin más.",limpieza,neutra
+H09,"El minibar tenía restos de comida del huésped anterior, qué falta de aseo.",limpieza,negativa
+H10,"Todo olía a limpio y la cama estaba perfectamente tendida.",limpieza,positiva
+H11,"La recepcionista de la noche fue grosera cuando le pedimos una cobija.",servicio,negativa
+H12,"El personal de la piscina siempre pendiente de que no nos faltara nada.",servicio,positiva
+H13,"Nos atendieron de forma cortés, sin nada que destacar.",servicio,neutra
+H14,"Solicitamos un taxi y en recepción se les olvidó, perdimos el vuelo casi.",servicio,negativa
+H15,"La chica del desayuno nos preparó algo especial para el niño, muy queridos todos.",servicio,positiva
+H16,"Tardaron muchísimo en traernos la comida y llegó fría.",servicio,negativa
+H17,"Un servicio impecable, nos trataron como reyes.",servicio,positiva
+H18,"El check-in fue normal y nos explicaron lo básico.",servicio,neutra
+H19,"Los empleados no saben resolver nada, todo hay que preguntarle a otro.",servicio,negativa
+H20,"Gente muy atenta, siempre con buena disposición.",servicio,positiva
+H21,"La calle del hotel es muy oscura y nos sentimos inseguros al volver de noche.",ubicacion,negativa
+H22,"Ubicado justo frente al mar, no se puede pedir más.",ubicacion,positiva
+H23,"Está en un barrio cualquiera, a media hora del centro.",ubicacion,neutra
+H24,"Hay un bar al lado que pone música hasta las tres de la mañana, imposible descansar.",ubicacion,negativa
+H25,"Muy céntrico, salíamos a pie a todos lados.",ubicacion,positiva
+H26,"Queda lejísimos, gastamos un dineral en transporte.",ubicacion,negativa
+H27,"La zona es bonita y tranquila, con cafés y parques cerca.",ubicacion,positiva
+H28,"La ubicación ni suma ni resta, está bien.",ubicacion,neutra
+H29,"Para llegar hay que pasar por una zona fea y sin pavimentar.",ubicacion,negativa
+H30,"Excelente sector, cerca de la playa y de los restaurantes.",ubicacion,positiva
+H31,"Nos cobraron un impuesto que no aparecía en la reserva, se aprovechan.",precio,negativa
+H32,"Súper buen precio, con desayuno y piscina incluidos.",precio,positiva
+H33,"El costo es parecido al de otros hoteles del sector.",precio,neutra
+H34,"Carísimo para lo pequeño de la habitación, no lo vale.",precio,negativa
+H35,"Pagamos muy poco por noche y quedamos contentos.",precio,positiva
+H36,"Te cobran todo aparte, hasta las toallas de la piscina.",precio,negativa
+H37,"La tarifa nos pareció justa y económica.",precio,positiva
+H38,"Lo que pagamos estuvo dentro de lo normal.",precio,neutra
+H39,"El precio que nos dieron al llegar fue mucho más alto que el de la página.",precio,negativa
+H40,"Muy buena relación entre lo que cuesta y lo que ofrecen.",precio,positiva

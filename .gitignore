@@ -1,0 +1,20 @@
+__pycache__/
+*.pyc
+salidas/demo/
+salidas/calibracion/*.log
+.streamlit/secrets.toml
+salidas/pruebas_rapido/
+.venv/
+venv/
+.env
+.streamlit/secrets.toml
+__pycache__/
+*.pyc
+salidas/pruebas/corridas/
+
+.pytest_cache/
+
+# Documentos pendientes de la version definitiva
+/docs/ReviewPulse-Agent_Documento_Ajustado.docx
+/docs/ReviewPulse-Agent_Documento_Ajustado.pdf
+/docs/bitacora_uso_ia.docx

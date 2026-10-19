@@ -1,0 +1,62 @@
+[
+  {
+    "conjunto": "todos",
+    "volumen": "x1",
+    "incidentes": 45,
+    "detectados": 29,
+    "deteccion": 0.644,
+    "alertas": 40,
+    "fp": 11,
+    "tasa_fp": 0.275
+  },
+  {
+    "conjunto": "todos",
+    "volumen": "x2",
+    "incidentes": 45,
+    "detectados": 36,
+    "deteccion": 0.8,
+    "alertas": 50,
+    "fp": 14,
+    "tasa_fp": 0.28
+  },
+  {
+    "conjunto": "todos",
+    "volumen": "x3",
+    "incidentes": 45,
+    "detectados": 36,
+    "deteccion": 0.8,
+    "alertas": 53,
+    "fp": 17,
+    "tasa_fp": 0.321
+  },
+  {
+    "conjunto": "sin fallas de plataforma ni arranque en frío",
+    "volumen": "x1",
+    "incidentes": 30,
+    "detectados": 20,
+    "deteccion": 0.667,
+    "alertas": 29,
+    "fp": 9,
+    "tasa_fp": 0.31
+  },
+  {
+    "conjunto": "sin fallas de plataforma ni arranque en frío",
+    "volumen": "x2",
+    "incidentes": 30,
+    "detectados": 26,
+    "deteccion": 0.867,
+    "alertas": 35,
+    "fp": 9,
+    "tasa_fp": 0.257
+  },
+  {
+    "conjunto": "sin fallas de plataforma ni arranque en frío",
+    "volumen": "x3",
+    "incidentes": 30,
+    "detectados": 26,
+    "deteccion": 0.867,
+    "alertas": 39,
+    "fp": 13,
+    "tasa_fp": 0.333
+  }
+]

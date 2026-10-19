@@ -1,0 +1,8 @@
+# Modelo datos/modelo.joblib serializado con scikit-learn 1.9.1.
+# Fijamos esa versión para no cargarlo con objetos serializados de otra versión.
+# No reentrenar ni sustituir el modelo sin repetir las pruebas y actualizar el PDF.
+numpy>=1.26,<3
+scikit-learn==1.9.1
+joblib>=1.3,<2
+pandas>=2.0,<3
+streamlit>=1.50,<2

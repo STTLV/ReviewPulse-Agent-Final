@@ -1,0 +1,42 @@
+sequenceDiagram
+    autonumber
+    actor G as Gerente
+    participant UI as Interfaz (Streamlit / config.json)
+    participant P as Agente: Percepción<br/>percibir()
+    participant D as Agente: Decisión<br/>decidir() + planificar()
+    participant A as Agente: Acción<br/>actuar()
+    participant E as Entorno<br/>TripAdvisor / Google (simulador)
+    participant M as Modelo de sentimiento<br/>(TF-IDF + léxico + LogReg)
+    participant R as Repositorio histórico (SQLite)
+    participant N as Notificador (correo / bandeja)
+
+    G->>UI: fijarUmbrales(α, delta, z, mínimo)
+    UI-->>P: config.json
+    loop cada 6 h de tiempo simulado
+        P->>E: consultar(plataforma, cursor, ahora)
+        E-->>P: reseñas nuevas + metadatos
+        P->>R: semanasPendientes()
+        R-->>P: semanas cerradas sin reporte
+        P->>D: Percepcion(lote, disponibilidad, semanas, horas)
+        D->>D: hechos → meta → BFS(acciones)
+        D-->>A: Plan[limpiar, clasificar, actualizar, comparar, decidir, reportar, registrar]
+        A->>A: validar(): idioma, vacío, HTML, fecha
+        A->>M: predecir(textos)
+        M-->>A: polaridad, tema, confianza
+        A->>R: guardarResena(etiqueta)
+        opt semana cerrada y margen de 12 h cumplido
+            A->>R: historial(k = 6 semanas)
+            R-->>A: agregados semanales
+            A->>A: prueba binomial + aumento + mínimo por tema
+            alt aumento significativo de negativas
+                A->>N: enviar(alerta en lenguaje natural)
+                N-->>G: correo de alerta
+                A->>R: guardarAlerta()
+            else variación normal
+                A->>A: registrar "sin alerta" con motivos
+            end
+            A->>R: guardarReporte() + cerrarSemana()
+            A-->>UI: resumen semanal por tema
+            UI-->>G: panel y reporte
+        end
+    end

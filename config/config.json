@@ -1,0 +1,13 @@
+{
+  "umbral_confianza": 0.55,
+  "alfa": 0.08,
+  "delta_minimo": 0.25,
+  "min_negativas": 6,
+  "semanas_historial": 6,
+  "min_semanas_historial": 3,
+  "margen_espera_h": 12,
+  "plazo_reporte_h": 24,
+  "intervalo_h": 6,
+  "destinatario": "gerente@hotelpiloto.co",
+  "z_minimo": 0.0
+}

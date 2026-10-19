@@ -1,0 +1,131 @@
+{
+  "puntajes": {
+    "ReviewPulse": 4.05,
+    "RetainIQ": 3.6
+  },
+  "influencia": [
+    [
+      "Viabilidad técnica",
+      0.25
+    ],
+    [
+      "Disponibilidad de datos o entorno",
+      0.2
+    ],
+    [
+      "Medibilidad del desempeño",
+      0.4
+    ],
+    [
+      "Complejidad de IA",
+      0.3
+    ],
+    [
+      "Costo y recursos",
+      0.0
+    ],
+    [
+      "Valor del problema",
+      0.1
+    ]
+  ],
+  "criterio_mas_influyente": "Medibilidad del desempeño",
+  "sensibilidad": [
+    {
+      "criterio": "Viabilidad técnica",
+      "cambio": "+10%",
+      "peso_nuevo": 0.35,
+      "ReviewPulse": 4.043,
+      "RetainIQ": 3.52,
+      "ganador": "ReviewPulse"
+    },
+    {
+      "criterio": "Viabilidad técnica",
+      "cambio": "-10%",
+      "peso_nuevo": 0.15,
+      "ReviewPulse": 4.057,
+      "RetainIQ": 3.68,
+      "ganador": "ReviewPulse"
+    },
+    {
+      "criterio": "Disponibilidad de datos o entorno",
+      "cambio": "+10%",
+      "peso_nuevo": 0.3,
+      "ReviewPulse": 4.044,
+      "RetainIQ": 3.525,
+      "ganador": "ReviewPulse"
+    },
+    {
+      "criterio": "Disponibilidad de datos o entorno",
+      "cambio": "-10%",
+      "peso_nuevo": 0.1,
+      "ReviewPulse": 4.056,
+      "RetainIQ": 3.675,
+      "ganador": "ReviewPulse"
+    },
+    {
+      "criterio": "Medibilidad del desempeño",
+      "cambio": "+10%",
+      "peso_nuevo": 0.3,
+      "ReviewPulse": 4.169,
+      "RetainIQ": 3.525,
+      "ganador": "ReviewPulse"
+    },
+    {
+      "criterio": "Medibilidad del desempeño",
+      "cambio": "-10%",
+      "peso_nuevo": 0.1,
+      "ReviewPulse": 3.931,
+      "RetainIQ": 3.675,
+      "ganador": "ReviewPulse"
+    },
+    {
+      "criterio": "Complejidad de IA",
+      "cambio": "+10%",
+      "peso_nuevo": 0.25,
+      "ReviewPulse": 3.926,
+      "RetainIQ": 3.765,
+      "ganador": "ReviewPulse"
+    },
+    {
+      "criterio": "Complejidad de IA",
+      "cambio": "-10%",
+      "peso_nuevo": 0.05,
+      "ReviewPulse": 4.174,
+      "RetainIQ": 3.435,
+      "ganador": "ReviewPulse"
+    },
+    {
+      "criterio": "Costo y recursos",
+      "cambio": "+10%",
+      "peso_nuevo": 0.2,
+      "ReviewPulse": 4.156,
+      "RetainIQ": 3.756,
+      "ganador": "ReviewPulse"
+    },
+    {
+      "criterio": "Costo y recursos",
+      "cambio": "-10%",
+      "peso_nuevo": 0.0,
+      "ReviewPulse": 3.944,
+      "RetainIQ": 3.444,
+      "ganador": "ReviewPulse"
+    },
+    {
+      "criterio": "Valor del problema",
+      "cambio": "+10%",
+      "peso_nuevo": 0.2,
+      "ReviewPulse": 3.933,
+      "RetainIQ": 3.644,
+      "ganador": "ReviewPulse"
+    },
+    {
+      "criterio": "Valor del problema",
+      "cambio": "-10%",
+      "peso_nuevo": 0.0,
+      "ReviewPulse": 4.167,
+      "RetainIQ": 3.556,
+      "ganador": "ReviewPulse"
+    }
+  ]
+}

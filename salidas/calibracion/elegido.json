@@ -1,0 +1,11 @@
+{
+  "alfa": 0.08,
+  "delta_minimo": 0.25,
+  "min_negativas": 6,
+  "z_minimo": 0.0,
+  "min_semanas_historial": 3,
+  "deteccion": 0.6333333333333333,
+  "alertas": 19,
+  "fp": 0,
+  "tasa_fp": 0.0
+}

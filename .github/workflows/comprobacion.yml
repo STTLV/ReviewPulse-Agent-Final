@@ -1,0 +1,33 @@
+name: Comprobación del agente
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Obtener código
+        uses: actions/checkout@v4
+      - name: Preparar Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: pip
+      - name: Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+      - name: Comprobar versión del modelo
+        run: |
+          python -c "import sklearn; assert sklearn.__version__ == '1.9.1', sklearn.__version__"
+      - name: Sintaxis de Python
+        run: python -m compileall -q reviewpulse app pruebas tests ejecutar_agente.py
+      - name: Pruebas de cierre SQLite
+        run: python -m unittest discover -s tests -v
+      - name: Caso normal E02
+        run: python ejecutar_agente.py --escenario E02 --semilla 11
+      - name: Caso de fallo E11
+        run: python ejecutar_agente.py --escenario E11 --semilla 11
