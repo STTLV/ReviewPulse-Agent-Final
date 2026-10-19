@@ -24,7 +24,7 @@ Base: ZIP `reviewpulse-agent-main.zip` aportado por el equipo. El proyecto se ma
 
 ## Cómo publicar de forma segura
 
-El contenido de este ZIP es la **raíz** del repositorio `https://github.com/Ellen-01/reviewpulse-agent`.
+En su primera versión el paquete estaba destinado a la **raíz** del repositorio original de Ellen; el repositorio actual de entrega es `https://github.com/STTLV/ReviewPulse-Agent-Final`.
 Subir **los archivos y carpetas de la raíz**, no la carpeta envolvente `reviewpulse-agent-main` como subcarpeta nueva. La alternativa recomendada es actualizar el repositorio existente con Git y subir solo los archivos modificados.
 No subir `.venv/`, `__pycache__/`, `.env`, secretos ni logs completos de `salidas/pruebas/corridas/` a menos que acuerden publicarlos; lo habitual es entregarlos aparte en un ZIP docente.
 
@@ -39,7 +39,7 @@ git commit -m "Corregir cierre SQLite y fijar dependencias del modelo"
 git push origin main
 ```
 
-Antes del `push`, comprobar `git remote -v`: el destino debe ser `https://github.com/Ellen-01/reviewpulse-agent.git`, **no** el repositorio de nuestro prototipo previo.
+Antes del `push`, comprobar `git remote -v`: para la entrega final el destino debe ser `https://github.com/STTLV/ReviewPulse-Agent-Final.git`. No utilizar el prototipo alternativo de la otra implementación.
 
 ## Verificación sugerida
 
@@ -61,3 +61,16 @@ py -3.13 -m venv .venv
 - Caso E11, semilla 11, ejecutado desde cero: **487 reseñas clasificadas, 20 descartadas, 14/14 reportes, dos reportes incompletos y una alerta tardía**.
 - Estas pruebas se ejecutaron aquí con **scikit-learn 1.8.0**, que advierte incompatibilidad con el modelo guardado en 1.9.1. **No se pudo instalar 1.9.1 en este entorno desconectado**; la instalación exacta y el primer GitHub Actions deben validarse en la computadora del equipo o CI. Python del entorno de pruebas: 3.13.
 - **No se repitió la batería completa de 60 corridas** y no se probó visualmente la interfaz alojada. No interpretar estas pruebas como nueva medición SMART.
+
+## Actualización de publicación y evidencia (19/10/2026)
+
+La versión corregida se publicó finalmente como **`https://github.com/STTLV/ReviewPulse-Agent-Final`**, rama `main`,
+y se desplegó como **`https://reviewpulse-agent-sttlv.streamlit.app/`**.
+Los enlaces de la sección original *Cómo publicar* se conservaban como instrucción
+histórica para el repositorio base de Ellen, no como la dirección final de evaluación.
+
+La estudiante comprobó las 7 funcionalidades del despliegue público en modo incógnito.
+GitHub Actions aprobó las pruebas de cierre SQLite y los escenarios E02/E11 con Python 3.13.
+Los registros de las 60 corridas originales se prepararon como ZIP de evidencia separado,
+con inventario y SHA-256. **No se ejecutó de nuevo toda la batería de 60 corridas**
+para esta actualización de enlaces: sus valores y límites no cambiaron.

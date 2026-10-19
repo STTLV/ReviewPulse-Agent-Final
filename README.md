@@ -4,7 +4,9 @@ Agente inteligente **basado en modelos y orientado a metas** (Russell y Norvig) 
 
 Proyecto del curso Inteligencia Artificial, Universidad Tecnológica de Bolívar (Tarea 3: implementación y pruebas).
 
-**Código fuente de esta implementación:** https://github.com/Ellen-01/reviewpulse-agent
+**Aplicación pública verificada:** https://reviewpulse-agent-sttlv.streamlit.app/
+**Repositorio de entrega (STTLV):** https://github.com/STTLV/ReviewPulse-Agent-Final
+**Base del código desarrollada por Ellen:** https://github.com/Ellen-01/reviewpulse-agent
 
 > **Importante:** la aplicación usa reseñas generadas por el simulador, no las API de TripAdvisor ni Google.
 > El guardado en SQLite y la generación de reportes se verifican en tiempo simulado;
@@ -23,7 +25,7 @@ mezclarlo con entornos de otros proyectos.
 ## Instalación
 
 ```bash
-git clone https://github.com/Ellen-01/reviewpulse-agent.git
+git clone https://github.com/STTLV/ReviewPulse-Agent-Final.git
 cd reviewpulse-agent
 python -m venv .venv
 source .venv/bin/activate        # en Windows: .venv\Scripts\activate
@@ -50,12 +52,15 @@ python pruebas/ejecutar_pruebas.py --rapido  # 1 repetición, para la demo en vi
 Resultados **resumidos** incluidos en el repositorio: `salidas/pruebas/tabla_resultados.md`,
 `resumen.json`, `m1_clasificacion.csv` y `escenarios.csv`. **Los logs detallados no se
 incluyen en GitHub**: la carpeta `salidas/pruebas/corridas/` está excluida para evitar
-publicar 60 bases SQLite y datos sintéticos extensos. Para generar todos los logs,
-ejecute la batería completa; para la evaluación docente, entregue por separado el ZIP
-con `corridas/` y sus JSONL, bases SQLite, reportes y bandejas de salida.
+publicar 60 bases SQLite y datos sintéticos extensos. Para generar todos los logs, ejecute la batería completa. El equipo dispone también del
+paquete separado **`ReviewPulse_Ellen_Evidencias_60_Corridas.zip`**, que contiene la evidencia
+histórica previa al arreglo de SQLite: 60 logs JSONL, bases SQLite, reportes y bandejas.
+Las métricas, el modelo y los umbrales de dicha evidencia coinciden con esta versión.
+Este paquete **no** equivale a afirmar que se repitieron las 60 corridas tras el arreglo.
+Adjuntar el ZIP de evidencia a la entrega docente, no solamente este repositorio.
 No sustituya la batería oficial con `--rapido`.
 
-**Resultados de la versión entregada:** M1 no se cumple (polaridad 81 % en el conjunto de control), M2 no se cumple (52 % de incidentes detectados en 24 h), M3 y M4 sí (100 % de reportes a tiempo, 3,1 % de falsos positivos). El análisis está en la sección 9.7 del documento.
+**Resultados de la batería documentada:** M1 no se cumple (polaridad 81 % en el conjunto de control), M2 no se cumple (52 % de incidentes detectados en 24 h), M3 y M4 sí en simulación (100 % de reportes locales generados a tiempo, 3,1 % de falsas alertas). El análisis está en la sección 9.7 del documento.
 
 **3. Interfaz web**
 
@@ -85,18 +90,39 @@ en Windows sin `PermissionError [WinError 32]`. Las pruebas en `tests/` verifica
 
 ## Documentación académica
 
-Los documentos existentes en `docs/ReviewPulse-Agent_Documento_Ajustado.*` son la copia
-incluida en el ZIP inicial y **están pendientes de ser sustituidos por una versión
-única y definitiva**: sus enlaces y la comparación de la métrica M1 aún deben
-revisarse. No tratarlos como el PDF final hasta completar la sección 9.9.
-La bitácora incluida en el ZIP también debe cotejarse con la versión aprobada
-por ambas integrantes. Este ajuste del código no cambia los resultados SMART.
+El **documento PDF definitivo** y la **bitácora de uso de IA** se entregan como archivos
+académicos por separado, después de validación de las dos integrantes. No confundir el
+PDF antiguo de trabajo con el PDF ajustado de la entrega: debe contener la sección
+**9.9 Enlaces**, con el nuevo GitHub y la aplicación pública, y presentar las metas SMART
+cumplidas e incumplidas con sus limitaciones reales.
+
+Los logs históricos detallados están en `ReviewPulse_Ellen_Evidencias_60_Corridas.zip`
+(paquete de evidencia adjunto a la entrega; no alojado en este repositorio).
 
 ## Despliegue en Streamlit Community Cloud
 
-1. Suba el repositorio a GitHub (público).
-2. En https://share.streamlit.io elija *Create app*, seleccione el repositorio, la rama `main` y el archivo `app/streamlit_app.py`.
-3. Python 3.11 o superior. No requiere secretos.
+**Aplicación ya desplegada:** https://reviewpulse-agent-sttlv.streamlit.app/
+**Repositorio de origen del despliegue:** https://github.com/STTLV/ReviewPulse-Agent-Final (rama `main`).
+
+Se desplegó desde Streamlit Community Cloud, archivo principal `app/streamlit_app.py`,
+Python 3.13, scikit-learn 1.9.1. El repositorio puede mantenerse privado mientras
+la aplicación sea pública para su evaluación.
+
+**Comprobación comunicada por el equipo, 19/10/2026:** acceso en incógnito sin iniciar sesión;
+menús *Resumen*, *Reseñas del hotel* (incluidos filtros), *Resumen por semana* y *Probar una reseña*;
+ejecuciones E02/semilla 11 y E11/semilla 11 desde *Demostración técnica*, sin WinError 32.
+GitHub Actions aprobó instalación, compatibilidad del modelo, pruebas SQLite y ambos escenarios.
+Estas verificaciones de despliegue fueron realizadas por la estudiante; no sustituyen la batería
+estadística completa de 60 corridas que respalda los valores SMART.
+
+**Recorrido para evaluación docente:**
+1. Abrir la aplicación pública y consultar *Resumen* y *Reseñas del hotel*.
+2. Probar una reseña breve en español en *Probar una reseña*.
+3. Entrar a *Demostración técnica → Ejecutar un escenario*; escoger `E02`, semilla `11`,
+   pulsar *Ejecutar desde cero* y revisar la alerta, el reporte y las fases del registro.
+4. Repetir con `E11`, semilla `11`, para evidenciar fallos de plataformas y alerta tardía.
+5. Abrir la pestaña *Resultados de las pruebas* para consultar M1–M4; descargar o revisar
+   `salidas/pruebas/tabla_resultados.md` y el ZIP histórico de corridas adjunto a la entrega.
 
 ## Estructura
 
