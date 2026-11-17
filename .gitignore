@@ -14,7 +14,7 @@ salidas/pruebas/corridas/
 
 .pytest_cache/
 
-# Documentos pendientes de la version definitiva
+# Documentos historicos conservados localmente
 /docs/ReviewPulse-Agent_Documento_Ajustado.docx
 /docs/ReviewPulse-Agent_Documento_Ajustado.pdf
 /docs/bitacora_uso_ia.docx

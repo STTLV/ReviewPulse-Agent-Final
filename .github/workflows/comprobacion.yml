@@ -27,6 +27,10 @@ jobs:
         run: python -m compileall -q reviewpulse app pruebas tests ejecutar_agente.py
       - name: Pruebas de cierre SQLite
         run: python -m unittest discover -s tests -v
+      - name: Línea base Hito 2 (40 reseñas)
+        run: |
+          python pruebas/linea_base_hito2.py
+          python -c "import json; d=json.load(open('salidas/pruebas/linea_base_hito2.json',encoding='utf-8')); assert d['metricas']['polaridad']['linea_base']['aciertos']==16 and d['metricas']['polaridad']['reviewpulse']['aciertos']==32; assert d['metricas']['tema']['linea_base']['aciertos']==10 and d['metricas']['tema']['reviewpulse']['aciertos']==34"
       - name: Caso normal E02
         run: python ejecutar_agente.py --escenario E02 --semilla 11
       - name: Caso de fallo E11

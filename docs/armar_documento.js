@@ -7,6 +7,9 @@ const { Document, Packer, Paragraph, TextRun, AlignmentType, HeadingLevel, Level
 
 const DOCS = __dirname;
 const ENLACES = TX.enlaces;
+if (!ENLACES.despliegue || !/^https:\/\/.+\.streamlit\.app\/?$/i.test(ENLACES.despliegue)) {
+  throw new Error("Antes de generar el documento final, define REVIEWPULSE_STREAMLIT_URL con la URL real de la aplicación publicada en Streamlit, por ejemplo: REVIEWPULSE_STREAMLIT_URL='https://tu-app.streamlit.app' node docs/armar_documento.js");
+}
 
 // ---------------------------------------------------------------- 9.1 arquitectura
 const s91 = [
@@ -168,9 +171,9 @@ const s97 = [
 const s98 = [H2("9.8 Limitaciones y trabajo futuro"), ...TX.limitaciones.map((t) => B(t))];
 const s99 = [
   H2("9.9 Enlaces"),
-  B(`Repositorio: ${ENLACES.repositorio}`),
-  B(`Plataforma de despliegue (Streamlit Community Cloud): ${ENLACES.despliegue}`),
-  B(`Video (≤ 20 min): ${ENLACES.video}`),
+  B(`Repositorio de código (GitHub): ${ENLACES.repositorio}`),
+  B(`Aplicación ejecutable (Streamlit Community Cloud): ${ENLACES.despliegue}`),
+  B("Modalidad de evidencia: opción A, plataforma de despliegue público; no aplica video."),
   B("Logs de las pruebas: salidas/pruebas/ en el repositorio (m1_clasificacion.csv, escenarios.csv, resumen.json, corridas/*/log_ejecucion.jsonl)"),
   B("Bitácora de uso de IA: docs/bitacora_uso_ia.docx"),
 ];

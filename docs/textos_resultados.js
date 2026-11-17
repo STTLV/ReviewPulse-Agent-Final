@@ -14,9 +14,10 @@ const det = (k) => `${Math.round(e[k].deteccion_media * 5 * (k === "E03" ? 2 : 1
 module.exports = {
   dim: { tipico: [2768, 1550], excepcion: [2768, 1456] },
   enlaces: {
-    repositorio: "[pegar enlace de GitHub]",
-    despliegue: "[pegar enlace de Streamlit Community Cloud]",
-    video: "[pegar enlace de YouTube no listado]",
+    repositorio: "https://github.com/STTLV/ReviewPulse-Agent-Final",
+    // Para generar el documento final, definir REVIEWPULSE_STREAMLIT_URL con la URL real publicada.
+    despliegue: (process.env.REVIEWPULSE_STREAMLIT_URL || "").trim(),
+    video: "No aplica: se entrega la opción A (plataforma de despliegue).",
   },
   analisis: [
     `**Se cumplen M3 y M4.** El agente entregó ${a.reportes_a_tiempo} de ${a.semanas} reportes dentro de 24 horas, incluidas las semanas con plataformas caídas, porque la planificación por metas cambia a «cerrar con datos incompletos» en el último ciclo antes del plazo. Solo ${a.fp} de ${a.alertas} alertas fue un falso positivo (${pct(a.tasa_fp)}), por debajo del 10 %: el gerente puede confiar en lo que recibe. El único falso positivo ocurrió en temporada alta (E04).`,

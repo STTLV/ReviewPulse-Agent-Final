@@ -1,0 +1,47 @@
+{
+  "titulo": "Hito 2 - Comparación de línea base contra ReviewPulse",
+  "conjunto": "datos/evaluacion_manual_holdout.csv",
+  "origen": "Corpus sintético; conjunto manual asistido por IA, no reseñas reales",
+  "n_control": 40,
+  "entrenamiento_base": {
+    "n": 4000,
+    "semilla": 7,
+    "conjunto": "frases de entrenamiento"
+  },
+  "modelo": "datos/modelo.joblib (modelo congelado, sin reentrenar)",
+  "nota": "No equivale a M1 histórica (media de cinco reentrenamientos); ambas técnicas se comparan aquí en el mismo control y una sola ejecución.",
+  "metricas": {
+    "polaridad": {
+      "clase_mayoritaria": "positiva",
+      "linea_base": {
+        "aciertos": 16,
+        "n": 40,
+        "exactitud": 0.4,
+        "f1_macro": 0.1905
+      },
+      "reviewpulse": {
+        "aciertos": 32,
+        "n": 40,
+        "exactitud": 0.8,
+        "f1_macro": 0.7869
+      },
+      "mejora_puntos_porcentuales": 40.0
+    },
+    "tema": {
+      "clase_mayoritaria": "servicio",
+      "linea_base": {
+        "aciertos": 10,
+        "n": 40,
+        "exactitud": 0.25,
+        "f1_macro": 0.1
+      },
+      "reviewpulse": {
+        "aciertos": 34,
+        "n": 40,
+        "exactitud": 0.85,
+        "f1_macro": 0.8465
+      },
+      "mejora_puntos_porcentuales": 60.0
+    }
+  }
+}

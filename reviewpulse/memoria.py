@@ -52,10 +52,17 @@ class RepositorioHistorico:
         self.con = sqlite3.connect(str(ruta), check_same_thread=False)  # noqa
         self.con.row_factory = sqlite3.Row
         self.con.executescript(ESQUEMA)
+        self._cerrado = False
 
     def cerrar(self):
-        """Libera el identificador del archivo SQLite (necesario en Windows)."""
-        self.con.close()
+        """Cierra la conexión SQLite, de forma idempotente.
+
+        Es importante cerrar esta conexión antes de borrar carpetas temporales:
+        en Windows, un archivo SQLite abierto puede impedir su eliminación.
+        """
+        if not self._cerrado:
+            self.con.close()
+            self._cerrado = True
 
     # --- escritura (actuadores) ---
     def guardar_resena(self, r: dict):

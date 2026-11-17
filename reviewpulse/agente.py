@@ -71,7 +71,9 @@ class Bitacora:
         self.f.write(json.dumps(e, ensure_ascii=False, default=str) + "\n")
 
     def cerrar(self):
-        self.f.close()
+        # Puede llamarse desde una ruta de salida normal o desde un finally.
+        if not self.f.closed:
+            self.f.close()
 
 
 @dataclass
@@ -324,11 +326,12 @@ class ReviewPulseAgent:
             self.actuar(plan, per)
 
     def ejecutar(self, horas_extra: int = 48) -> dict:
-        """Ejecuta el ciclo y libera los recursos incluso si ocurre un error.
+        """Ejecuta el ciclo completo y libera siempre los recursos del agente.
 
-        En particular, SQLite debe estar cerrado antes de salir de una carpeta
-        temporal: Windows impide eliminar memoria.db mientras haya conexiones abiertas.
-        Los resultados se materializan antes de cerrar la conexión.
+        El resultado se materializa antes de cerrar SQLite. El bloque finally
+        garantiza que tanto el log como la conexión a la base de datos se cierren
+        también si ocurre una excepción durante la ejecución. Esto evita que
+        Windows mantenga bloqueado memoria.db al salir de TemporaryDirectory.
         """
         t0 = time.perf_counter()
         try:
@@ -338,9 +341,14 @@ class ReviewPulseAgent:
                 self.paso(ahora)
                 ahora += timedelta(hours=self.cfg["intervalo_h"])
             self.log(ahora, "SISTEMA", "fin_ejecucion", segundos=round(time.perf_counter() - t0, 2))
-            return {"alertas": self.repo.alertas(), "reportes": self.repo.reportes(), "resenas": self.repo.resenas(),
-                    "descartadas": self.repo.descartadas()}
+            return {
+                "alertas": self.repo.alertas(),
+                "reportes": self.repo.reportes(),
+                "resenas": self.repo.resenas(),
+                "descartadas": self.repo.descartadas(),
+            }
         finally:
+            # El cierre de SQLite debe ejecutarse incluso si falla el cierre del log.
             try:
                 self.log.cerrar()
             finally:
