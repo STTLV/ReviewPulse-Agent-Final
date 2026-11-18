@@ -1,6 +1,6 @@
 # ReviewPulse-Agent 2.0: agente LLM con herramientas (diseño)
 
-Fecha: 2026-11-17 · Equipo: Sara Bastidas Triana, Ellen Nicole Ordoñez Chavez · Asesoría técnica externa: David (Ing. Software)
+Fecha: 2026-11-17 · Equipo: Sara Bastidas Triana, Ellen Nicole Ordoñez Chavez · Asesoría técnica externa: David (Ing. Sistemas)
 Estado: **corregido tras la revisión de arquitectura y con OmniRoute probado; pendiente de aprobación**. Nada se construye hasta que se apruebe.
 
 ---
