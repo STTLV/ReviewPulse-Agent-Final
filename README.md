@@ -2,7 +2,7 @@
 
 Agente inteligente **basado en modelos y orientado a metas** (Russell y Norvig) que clasifica las reseñas de un hotel piloto por polaridad (positiva, negativa, neutra) y tema (limpieza, servicio, ubicación, precio), compara cada semana contra su historial y alerta al gerente cuando el tono negativo de un tema se sale de lo normal.
 
-Proyecto del curso Inteligencia Artificial, Universidad Tecnológica de Bolívar (Tarea 3: implementación y pruebas). Este repositorio conserva el trabajo de Ellen y documenta el avance del Hito 2 del proyecto final.
+Proyecto del curso Inteligencia Artificial, Universidad Tecnológica de Bolívar (Tarea 3: implementación y pruebas). Este repositorio conserva el trabajo anterior y documenta el avance del Hito 2 del proyecto final.
 
 **Integrantes:** Ellen Nicole Ordoñez Chavez y Sara Bastidas Triana.
 **Repositorio de entrega:** https://github.com/STTLV/ReviewPulse-Agent-Final
