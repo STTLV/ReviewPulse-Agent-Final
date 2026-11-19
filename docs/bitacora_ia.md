@@ -13,6 +13,8 @@ Se listan usos relevantes respaldados por la bitácora original y las verificaci
 | 16/11/2026 | Sara | ChatGPT | Auditar el ZIP, revisar el Hito 2 y contrastar el PDF con la nueva rúbrica. | Corregimos el comando de consola; separamos ejecución del agente de una línea base comparativa. | Ejecución E02, lectura de la guía y comparación de los resultados guardados. |
 | 16/11/2026 | Sara, con revisión del equipo | ChatGPT | Preparar una línea base mayoritaria reproducible y documentarla. | Incorporamos la comparación en las mismas 40 reseñas de control, sin ajustar el modelo ni reescribir los resultados históricos. | `python pruebas/linea_base_hito2.py`: base 40 %/25 % frente al modelo guardado 80 %/85 %. |
 
+| 18/11/2026 | Sara | ChatGPT | Apoyo para reorganizar el codigo en src, data y experiments, corregir rutas y preparar las pruebas de paridad P1. | Revise y aplique los cambios, conserve el modelo anterior y sus resultados, actualice las rutas y adapte las pruebas automaticas. | Compilacion correcta, 4 pruebas locales aprobadas, GitHub Actions exitoso y revision de David de P1, E02 y E11. |
+
 ## Alcance y decisiones del equipo
 
 Los datos son **sintéticos**. La evaluación M1 histórica representa cinco reentrenamientos, mientras que el Hito 2 compara **una sola carga del modelo guardado** contra un método mayoritario en el mismo conjunto de control. M1 (polaridad) y M2 no alcanzaron sus metas históricas, y se registran así. M3 prueba generación y registro local de reportes, no recepción efectiva de mensajes de correo. Las sugerencias de IA se aceptaron solo después de cotejarlas con el código y las pruebas; la decisión académica sigue siendo de las integrantes.
