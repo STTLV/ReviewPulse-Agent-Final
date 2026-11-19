@@ -507,7 +507,7 @@ def test_kappa_perfecto_y_azar(self):
 
 def test_muestra_sin_frases_de_entrenamiento(self):
     filas = leer_csv("data/gold/muestra.csv")
-    self.assertEqual(len(filas), 300)
+    self.assertEqual(len(filas), 120)
     self.assertNotIn("polaridad", filas[0])
 ```
 
@@ -518,7 +518,7 @@ Expected: FAIL con `ModuleNotFoundError`.
 
 - [ ] **Step 3: Generar la muestra ciega**
 
-`preparar_gold.py` usa `construir_corpus(300, semilla=2026, conjunto="evaluacion", prob_ironia=0.10)`, escribe `muestra.csv` sin etiquetas y guarda la etiqueta del simulador en un archivo aparte que no se abre hasta terminar. Los primeros 30 registros los etiquetan ambas; de los 270 restantes, cada una etiqueta 135.
+`preparar_gold.py` usa `construir_corpus(120, semilla=2026, conjunto="evaluacion", prob_ironia=0.10)`, escribe `muestra.csv` sin etiquetas y guarda la etiqueta del simulador en un archivo aparte que no se abre hasta terminar. Los primeros 12 registros los etiquetan ambas; de los 108 restantes, cada una etiqueta 54.
 
 - [ ] **Step 4: Etiquetar a mano**
 
@@ -527,7 +527,7 @@ Sara y Ellen completan sus archivos sin usar IA y sin ver la etiqueta del simula
 - [ ] **Step 5: Calcular acuerdo y consolidar**
 
 Run: `$env:PYTHONPATH="src"; python experiments/acuerdo.py`
-Expected: imprime kappa de polaridad y tema sobre los 30 comunes y escribe `gold.csv`. Las diferencias se resuelven conversándolas.
+Expected: imprime kappa de polaridad y tema sobre los 12 comunes y escribe `gold.csv`. Las diferencias se resuelven conversándolas.
 
 - [ ] **Step 6: Documentar**
 
@@ -609,9 +609,9 @@ git commit -m "exp: calibrar CUSUM y medir M1 a M4"
 - [ ] **Step 1: Escribir las pruebas**
 
 ```python
-def test_hay_26_tareas_por_tipo(self):
+def test_hay_20_tareas_por_tipo(self):
     c = Counter(t["tipo"] for t in cargar_tareas())
-    self.assertEqual(c, {"conteo": 6, "comparacion": 4, "evidencia": 4, "clasificacion": 4,
+    self.assertEqual(c, {"conteo": 3, "comparacion": 3, "evidencia": 3, "clasificacion": 3,
                          "alerta": 3, "reporte": 1, "trampa": 4})
 
 def test_conteo_exacto(self):
@@ -624,7 +624,7 @@ def test_trampa_no_acepta_cifra_inventada(self):
     self.assertFalse(verificar(t, "Hubo 12 reseñas en la semana 40.", base))
 
 def test_bootstrap_detecta_diferencia_clara(self):
-    d, bajo, alto = bootstrap_diferencia([1.0] * 26, [0.0] * 26)
+    d, bajo, alto = bootstrap_diferencia([1.0] * 20, [0.0] * 20)
     self.assertEqual((d, bajo, alto), (1.0, 1.0, 1.0))
 
 def test_linea_base_recibe_todas_las_resenas(self):
@@ -646,7 +646,7 @@ Las respuestas esperadas se calculan con SQL sobre la base fija. Las conclusione
 
 - [ ] **Step 5: Implementar `correr.py`**
 
-Argumentos `--sistema agente|base|ambos`, `--repeticiones 5`, `--tareas`. Guarda una fila por ejecución en `experiments/resultados/corridas.csv` y cada traza en `experiments/resultados/trazas/`. Se puede reanudar sin repetir ejecuciones terminadas.
+Argumentos `--sistema agente|base|ambos`, `--repeticiones 3`, `--tareas`. Guarda una fila por ejecución en `experiments/resultados/corridas.csv` y cada traza en `experiments/resultados/trazas/`. Se puede reanudar sin repetir ejecuciones terminadas.
 
 - [ ] **Step 6: Verificar con una corrida corta**
 
@@ -820,8 +820,8 @@ Expected: PASS.
 
 - [ ] **Step 3: Correr la evaluación completa**
 
-Run: `$env:PYTHONPATH="src"; python experiments/correr.py --sistema ambos --repeticiones 5`
-Expected: 260 ejecuciones registradas. Los umbrales no se modifican después de este paso.
+Run: `$env:PYTHONPATH="src"; python experiments/correr.py --sistema ambos --repeticiones 3`
+Expected: 120 ejecuciones registradas. Los umbrales no se modifican después de este paso.
 
 - [ ] **Step 4: Analizar**
 
