@@ -1,7 +1,7 @@
 """Comprobaciones mínimas de la línea base del Hito 2."""
 import unittest
 
-from pruebas.linea_base_hito2 import calcular
+from experiments.linea_base_hito2 import calcular
 
 
 class PruebaComparacionHito2(unittest.TestCase):

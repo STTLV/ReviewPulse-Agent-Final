@@ -23,7 +23,7 @@ from .corpus import construir_corpus
 from .lexico import RasgosLexico
 from .preprocesamiento import normalizar
 
-RUTA_MODELO = Path(__file__).resolve().parent.parent / "datos" / "modelo.joblib"
+RUTA_MODELO = Path(__file__).resolve().parents[2] / "data" / "modelo.joblib"
 
 
 @dataclass

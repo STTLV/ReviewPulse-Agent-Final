@@ -2,12 +2,12 @@
 
 Ambos métodos se evalúan SOBRE LAS MISMAS 40 reseñas de control.
 La clase mayoritaria se aprende solo del conjunto de entrenamiento sintético.
-El modelo propuesto se carga del archivo congelado `datos/modelo.joblib`.
+El modelo propuesto se carga del archivo congelado `data/modelo.joblib`.
 Este resultado es UNA ejecución del modelo guardado, no el promedio M1
 que se obtuvo con cinco reentrenamientos (81 % y 90 % respectivamente).
 
 Ejecutar desde la raíz del repositorio:
-    python pruebas/linea_base_hito2.py
+    python -m experiments.linea_base_hito2
 """
 from __future__ import annotations
 
@@ -29,12 +29,12 @@ from reviewpulse.modelo import ClasificadorSentimiento, RUTA_MODELO  # noqa: E40
 def calcular() -> tuple[dict, list[dict]]:
     if not RUTA_MODELO.exists():
         raise FileNotFoundError(
-            "Falta datos/modelo.joblib; no se reentrena para conservar la comparación."
+            "Falta data/modelo.joblib; no se reentrena para conservar la comparación."
         )
     entrenamiento = construir_corpus(
         4000, semilla=7, conjunto="entrenamiento", prob_ironia=0.10
     )
-    with (RAIZ / "datos" / "evaluacion_manual_holdout.csv").open(
+    with (RAIZ / "data" / "evaluacion_manual_holdout.csv").open(
         encoding="utf-8-sig", newline=""
     ) as f:
         control = list(csv.DictReader(f))
@@ -64,12 +64,12 @@ def calcular() -> tuple[dict, list[dict]]:
 
     resultados = {
         "titulo": "Hito 2 - Comparación de línea base contra ReviewPulse",
-        "conjunto": "datos/evaluacion_manual_holdout.csv",
+        "conjunto": "data/evaluacion_manual_holdout.csv",
         "origen": "Corpus sintético; conjunto manual asistido por IA, no reseñas reales",
         "n_control": len(control),
         "entrenamiento_base": {"n": len(entrenamiento), "semilla": 7,
                                  "conjunto": "frases de entrenamiento"},
-        "modelo": "datos/modelo.joblib (modelo congelado, sin reentrenar)",
+        "modelo": "data/modelo.joblib (modelo congelado, sin reentrenar)",
         "nota": "No equivale a M1 histórica (media de cinco reentrenamientos); ambas "
                 "técnicas se comparan aquí en el mismo control y una sola ejecución.",
         "metricas": {},
@@ -95,8 +95,8 @@ def calcular() -> tuple[dict, list[dict]]:
 
 def main() -> None:
     resultados, detalle = calcular()
-    ruta_resumen = RAIZ / "salidas" / "pruebas" / "linea_base_hito2.json"
-    ruta_detalle = RAIZ / "experiments" / "hito2" / "comparacion_holdout.csv"
+    ruta_resumen = RAIZ / "experiments" / "v1" / "linea_base_hito2.json"
+    ruta_detalle = RAIZ / "experiments" / "v1" / "comparacion_holdout.csv"
     ruta_resumen.parent.mkdir(parents=True, exist_ok=True)
     ruta_detalle.parent.mkdir(parents=True, exist_ok=True)
     ruta_resumen.write_text(json.dumps(resultados, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -109,8 +109,8 @@ def main() -> None:
         print(f"{campo}: línea base {b['aciertos']}/40 = {b['exactitud']:.0%}; "
               f"ReviewPulse {m['aciertos']}/40 = {m['exactitud']:.0%}; "
               f"mejora {v['mejora_puntos_porcentuales']:+.1f} pp")
-    print("Resumen: salidas/pruebas/linea_base_hito2.json")
-    print("Detalle: experiments/hito2/comparacion_holdout.csv")
+    print("Resumen: experiments/v1/linea_base_hito2.json")
+    print("Detalle: experiments/v1/comparacion_holdout.csv")
 
 
 if __name__ == "__main__":
