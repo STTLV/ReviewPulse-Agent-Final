@@ -23,13 +23,42 @@ class Notificador:
         self.destinatario, self.smtp = destinatario, smtp
 
     def redactar(self, a: dict) -> str:
+        """Redacta alertas CUSUM y conserva compatibilidad temporal."""
+
         tema = NOMBRE_TEMA[a["tema"]]
-        tardia = " (detectada con reseñas que llegaron tarde)" if a["tipo"] == "tardia" else ""
-        return (f"Alerta ReviewPulse, semana {a['semana_texto']}{tardia}: las reseñas negativas sobre "
-                f"{tema.lower()} subieron a {a['proporcion']:.0%} ({a['negativas']:.0f} de {a['total']:.0f}), "
-                f"frente a un promedio de {a['promedio']:.0%} en las últimas {a['k']} semanas. "
-                f"La probabilidad de ver un aumento así por simple azar es {a['p_valor']:.4f}. "
-                f"Ejemplos: " + " | ".join(f"“{e}”" for e in a["ejemplos"][:2]))
+        tardia = (
+            " (detectada con reseñas que llegaron tarde)"
+            if a["tipo"] == "tardia"
+            else ""
+        )
+
+        mensaje = (
+            f"Alerta ReviewPulse, semana {a['semana_texto']}{tardia}: "
+            f"las reseñas negativas sobre {tema.lower()} "
+            f"subieron a {a['proporcion']:.0%} "
+            f"({a['negativas']:.0f} de {a['total']:.0f}), "
+            f"frente a un promedio de {a['promedio']:.0%} "
+            f"en las últimas {a['k']} semanas. "
+        )
+
+        if "s_max" in a and "h" in a:
+            mensaje += (
+                f"El indicador CUSUM alcanzó S={a['s_max']:.3f}, "
+                f"con un umbral de alerta h={a['h']:.3f}. "
+            )
+        elif "p_valor" in a:
+            mensaje += (
+                f"La probabilidad de ver un aumento así "
+                f"por simple azar es {a['p_valor']:.4f}. "
+            )
+        else:
+            raise ValueError("La alerta no tiene indicadores estadísticos.")
+
+        return (
+            mensaje
+            + "Ejemplos: "
+            + " | ".join(f"“{e}”" for e in a["ejemplos"][:2])
+        )
 
     def enviar(self, alerta: dict, ts: str) -> dict:
         mensaje = self.redactar(alerta)
@@ -53,7 +82,7 @@ class GeneradorReporte:
         self.carpeta.mkdir(parents=True, exist_ok=True)
 
     def generar(self, semana: int, semana_texto: str, conteos: dict, comparacion: dict, alertas: list,
-                incompleto: bool, revision_manual: int, ts: str) -> Path:
+                incompleto: bool, revision_manual: int, ts: str, nota: str = "") -> Path:
         filas = []
         for t in TEMAS:
             c = conteos[t]
@@ -65,6 +94,7 @@ class GeneradorReporte:
         total = sum(sum(c.values()) for c in conteos.values())
         lineas = [
             f"# Resumen semanal ReviewPulse — semana {semana_texto}",
+            nota,
             f"Generado: {ts} · Reseñas clasificadas: {total:.1f} · Para revisión manual: {revision_manual}",
             "Conteos ponderados: una reseña con confianza baja (revisión manual) cuenta 0,5.",
             "",

@@ -24,7 +24,8 @@ CREATE TABLE IF NOT EXISTS semanas (
   reporte_en TEXT, alerto INTEGER DEFAULT 0, tardias INTEGER DEFAULT 0);
 CREATE TABLE IF NOT EXISTS alertas (
   id INTEGER PRIMARY KEY AUTOINCREMENT, semana INTEGER, tema TEXT, proporcion REAL,
-  promedio REAL, p_valor REAL, enviada_en TEXT, tipo TEXT, mensaje TEXT);
+  promedio REAL, s_max REAL, h REAL, enviada_en TEXT, tipo TEXT, mensaje TEXT);
+CREATE TABLE IF NOT EXISTS alertas_legadas (alerta_id INTEGER PRIMARY KEY, p_valor REAL);
 CREATE TABLE IF NOT EXISTS reportes (semana INTEGER PRIMARY KEY, generado_en TEXT, ruta TEXT, incompleto INTEGER);
 """
 
@@ -52,6 +53,26 @@ class RepositorioHistorico:
         self.con = sqlite3.connect(str(ruta), check_same_thread=False)  # noqa
         self.con.row_factory = sqlite3.Row
         self.con.executescript(ESQUEMA)
+        columnas = {
+            fila["name"]
+            for fila in self.con.execute("PRAGMA table_info(alertas)")
+        }
+
+        with self.con:
+            for columna in ("s_max", "h"):
+                if columna not in columnas:
+                    self.con.execute(
+                        f"ALTER TABLE alertas ADD COLUMN {columna} REAL"
+                    )
+
+            if "p_valor" in columnas:
+                self.con.execute(
+                    "INSERT OR IGNORE INTO alertas_legadas (alerta_id, p_valor) "
+                    "SELECT id, p_valor FROM alertas WHERE p_valor IS NOT NULL"
+                )
+                self.con.execute(
+                    "ALTER TABLE alertas DROP COLUMN p_valor"
+                )
         self._cerrado = False
 
     def cerrar(self):
@@ -94,14 +115,139 @@ class RepositorioHistorico:
         self.con.execute("UPDATE semanas SET alerto=1 WHERE semana=?", (semana,))
 
     def guardar_alerta(self, a: dict):
-        self.con.execute("INSERT INTO alertas (semana,tema,proporcion,promedio,p_valor,enviada_en,tipo,mensaje)"
-                         " VALUES (?,?,?,?,?,?,?,?)", (a["semana"], a["tema"], a["proporcion"], a["promedio"],
-                                                       a["p_valor"], a["enviada_en"], a["tipo"], a["mensaje"]))
-        self.con.commit()
+        """Guarda CUSUM y preserva alertas antiguas por separado."""
+        tiene_s = "s_max" in a
+        tiene_h = "h" in a
+
+        if tiene_s != tiene_h:
+            raise ValueError("CUSUM requiere s_max y h.")
+
+        if not tiene_s and "p_valor" not in a:
+            raise ValueError("Falta el indicador estadistico.")
+
+        with self.con:
+            cursor = self.con.execute(
+                """
+                INSERT INTO alertas
+                (semana, tema, proporcion, promedio, s_max, h,
+                 enviada_en, tipo, mensaje)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    a["semana"], a["tema"],
+                    a["proporcion"], a["promedio"],
+                    a.get("s_max"), a.get("h"),
+                    a["enviada_en"], a["tipo"], a["mensaje"],
+                ),
+            )
+
+            if not tiene_s:
+                self.con.execute(
+                    "INSERT INTO alertas_legadas (alerta_id, p_valor) VALUES (?, ?)",
+                    (cursor.lastrowid, a["p_valor"]),
+                )
 
     def guardar_reporte(self, semana: int, ts: str, ruta: str, incompleto: bool):
         self.con.execute("INSERT OR REPLACE INTO reportes VALUES (?,?,?,?)", (semana, ts, ruta, int(incompleto)))
         self.con.commit()
+
+    def conteos_diarios(
+        self, semana: int, tema: str
+    ) -> list[tuple[float, float]]:
+        """Devuelve negativas y total ponderados de lunes a domingo."""
+
+        dias = [(0.0, 0.0) for _ in range(7)]
+
+        filas = self.con.execute(
+            """
+            SELECT
+                substr(fecha, 1, 10) AS dia,
+                SUM(
+                    CASE WHEN polaridad = 'negativa'
+                    THEN CASE WHEN revision_manual = 1
+                              THEN 0.5 ELSE 1.0 END
+                    ELSE 0.0 END
+                ) AS negativas,
+                SUM(
+                    CASE WHEN revision_manual = 1
+                         THEN 0.5 ELSE 1.0 END
+                ) AS total
+            FROM resenas
+            WHERE semana = ? AND tema = ?
+            GROUP BY substr(fecha, 1, 10)
+            ORDER BY dia
+            """,
+            (semana, tema),
+        ).fetchall()
+
+        from datetime import date
+
+        for fila in filas:
+            fecha = date.fromisoformat(fila["dia"])
+            indice = fecha.weekday()
+
+            negativas, total = dias[indice]
+
+            dias[indice] = (
+                negativas + float(fila["negativas"]),
+                total + float(fila["total"]),
+            )
+
+        return dias
+
+    def conteos_semana(self, semana: int) -> dict:
+        """Obtiene conteos ponderados por tema y polaridad."""
+
+        conteos = conteo_vacio()
+
+        filas = self.con.execute(
+            """
+            SELECT tema, polaridad,
+                   SUM(
+                       CASE WHEN revision_manual = 1
+                            THEN 0.5 ELSE 1.0 END
+                   ) AS cantidad
+            FROM resenas
+            WHERE semana = ?
+            GROUP BY tema, polaridad
+            """,
+            (semana,),
+        ).fetchall()
+
+        for fila in filas:
+            tema = fila["tema"]
+            polaridad = fila["polaridad"]
+
+            if tema in conteos and polaridad in conteos[tema]:
+                conteos[tema][polaridad] = float(fila["cantidad"])
+
+        return conteos
+
+    def ejemplos_negativos(
+        self,
+        semana: int,
+        tema: str,
+        limite: int = 2,
+    ) -> list[str]:
+        """Recupera ejemplos negativos de una semana y tema."""
+
+        if limite < 0:
+            raise ValueError("El limite no puede ser negativo.")
+
+        filas = self.con.execute(
+            """
+            SELECT texto
+            FROM resenas
+            WHERE semana = ?
+              AND tema = ?
+              AND polaridad = 'negativa'
+            ORDER BY fecha, id
+            LIMIT ?
+            """,
+            (semana, tema, limite),
+        ).fetchall()
+
+        return [fila["texto"] for fila in filas]
 
     # --- lectura (percepción del historial) ---
     def historial(self, antes_de: int, k: int, excluir_alertadas: bool = True) -> list[dict]:
@@ -114,7 +260,10 @@ class RepositorioHistorico:
         return dict(f, conteos=json.loads(f["conteos"])) if f else None
 
     def alertas(self) -> list[dict]:
-        return [dict(f) for f in self.con.execute("SELECT * FROM alertas ORDER BY id")]
+        return [dict(f) for f in self.con.execute(
+            "SELECT a.*, l.p_valor AS p_valor FROM alertas a "
+            "LEFT JOIN alertas_legadas l ON l.alerta_id = a.id ORDER BY a.id"
+        )]
 
     def reportes(self) -> list[dict]:
         return [dict(f) for f in self.con.execute("SELECT * FROM reportes ORDER BY semana")]
