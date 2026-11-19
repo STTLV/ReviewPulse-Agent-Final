@@ -298,5 +298,37 @@ class TestEstadistica(unittest.TestCase):
                 "Diagnostico CUSUM verificado"
             )
 
+    def test_reporte_sin_nota_no_deja_linea_vacia(self):
+        from pathlib import Path
+        from tempfile import TemporaryDirectory
+        from reviewpulse.actuadores import GeneradorReporte
+        from reviewpulse.memoria import conteo_vacio
+
+        with TemporaryDirectory() as carpeta:
+            generador = GeneradorReporte(Path(carpeta))
+
+            for nota in ("", "   "):
+                with self.subTest(nota=nota):
+                    ruta = generador.generar(
+                        semana=1,
+                        semana_texto="01",
+                        conteos=conteo_vacio(),
+                        comparacion={},
+                        alertas=[],
+                        incompleto=False,
+                        revision_manual=0,
+                        ts="2026-11-19T10:00:00",
+                        nota=nota,
+                    )
+
+                    lineas = ruta.read_text(
+                        encoding="utf-8"
+                    ).splitlines()
+
+                    self.assertTrue(
+                        lineas[1].startswith("Generado:"),
+                        lineas[:3],
+                    )
+
 if __name__ == "__main__":
     unittest.main()

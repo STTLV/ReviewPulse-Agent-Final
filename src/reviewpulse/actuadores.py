@@ -94,7 +94,7 @@ class GeneradorReporte:
         total = sum(sum(c.values()) for c in conteos.values())
         lineas = [
             f"# Resumen semanal ReviewPulse — semana {semana_texto}",
-            nota,
+            *([nota] if nota.strip() else []),
             f"Generado: {ts} · Reseñas clasificadas: {total:.1f} · Para revisión manual: {revision_manual}",
             "Conteos ponderados: una reseña con confianza baja (revisión manual) cuenta 0,5.",
             "",
