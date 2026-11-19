@@ -18,7 +18,7 @@ Usuario del sistema: el gerente de un hotel piloto. Le pregunta en lenguaje natu
 **Metas**
 1. Bucle agéntico propio (ReAct: razonar → usar herramienta → observar) sobre un LLM vía OmniRoute, con memoria, herramientas tipadas y registro de cada paso.
 2. Se conserva el entorno actual: Hotel piloto ficticio y reseñas **100 % sintéticas**, declaradas como tales, con un conjunto de prueba etiquetado a mano por el equipo.
-3. Comparación exigida por la Ruta E: **agente con herramientas vs. prompt único sin herramientas** en 26 tareas, 5 repeticiones, con métricas fijadas antes de correr.
+3. Comparación exigida por la Ruta E: **agente con herramientas vs. prompt único sin herramientas** en 20 tareas, 3 repeticiones, con métricas fijadas antes de correr.
 4. Prototipo desplegado por completo en Railway (interfaz, API y agente), con chat del gerente, traza visible del agente y diseño responsive. Streamlit se retira.
 5. Repositorio con la estructura de la guía (`src/ data/ notebooks/ experiments/ docs/`), README de ≤ 5 comandos, commits de las dos integrantes repartidos en las 3 semanas.
 
@@ -167,10 +167,10 @@ ReviewPulse-Agent-Final/
 │   └── gold/                    # etiquetas manuales del equipo
 ├── experiments/
 │   ├── preparar.py              # crea la base fija de evaluación (E03, semilla 11)
-│   ├── tareas.yaml              # 26 tareas con respuesta esperada y forma de verificar
+│   ├── tareas.yaml              # 20 tareas con respuesta esperada y forma de verificar
 │   ├── verdad.py                # calcula las respuestas esperadas
 │   ├── umbrales.json            # métricas y umbrales, fechados ANTES de correr
-│   ├── correr.py                # agente vs línea base, 5 repeticiones
+│   ├── correr.py                # agente vs línea base, 3 repeticiones
 │   ├── medir_m1_m4.py           # 60 corridas: regla semanal v1 vs CUSUM
 │   ├── calibrar_cusum.py        # calibración solo con semillas 101–105
 │   ├── juez.py                  # LLM-juez para respuestas en texto libre
@@ -266,7 +266,7 @@ El trabajo repetitivo no depende del modelo:
 **Decisión del equipo (2026-11-17): las reseñas siguen siendo 100 % sintéticas y el hotel sigue siendo ficticio.**
 
 1. **Fuente:** `corpus.py` y el simulador `EntornoHotel` actuales, con sus 12 escenarios y semillas fijas. Son datos propios, sin datos personales y sin problemas de licencia. `data/README.md` documenta cómo se generan, su tamaño y sus límites.
-2. **Etiquetado propio.** Sara y Ellen etiquetan a mano, sin ver la etiqueta del simulador, polaridad y tema de ~300 reseñas de prueba. Un 10 % lo etiquetan ambas para medir el acuerdo (kappa de Cohen).
+2. **Etiquetado propio.** Sara y Ellen etiquetan a mano, sin ver la etiqueta del simulador, polaridad y tema de 120 reseñas de prueba. Un 10 % lo etiquetan ambas para medir el acuerdo (kappa de Cohen).
 3. **Partición fija con semilla:** entrenamiento, validación y prueba, sin compartir frases entre ellas. La prueba solo se usa al final.
 4. **Limitación declarada.** El informe dice de forma explícita que ningún resultado demuestra desempeño con reseñas reales, y que el lenguaje simulado es más ordenado que el real. El Hito 2 anunció reseñas reales como siguiente paso, así que el informe justifica por escrito este cambio de alcance.
 
@@ -280,14 +280,14 @@ El trabajo repetitivo no depende del modelo:
 
 **Línea base:** mismo modelo y una sola llamada, sin herramientas. Recibe **todas** las reseñas de la base con id, fecha, plataforma, texto, polaridad y tema (unos 32.000 tokens, caben completas). No se debilita a propósito. En las tareas de acción, tiene éxito si su texto indica la decisión correcta; como no tiene actuadores, la ejecución real se reporta aparte.
 
-**Tareas (`experiments/tareas.yaml`, 26):**
+**Tareas (`experiments/tareas.yaml`, 20):**
 
 | Tipo | Ejemplo | Verificación |
 |---|---|---|
-| Conteo (6) | "¿Cuántas reseñas negativas de servicio hubo en la semana 8?" | Automática: número exacto contra SQL |
-| Comparación (4) | "¿El servicio empeoró en la semana 8 frente a las 6 anteriores?" | Automática: cifras contra SQL y conclusión contra el incidente declarado |
-| Evidencia (4) | "Dame 2 quejas sobre ruido" | Automática: los IDs existen y cumplen el filtro |
-| Clasificación (4) | "Clasifica: 'el cuarto bien pero cobran todo aparte'" | Automática contra la etiqueta manual del equipo |
+| Conteo (3) | "¿Cuántas reseñas negativas de servicio hubo en la semana 8?" | Automática: número exacto contra SQL |
+| Comparación (3) | "¿El servicio empeoró en la semana 8 frente a las 6 anteriores?" | Automática: cifras contra SQL y conclusión contra el incidente declarado |
+| Evidencia (3) | "Dame 2 quejas sobre ruido" | Automática: los IDs existen y cumplen el filtro |
+| Clasificación (3) | "Clasifica: 'el cuarto bien pero cobran todo aparte'" | Automática contra la etiqueta manual del equipo |
 | Decisión de alerta (3) | Evento "cierre semana 8", "semana 11" y "semana 5" | Automática: decisión y tema contra el incidente declarado |
 | Reporte (1) | "Arma el reporte de la semana 11" | Juez LLM + revisión humana |
 | Trampa (4) | Semana 40 inexistente · plataforma caída · 2 reseñas con instrucciones inyectadas | Automática: reconoce la falta de datos o no obedece la inyección |
@@ -303,7 +303,7 @@ El trabajo repetitivo no depende del modelo:
 | Errores de herramienta | llamadas inválidas o fallidas / llamadas | ≤ 10 % |
 | Pasos y costo | herramientas por tarea; tokens → USD según tarifa pública | Se reportan; ≤ US$1 por corrida completa |
 
-5 repeticiones por tarea y sistema (260 ejecuciones). Se reporta media ± desviación estándar y se guarda cada traza JSONL. Si el agente no supera a la línea base, se reporta así y se analiza la causa.
+3 repeticiones por tarea y sistema (120 ejecuciones). Se reporta media ± desviación estándar y se guarda cada traza JSONL. Si el agente no supera a la línea base, se reporta así y se analiza la causa.
 
 ### 10.2 Medidas M1–M4: no cambian
 
