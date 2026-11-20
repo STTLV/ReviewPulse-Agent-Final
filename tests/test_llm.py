@@ -92,6 +92,62 @@ class AjustesLLMPrueba(unittest.TestCase):
                 )
 
 class LLMFalsoPrueba(unittest.TestCase):
+    def test_llmfalso_guion_funcion_reutilizable(self):
+        falso = LLMFalso(lambda mensajes: respuesta_herramienta(
+            "generar_reporte", semana=len(mensajes)))
+        primera = falso.chat([{"role": "user", "content": "hola"}])
+        segunda = falso.chat([])
+        self.assertEqual(primera.llamadas[0].nombre, "generar_reporte")
+        self.assertIn('"semana": 1', primera.llamadas[0].argumentos_crudos)
+        self.assertIn('"semana": 0', segunda.llamadas[0].argumentos_crudos)
+        self.assertEqual(len(falso.llamadas), 2)
+
+    def test_llmfalso_guion_operativo_callable_cierre(self):
+        falso = LLMFalso(guion_operativo)
+        usuario = {"role": "user", "content": "CIERRE semana=8 incompleto=0"}
+        reporte = falso.chat([usuario])
+        self.assertTrue(reporte.ok)
+        self.assertEqual(reporte.llamadas[0].nombre, "generar_reporte")
+        mensajes = [
+            usuario,
+            reporte.mensaje_asistente,
+            {"role": "tool", "tool_call_id": reporte.llamadas[0].id,
+             "content": '{"reporte": "listo"}'},
+        ]
+        final = falso.chat(mensajes)
+        self.assertTrue(final.ok)
+        self.assertEqual(final.llamadas, [])
+        self.assertIn("Reporte de la semana 8 generado", final.texto)
+        self.assertEqual(len(falso.llamadas), 2)
+
+    def test_llmfalso_guion_operativo_callable_alarma(self):
+        for hubo_alarma in (False, True):
+            with self.subTest(hubo_alarma=hubo_alarma):
+                falso = LLMFalso(guion_operativo)
+                usuario = {"role": "user", "content": "ALARMA semana=4 tema=limpieza observaciones=8"}
+                compara = falso.chat([usuario])
+                self.assertEqual(compara.llamadas[0].nombre, "comparar_semana")
+                mensajes = [
+                    usuario,
+                    compara.mensaje_asistente,
+                    {"role": "tool", "tool_call_id": compara.llamadas[0].id,
+                     "content": '{"hubo_alarma": ' + str(hubo_alarma).lower() + ', "error": null}'},
+                ]
+                siguiente = falso.chat(mensajes)
+                if not hubo_alarma:
+                    self.assertEqual(siguiente.llamadas, [])
+                    self.assertIn("No hubo alarma", siguiente.texto)
+                else:
+                    self.assertEqual(siguiente.llamadas[0].nombre, "emitir_alerta")
+                    mensajes.extend([
+                        siguiente.mensaje_asistente,
+                        {"role": "tool", "tool_call_id": siguiente.llamadas[0].id,
+                         "content": "ok"},
+                    ])
+                    final = falso.chat(mensajes)
+                    self.assertEqual(final.llamadas, [])
+                    self.assertIn("Alerta emitida", final.texto)
+
     def test_entrega_respuesta_de_herramienta(self):
         falso = LLMFalso([respuesta_herramienta("generar_reporte", semana=3)])
         r = falso.chat([], [{"type": "function"}])

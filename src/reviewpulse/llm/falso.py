@@ -34,16 +34,19 @@ def respuesta_herramienta(nombre: str, **args) -> RespuestaLLM:
 
 
 class LLMFalso:
-    def __init__(self, guion: list[RespuestaLLM | Exception | Callable[[list[dict]], RespuestaLLM]]):
-        self.guion = list(guion)
+    def __init__(self, guion: list[RespuestaLLM | Exception | Callable[[list[dict]], RespuestaLLM]] | Callable[[list[dict]], RespuestaLLM]):
+        self.guion = guion if callable(guion) else list(guion)
         self.llamadas: list[list[dict]] = []
 
     def chat(self, mensajes: list[dict], herramientas: list[dict] | None = None,
              modelo: str | None = None) -> RespuestaLLM:
         self.llamadas.append(list(mensajes))
-        if not self.guion:
-            return respuesta_texto("")
-        siguiente = self.guion.pop(0)
+        if callable(self.guion):
+            siguiente = self.guion(mensajes)
+        else:
+            if not self.guion:
+                return respuesta_texto("")
+            siguiente = self.guion.pop(0)
         if isinstance(siguiente, BaseException):
             raise siguiente
         if callable(siguiente):
