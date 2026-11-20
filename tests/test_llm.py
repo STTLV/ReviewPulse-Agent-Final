@@ -56,6 +56,11 @@ class AjustesLLMPrueba(unittest.TestCase):
         self.assertNotIn("secreta", repr(ajustes))
         self.assertNotIn("C", repr(ajustes))
 
+    def test_cargar_ajustes_carga_dotenv(self):
+        with patch("reviewpulse.config.load_dotenv") as cargar:
+            cargar_ajustes({"LLM_TOPE_TOKENS_DIA": "0"})
+        cargar.assert_called_once_with()
+
     def test_cargar_ajustes_desde_diccionario(self):
         ajustes = cargar_ajustes({
             "LLM_BASE_URL": "https://ejemplo.test/v1",
@@ -69,7 +74,8 @@ class AjustesLLMPrueba(unittest.TestCase):
         self.assertEqual(ajustes.llm_model, "modelo-a")
 
     def test_valores_openai_por_defecto_vacios(self):
-        ajustes = cargar_ajustes({})
+        with patch("reviewpulse.config.load_dotenv"), patch.dict("os.environ", {}, clear=True):
+            ajustes = cargar_ajustes({})
         self.assertEqual(ajustes.llm_base_url, "")
         self.assertEqual(ajustes.llm_model, "")
         self.assertEqual(ajustes.llm_juez_model, "")
@@ -153,6 +159,18 @@ class LLMFalsoPrueba(unittest.TestCase):
 
 
 class ClienteOpenAIPrueba(unittest.TestCase):
+    def test_sin_url_modelo_o_tope_devuelve_no_configurado(self):
+        casos = (("", "m", 250), ("https://ejemplo.test/v1", "", 250),
+                 ("https://ejemplo.test/v1", "m", 0))
+        for url, modelo, tope in casos:
+            with self.subTest(url=bool(url), modelo=bool(modelo), tope=tope):
+                sdk = SdkFalso([])
+                ajustes = Ajustes(url, "llave-de-prueba", modelo, "j", "", tope)
+                r = ClienteOpenAI(ajustes, sdk=sdk).chat([{"role": "user", "content": "hola"}])
+                self.assertFalse(r.ok)
+                self.assertEqual(r.error, "no_configurado")
+                self.assertEqual(sdk.llamadas, [])
+
     def test_sin_llave_devuelve_no_configurado(self):
         ajuste = Ajustes("u", "", "m", "j", "", 1000)
         r = ClienteOpenAI(ajuste, sdk=SdkFalso([])).chat([])

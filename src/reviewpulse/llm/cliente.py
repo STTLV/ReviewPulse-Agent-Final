@@ -60,7 +60,12 @@ class ClienteOpenAI:
 
     def chat(self, mensajes: list[dict], herramientas: list[dict] | None = None,
              modelo: str | None = None) -> RespuestaLLM:
-        if not self.ajustes.llm_api_key:
+        if (
+            not self.ajustes.llm_base_url
+            or not self.ajustes.llm_api_key
+            or not (modelo or self.ajustes.llm_model)
+            or self.ajustes.llm_tope_tokens_dia <= 0
+        ):
             return RespuestaLLM(False, error="no_configurado")
         parametros = {
             "model": modelo or self.ajustes.llm_model,

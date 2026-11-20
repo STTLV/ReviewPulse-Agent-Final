@@ -4,6 +4,8 @@ import os
 from dataclasses import dataclass
 from typing import Mapping
 
+from dotenv import load_dotenv
+
 
 @dataclass(repr=False)
 class Ajustes:
@@ -23,6 +25,7 @@ class Ajustes:
 
 
 def cargar_ajustes(fuentes: Mapping[str, object] | None = None) -> Ajustes:
+    load_dotenv()
     fuente = dict(fuentes or {})
 
     def leer(nombre: str, defecto: str = "") -> str:
