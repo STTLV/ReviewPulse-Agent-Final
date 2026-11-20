@@ -31,11 +31,11 @@ def cargar_ajustes(fuentes: Mapping[str, object] | None = None) -> Ajustes:
             return str(valor)
         return os.getenv(nombre, defecto)
 
-    limite_texto = leer("LLM_TOPE_TOKENS_DIA", "1000")
+    limite_texto = leer("LLM_TOPE_TOKENS_DIA")
     try:
         limite = int(limite_texto)
     except (TypeError, ValueError):
-        limite = 1000
+        limite = 0
 
     return Ajustes(
         llm_base_url=leer("LLM_BASE_URL"),

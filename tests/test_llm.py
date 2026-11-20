@@ -75,6 +75,16 @@ class AjustesLLMPrueba(unittest.TestCase):
         self.assertEqual(ajustes.llm_juez_model, "")
 
 
+    def test_tope_tokens_sin_configuracion_es_cero(self):
+        for valor in ("", "no-es-numero"):
+            with self.subTest(valor=valor):
+                ajustes = cargar_ajustes({
+                    "LLM_TOPE_TOKENS_DIA": valor
+                })
+                self.assertEqual(
+                    ajustes.llm_tope_tokens_dia, 0
+                )
+
 class LLMFalsoPrueba(unittest.TestCase):
     def test_entrega_respuesta_de_herramienta(self):
         falso = LLMFalso([respuesta_herramienta("generar_reporte", semana=3)])
