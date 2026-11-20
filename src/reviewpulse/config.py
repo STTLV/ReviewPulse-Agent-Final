@@ -38,10 +38,10 @@ def cargar_ajustes(fuentes: Mapping[str, object] | None = None) -> Ajustes:
         limite = 1000
 
     return Ajustes(
-        llm_base_url=leer("LLM_BASE_URL", "https://api.openai.com/v1"),
+        llm_base_url=leer("LLM_BASE_URL"),
         llm_api_key=leer("LLM_API_KEY"),
-        llm_model=leer("LLM_MODEL", "gpt-4o-mini"),
-        llm_juez_model=leer("LLM_JUEZ_MODEL", "gpt-4o-mini"),
+        llm_model=leer("LLM_MODEL"),
+        llm_juez_model=leer("LLM_JUEZ_MODEL"),
         app_codigo_acceso=leer("APP_CODIGO_ACCESO"),
         llm_tope_tokens_dia=max(0, limite),
     )
