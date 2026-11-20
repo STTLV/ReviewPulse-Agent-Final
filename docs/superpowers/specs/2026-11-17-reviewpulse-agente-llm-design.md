@@ -1,7 +1,7 @@
 # ReviewPulse-Agent 2.0: agente LLM con herramientas (diseño)
 
 Fecha: 2026-11-17 · Equipo: Sara Bastidas Triana, Ellen Nicole Ordoñez Chavez · Asesoría técnica externa: David (Ing. Sistemas)
-Estado: **corregido tras la revisión de arquitectura y con OmniRoute probado; pendiente de aprobación**. Nada se construye hasta que se apruebe.
+Estado (19/11/2026): **implementación en curso; el diseño actualizado está pendiente de revisión de David**. La Tarea 1 ya se integró en `v2` y la Tarea 2 tiene un PR abierto para revisión; los cambios se integran únicamente tras aprobar su PR.
 
 ---
 
@@ -20,7 +20,7 @@ Usuario del sistema: el gerente de un hotel piloto. Le pregunta en lenguaje natu
 2. Se conserva el entorno actual: Hotel piloto ficticio y reseñas **100 % sintéticas**, declaradas como tales, con un conjunto de prueba etiquetado a mano por el equipo.
 3. Comparación exigida por la Ruta E: **agente con herramientas vs. prompt único sin herramientas** en 20 tareas, 3 repeticiones, con métricas fijadas antes de correr.
 4. Prototipo desplegado por completo en Railway (interfaz, API y agente), con chat del gerente, traza visible del agente y diseño responsive. Streamlit se retira.
-5. Repositorio con la estructura de la guía (`src/ data/ notebooks/ experiments/ docs/`), README de ≤ 5 comandos, commits de las dos integrantes repartidos en las 3 semanas.
+5. Repositorio con la estructura de la guía (`src/ data/ notebooks/ experiments/ docs/`), README de ≤ 5 comandos, commits de ambas integrantes distribuidos entre las 3 fases de trabajo (18–27 de noviembre).
 
 **No-metas**
 - Multi-hotel, multi-agente, cuentas de usuario. La app pública se protege con un solo código de acceso (sección 11).
@@ -42,7 +42,7 @@ Usuario del sistema: el gerente de un hotel piloto. Le pregunta en lenguaje natu
 - OmniRoute reporta unos 2.566 tokens de entrada en una petición mínima, porque el proveedor agrega contexto propio. Afecta por igual al agente y a la línea base, y el informe lo declara al reportar el costo.
 - Despliegue en Railway. La sesión de la CLI está vencida y la renueva el usuario con `railway login`.
 - Versiones fijadas en `requirements.txt` (consultadas el 2026-11-17): `scikit-learn==1.9.1`, `numpy==2.5.5`, `pandas==2.3.3`, `joblib==1.6.0`, `openai==3.54.0`, `fastapi==0.163.2`, `uvicorn==0.54.0`, `pydantic==2.14.3`, `python-dotenv==1.2.4`, `pyyaml==6.0.3`.
-- Plazo: 3 semanas. Hito 3 = informe IEEE + repositorio + prototipo + bitácora (criterios 1 a 8, 85 pts).
+- Plazo actualizado: entrega del código, informe IEEE, repositorio, prototipo y bitácora el **27 de noviembre de 2026**; la sustentación será posterior. Hito 3: criterios 1 a 8, 85 puntos.
 
 ## 4. Enfoques considerados
 
@@ -266,7 +266,7 @@ El trabajo repetitivo no depende del modelo:
 **Decisión del equipo (2026-11-17): las reseñas siguen siendo 100 % sintéticas y el hotel sigue siendo ficticio.**
 
 1. **Fuente:** `corpus.py` y el simulador `EntornoHotel` actuales, con sus 12 escenarios y semillas fijas. Son datos propios, sin datos personales y sin problemas de licencia. `data/README.md` documenta cómo se generan, su tamaño y sus límites.
-2. **Etiquetado propio.** Sara y Ellen etiquetan a mano, sin ver la etiqueta del simulador, polaridad y tema de 120 reseñas de prueba. Un 10 % lo etiquetan ambas para medir el acuerdo (kappa de Cohen).
+2. **Etiquetado propio.** Las 120 reseñas sintéticas deben tener ID único. Sara y Ellen asignan manualmente polaridad y tema, sin ver las etiquetas del simulador ni las respuestas de la otra: las mismas 30 reseñas son etiquetadas independientemente por ambas; de las otras 90, cada una etiqueta 45. Son 120 reseñas únicas y 150 registros de etiquetado (75 por integrante). Primero se calcula kappa de Cohen para polaridad y tema sobre las 30 comunes; después se resuelven y documentan los desacuerdos para consolidar `gold.csv`.
 3. **Partición fija con semilla:** entrenamiento, validación y prueba, sin compartir frases entre ellas. La prueba solo se usa al final.
 4. **Limitación declarada.** El informe dice de forma explícita que ningún resultado demuestra desempeño con reseñas reales, y que el lenguaje simulado es más ordenado que el real. El Hito 2 anunció reseñas reales como siguiente paso, así que el informe justifica por escrito este cambio de alcance.
 
@@ -289,7 +289,7 @@ El trabajo repetitivo no depende del modelo:
 | Evidencia (3) | "Dame 2 quejas sobre ruido" | Automática: los IDs existen y cumplen el filtro |
 | Clasificación (3) | "Clasifica: 'el cuarto bien pero cobran todo aparte'" | Automática contra la etiqueta manual del equipo |
 | Decisión de alerta (3) | Evento "cierre semana 8", "semana 11" y "semana 5" | Automática: decisión y tema contra el incidente declarado |
-| Reporte (1) | "Arma el reporte de la semana 11" | Juez LLM + revisión humana |
+| Reporte (1) | "Arma el reporte de la semana 11" | Juez LLM distinto del agente, con rúbrica versionada y revisión humana |
 | Trampa (4) | Semana 40 inexistente · plataforma caída · 2 reseñas con instrucciones inyectadas | Automática: reconoce la falta de datos o no obedece la inyección |
 
 **Métricas y umbrales** (se guardan en `experiments/umbrales.json` con fecha, antes de la primera corrida completa):
@@ -303,7 +303,7 @@ El trabajo repetitivo no depende del modelo:
 | Errores de herramienta | llamadas inválidas o fallidas / llamadas | ≤ 10 % |
 | Pasos y costo | herramientas por tarea; tokens → USD según tarifa pública | Se reportan; ≤ US$1 por corrida completa |
 
-3 repeticiones por tarea y sistema (120 ejecuciones). Se reporta media ± desviación estándar y se guarda cada traza JSONL. Si el agente no supera a la línea base, se reporta así y se analiza la causa.
+3 repeticiones por tarea y sistema (20 tareas × 3 repeticiones × 2 sistemas = 120 ejecuciones). El único tipo que usa juez LLM es **reporte**: 1 tarea × 3 repeticiones × 2 sistemas = **6 veredictos**, de los que se revisan manualmente **al menos 2** (≥ 20 %), registrando acuerdo y desacuerdos. El resto de los tipos se verifica automáticamente con los criterios fijados. Se reporta media ± desviación estándar y se guarda cada traza JSONL. Si el agente no supera a la línea base, se reporta así y se analiza la causa.
 
 ### 10.2 Medidas M1–M4: no cambian
 
@@ -352,13 +352,21 @@ M2–M4 corren con `llm/falso.py` (guion fijo sobre las herramientas reales), as
 | Temas | `#3F8FAE` · `#D4577F` · `#5FA67F` · `#D9A21B` | Limpieza · servicio · ubicación · precio |
 | Tipografía | Bricolage Grotesque + Plus Jakarta Sans | Títulos + texto |
 
-## 12. Cronograma y reparto (18 nov – 8 dic de 2026)
+## 12. Cronograma y reparto (18–27 de noviembre de 2026)
 
-| Semana | Sara | Ellen | Las dos |
+| Fase y fecha límite | Sara | Ellen | Trabajo conjunto |
 |---|---|---|---|
-| **1** (18–24 nov) | Mover código a `src/`, paridad P1–P3, `data/README.md`, partición fija, `ciclo/ingesta.py` y `ciclo/cierre.py` | `config.py`, `llm/cliente.py`, `llm/falso.py`, registro de herramientas y 7 herramientas | Etiquetado manual; `agente/bucle.py` en pareja |
-| **2** (25 nov – 1 dic) | CUSUM y calibración, `tareas.yaml`, `verdad.py`, `umbrales.json` fechado, `correr.py`, `juez.py` | API FastAPI, interfaz web responsive, Dockerfile y despliegue en Railway | Primera corrida completa y revisión de trazas |
-| **3** (2–8 dic) | Análisis de errores, resultados y métodos del informe | IA responsable, trabajo relacionado, fuente de relevancia del problema, README | Informe IEEE 6–8 págs., bitácora, contribuciones, reflexión sobre IA, `hito3.pdf`, `hito4` (PPT), 2 ensayos cruzados con modificación en vivo |
+| **Fase 1: 20 nov** (objetivo de cierre anticipado: **19 nov**) | Task 1: migración a `src/` (integrada); Task 2: CUSUM diario y SQLite (**20 nov**) | Task 4: configuración y frontera LLM (**20 nov**) | Preparar la muestra ciega y comenzar el etiquetado independiente de las mismas **30 reseñas** el 19 nov |
+| **Fase 2: 24 nov** | Task 3: ingesta y cierre (**21 nov**); Task 8: calibración M1–M4 (**24 nov**) | Task 5: siete herramientas (**22 nov**); Task 10: API FastAPI (**24 nov**) | Task 7: datos y etiquetas (**21 nov**); Task 6: bucle del agente (**23 nov**) |
+| **Fase 3: 27 nov** | Task 9: evaluación agente vs. línea base (**25 nov**) | Task 11: interfaz responsive (**25 nov**); Task 12: Railway (**26 nov**) | Task 13: corrida y análisis (**26 nov**); Task 14: informe, paso a `main` y entrega final (**27 nov**) |
+
+**Estado al 19/11/2026:** Task 1 está integrada en `v2`; Task 2 está publicada en el PR #17 y pendiente de revisión. El objetivo de cerrar Fase 1 el 19/11 es anticipado; el hito registrado en GitHub vence el 20/11. No se marca completada hasta revisar e integrar también la Task 4.
+
+**Etiquetado:** 120 reseñas sintéticas con ID único; 30 compartidas y etiquetadas independientemente por ambas, 45 adicionales solo por Sara y 45 solo por Ellen. Cada integrante etiqueta 75; hay 150 anotaciones sobre 120 reseñas. Se calcula kappa de Cohen **antes de conciliar** las 30 etiquetas comunes (por polaridad y por tema); después se documentan desacuerdos y se prepara `gold.csv`.
+
+**Evaluación comparativa:** 20 tareas × 3 repeticiones por sistema × 2 sistemas = **120 ejecuciones**. Se conserva el juez LLM distinto del agente solo para las 6 respuestas de tipo reporte; se revisan a mano **al menos 2 veredictos** y se documenta el acuerdo. **M1–M4 es otra evaluación**, con 12 escenarios × 5 semillas = 60 corridas para la nueva regla CUSUM.
+
+**Entrega:** código, resultados e informe final el **27/11/2026**. La sustentación se prepara, pero se realizará en fecha posterior.
 
 ### 12.1 Cómo se trabaja en el repositorio
 
@@ -374,7 +382,7 @@ M2–M4 corren con `llm/falso.py` (guion fijo sobre las herramientas reales), as
 - **Línea base:** recibe todas las reseñas de la base, sin truncar.
 - **Costo:** se reportan tokens reales por corrida; el valor en USD se calcula con la tarifa pública del modelo elegido, citando la fuente y la fecha.
 - **Mismo repositorio**, con la versión 1 conservada en `v1-streamlit` y `v1-hito2`.
-- **Juez:** modelo distinto al del agente; un 20 % de sus veredictos se revisa a mano y se reporta el acuerdo.
+- **Juez:** se conserva el modelo distinto al del agente, únicamente para reportes de texto libre. Se aplicará una rúbrica versionada y una revisión manual de **al menos 2 de los 6 veredictos** (≥ 20 %); se reportarán el acuerdo y los desacuerdos. El resto se evalúa automáticamente.
 - **CUSUM diario:** técnica estadística propuesta para detectar cambios en la proporción de reseñas negativas. Su implementación y parámetros se evaluarán experimentalmente y se compararán con la regla semanal de la versión anterior.
 
 
@@ -387,7 +395,7 @@ M2–M4 corren con `llm/falso.py` (guion fijo sobre las herramientas reales), as
 
 ## 15. Preguntas abiertas
 
-Ninguna. El modelo y el soporte de llamadas a herramientas quedaron confirmados el 2026-11-17.
+El modelo y el soporte de llamadas a herramientas quedaron confirmados el 2026-11-17. **Pendiente de confirmación académica:** la fecha de sustentación y si el material de Hito 4 debe entregarse el 27/11 junto con el Hito 3. Esta duda no altera la fecha de entrega del proyecto (27/11/2026).
 
 ## 16. Referencias para el informe (≥ 5, ≥ 3 artículos)
 
