@@ -34,24 +34,26 @@
 
 ---
 
-## Mapa de tareas
+## Mapa de tareas y fechas (entrega: 27/11/2026)
 
-| # | Tarea | Responsable | Semana |
-|---|---|---|---|
-| 1 | Mover el código a `src/` y fijar la paridad P1 | Sara | 1 |
-| 2 | CUSUM diario y consultas de SQLite | Sara | 1 |
-| 3 | Ingesta, cierre y paridad P2–P3 | Sara | 1 |
-| 4 | Configuración y frontera LLM | Ellen | 1 |
-| 5 | Registro y 7 herramientas | Ellen | 1 |
-| 6 | Bucle del agente | Sara y Ellen | 1 |
-| 7 | Datos, partición y etiquetado manual | Sara y Ellen | 1 |
-| 8 | Calibración y medidas M1–M4 | Sara | 2 |
-| 9 | Evaluación agente vs. línea base | Sara | 2 |
-| 10 | API FastAPI | Ellen | 2 |
-| 11 | Interfaz web responsive | Ellen | 2 |
-| 12 | Despliegue en Railway | Ellen | 2 |
-| 13 | Corrida final y análisis | Sara y Ellen | 3 |
-| 14 | Informe, cambio a `main` y sustentación | Sara y Ellen | 3 |
+| # | Tarea | Responsable | Fase | Fecha límite |
+|---|---|---|---|---|
+| 1 | Mover el código a `src/` y fijar la paridad P1 | Sara | 1 | 19 nov (integrada) |
+| 2 | CUSUM diario y consultas de SQLite | Sara | 1 | 20 nov (PR #17 en revisión al 19/11) |
+| 3 | Ingesta, cierre y paridad P2–P3 | Sara | 2 | 21 nov |
+| 4 | Configuración y frontera LLM | Ellen | 1 | 20 nov |
+| 5 | Registro y 7 herramientas | Ellen | 2 | 22 nov |
+| 6 | Bucle del agente | Sara y Ellen | 2 | 23 nov |
+| 7 | Datos, partición y etiquetado manual | Sara y Ellen | 2 | 21 nov (30 comunes: iniciar 19 nov) |
+| 8 | Calibración y medidas M1–M4 | Sara | 2 | 24 nov |
+| 9 | Evaluación agente vs. línea base | Sara | 3 | 25 nov |
+| 10 | API FastAPI | Ellen | 2 | 24 nov |
+| 11 | Interfaz web responsive | Ellen | 3 | 25 nov |
+| 12 | Despliegue en Railway | Ellen | 3 | 26 nov |
+| 13 | Corrida final y análisis | Sara y Ellen | 3 | 26 nov |
+| 14 | Informe, paso a `main` y entrega final | Sara y Ellen | 3 | 27 nov |
+
+**Hitos:** Fase 1: 20 nov (objetivo anticipado 19 nov); Fase 2: 24 nov; Fase 3: 27 nov. La **sustentación es posterior a la entrega** y no se cuenta como condición para cerrar la Fase 3.
 
 ---
 
@@ -509,6 +511,9 @@ def test_muestra_sin_frases_de_entrenamiento(self):
     filas = leer_csv("data/gold/muestra.csv")
     self.assertEqual(len(filas), 120)
     self.assertNotIn("polaridad", filas[0])
+    self.assertNotIn("tema", filas[0])
+    self.assertEqual(set(filas[0]), {"id", "texto"})  # ciego: sin calificacion ni etiquetas
+    self.assertEqual(len({f["id"] for f in filas}), 120)  # no IDs duplicados
 ```
 
 - [ ] **Step 2: Verificar que falla**
@@ -518,16 +523,16 @@ Expected: FAIL con `ModuleNotFoundError`.
 
 - [ ] **Step 3: Generar la muestra ciega**
 
-`preparar_gold.py` usa `construir_corpus(120, semilla=2026, conjunto="evaluacion", prob_ironia=0.10)`, escribe `muestra.csv` sin etiquetas y guarda la etiqueta del simulador en un archivo aparte que no se abre hasta terminar. Los primeros 12 registros los etiquetan ambas; de los 108 restantes, cada una etiqueta 54.
+`preparar_gold.py` usa `construir_corpus(120, semilla=2026, conjunto="evaluacion", prob_ironia=0.10)`. Debe comprobar 120 **IDs únicos** (y ausencia de frases repetidas entre particiones), escribir `muestra.csv` solo con columnas `id` y `texto` (sin calificación, confianza, predicciones ni etiquetas), y guardar las etiquetas del simulador en un archivo aparte que no se abre hasta terminar. Los primeros 30 registros se entregan a ambas sin etiquetas; de los 90 restantes, 45 se asignan solo a Sara y 45 solo a Ellen. Total: **75 etiquetas por integrante**, **150 anotaciones** sobre **120 reseñas únicas**.
 
 - [ ] **Step 4: Etiquetar a mano**
 
-Sara y Ellen completan sus archivos sin usar IA y sin ver la etiqueta del simulador.
+Sara y Ellen comienzan el **19/11** por los 30 registros compartidos, etiquetándolos independientemente sin usar IA, sin ver las etiquetas del simulador ni las de la otra. Las 45 reseñas restantes de cada una se completan según el hito de la Tarea 7 (21/11).
 
 - [ ] **Step 5: Calcular acuerdo y consolidar**
 
 Run: `$env:PYTHONPATH="src"; python experiments/acuerdo.py`
-Expected: imprime kappa de polaridad y tema sobre los 12 comunes y escribe `gold.csv`. Las diferencias se resuelven conversándolas.
+Expected: imprime kappa de polaridad y tema sobre las **30 etiquetas comunes antes de resolver diferencias**, documenta los desacuerdos y escribe `gold.csv` con **120 IDs únicos** y etiquetas consensuadas.
 
 - [ ] **Step 6: Documentar**
 
@@ -638,7 +643,7 @@ Expected: FAIL con `ModuleNotFoundError`.
 
 - [ ] **Step 3: Implementar `preparar.py`, `verdad.py`, `juez.py` y `tareas.yaml`**
 
-Las respuestas esperadas se calculan con SQL sobre la base fija. Las conclusiones se verifican contra los incidentes declarados: servicio en la semana 8 y precio en la semana 11. El juez usa `LLM_JUEZ_MODEL` y responde JSON con veredicto y evidencia.
+Las respuestas esperadas se calculan con SQL sobre la base fija. Las conclusiones se verifican contra los incidentes declarados: servicio en la semana 8 y precio en la semana 11. Se conserva el juez (`LLM_JUEZ_MODEL`), **distinto del agente y la línea base**, únicamente para las respuestas de reporte de texto libre; utiliza una rúbrica fija y devuelve JSON con veredicto y evidencia. Hay **6 veredictos de reporte** (1 tarea × 3 repeticiones × 2 sistemas); todos los demás tipos de tarea se verifican automáticamente.
 
 - [ ] **Step 4: Fijar umbrales antes de correr**
 
@@ -821,7 +826,7 @@ Expected: PASS.
 - [ ] **Step 3: Correr la evaluación completa**
 
 Run: `$env:PYTHONPATH="src"; python experiments/correr.py --sistema ambos --repeticiones 3`
-Expected: 120 ejecuciones registradas. Los umbrales no se modifican después de este paso.
+Expected: 120 ejecuciones registradas (20 tareas × 3 repeticiones × 2 sistemas). Estas no se confunden con las 60 corridas separadas de M1–M4. Los umbrales no se modifican después de este paso.
 
 - [ ] **Step 4: Analizar**
 
@@ -830,7 +835,7 @@ Expected: `resumen.json` con todas las métricas de la sección 10 y `subgrupos.
 
 - [ ] **Step 5: Clasificar al menos 10 errores**
 
-Leer las trazas y completar `errores.csv`: tarea, tipo de error, evidencia e hipótesis de causa. Revisar a mano el 20 % de los veredictos del juez y reportar el acuerdo.
+Leer las trazas y completar `errores.csv`: tarea, tipo de error, evidencia e hipótesis de causa. Revisar manualmente **al menos 2 de los 6 veredictos** del juez (≥ 20 %), elegidos con criterio reproducible y antes de mirar los resultados, y reportar acuerdo y desacuerdos.
 
 - [ ] **Step 6: Commit y PR hacia `v2`**
 
@@ -841,7 +846,7 @@ git commit -m "exp: registrar resultados finales y analisis de errores"
 
 ---
 
-### Task 14: Informe, cambio a `main` y sustentación (Sara y Ellen)
+### Task 14: Informe, paso a `main` y entrega final (Sara y Ellen)
 
 **Files:**
 - Create: `docs/arquitectura.md`, `docs/adr/001-bucle-propio.md`, `docs/adr/002-omniroute.md`, `reviewpulse_agent_hito3.pdf`, `reviewpulse_agent_hito4.pptx`
@@ -860,10 +865,10 @@ Cada número del informe se contrasta con `experiments/resultados/`. Una cifra s
 Crear `v1-streamlit` y la etiqueta `v1-hito2` desde `main`, apuntar Streamlit Cloud a esa rama, comprobar que su enlace abre y unir `v2` en `main` con un PR.
 Expected: CI de `main` en verde y `/api/salud` responde 200. Si falla: `git revert -m 1 <merge>` y volver al despliegue anterior en Railway.
 
-- [ ] **Step 4: Ensayar la sustentación dos veces**
+- [ ] **Step 4: Preparar la sustentación posterior a la entrega**
 
-Cada integrante explica la parte de la otra, resuelve un caso no preparado y hace una modificación en vivo prediciendo el efecto: cambiar `cusum_h`, `max_pasos` o una regla de `PROMPT_SISTEMA`.
+Antes de la sustentación (que será **después del 27/11**, en la fecha que indique el curso), ensayar dos veces: cada integrante explica la parte de la otra, resuelve un caso no preparado y hace una modificación en vivo prediciendo el efecto: cambiar `cusum_h`, `max_pasos` o una regla de `PROMPT_SISTEMA`. Esta preparación no cambia la fecha de entrega.
 
 - [ ] **Step 5: Entregar**
 
-Subir `hito3.pdf` y `hito4` con el nombre que exige la guía. Apagar Streamlit Cloud solo después de que el Hito 3 esté calificado.
+El **27/11/2026** entregar el informe IEEE, repositorio y prototipo y subir el archivo del Hito 3 con el nombre exacto exigido por la guía. Preparar el material de Hito 4 para la sustentación posterior; entregarlo el 27/11 solo si la guía académica también exige ese archivo ese día (fecha de Hito 4 pendiente de confirmación). Apagar Streamlit Cloud únicamente después de que el Hito 3 esté calificado.
