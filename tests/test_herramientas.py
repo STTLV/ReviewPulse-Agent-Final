@@ -11,7 +11,9 @@ from types import SimpleNamespace
 from reviewpulse.actuadores import GeneradorReporte, Notificador
 from reviewpulse.ciclo.ingesta import CONFIG_DEFECTO
 from reviewpulse.herramientas.registro import Contexto, Sesion, catalogo_openai, ejecutar
-from reviewpulse.memoria import RepositorioHistorico
+from reviewpulse.memoria import RepositorioHistorico, conteo_vacio
+from reviewpulse.entorno import inicio_semana
+from reviewpulse.llm.falso import LLMFalso, guion_operativo
 from reviewpulse.preprocesamiento import enmascarar_nombres
 
 
@@ -54,6 +56,72 @@ class PruebasHerramientas(unittest.TestCase):
 
     def llamar(self, nombre, argumentos=None):
         return ejecutar(nombre, json.dumps(argumentos or {}, ensure_ascii=False), self.ctx)
+
+    def conversar(self, tarea):
+        """Guion operativo conectado al dispatcher REAL, no respuestas inventadas."""
+        llm = LLMFalso([guion_operativo] * 8)
+        mensajes = [{"role": "user", "content": tarea}]
+        nombres = []
+        for _ in range(8):
+            respuesta = llm.chat(mensajes, herramientas=catalogo_openai())
+            mensajes.append(respuesta.mensaje_asistente)
+            if not respuesta.llamadas:
+                return respuesta.texto, nombres, mensajes
+            for llamada in respuesta.llamadas:
+                nombres.append(llamada.nombre)
+                resultado = ejecutar(llamada.nombre, llamada.argumentos_crudos, self.ctx)
+                mensajes.append({"role": "tool", "tool_call_id": llamada.id,
+                                 "name": llamada.nombre,
+                                 "content": json.dumps(resultado, ensure_ascii=False)})
+        self.fail("El LLM falso no terminó la conversación.")
+
+    def test_falso_cierre_con_ejecutar_real(self):
+        texto, nombres, mensajes = self.conversar("CIERRE semana=8 incompleto=1")
+        self.assertEqual(nombres, ["generar_reporte"])
+        self.assertEqual(len(self.repo.reportes()), 1)
+        self.assertTrue(json.loads(mensajes[-2]["content"])["ok"])
+        self.assertIn("generado", texto)
+
+    def test_falso_no_declara_exito_si_reporte_fallo(self):
+        texto, nombres, mensajes = self.conversar("CIERRE semana=40 incompleto=0")
+        self.assertEqual(nombres, ["generar_reporte"])
+        self.assertEqual(json.loads(mensajes[-2]["content"])["error"], "sin_datos")
+        self.assertNotIn("generado", texto.lower())
+        self.assertEqual(self.repo.reportes(), [])
+
+    def test_falso_alarma_negativa_no_confunde_ok_con_alarma(self):
+        texto, nombres, mensajes = self.conversar("ALARMA semana=8 tema=servicio")
+        self.assertEqual(nombres, ["comparar_semana"])
+        r = json.loads(mensajes[-2]["content"])
+        self.assertTrue(r["ok"])
+        self.assertFalse(r["datos"]["servicio"]["alarma"])
+        self.assertEqual(self.repo.alertas(), [])
+        self.assertIn("No hubo alarma", texto)
+
+    def test_falso_alarma_positiva_emite_con_justificacion(self):
+        # Historial normal y suficiente para CUSUM; el aumento es deliberado.
+        for semana in range(2, 8):
+            conteos = conteo_vacio()
+            conteos["servicio"]["positiva"] = 19
+            conteos["servicio"]["negativa"] = 1
+            self.repo.cerrar_semana(semana, conteos, False,
+                                    inicio_semana(semana + 1).isoformat(), False)
+        for i in range(24):
+            self.repo.guardar_resena({
+                "id": f"nuevo_{i}", "plataforma": "Google",
+                "fecha": "2026-03-02T09:00:00", "semana": 8,
+                "texto": "Mala atención", "calificacion": 1,
+                "polaridad": "negativa", "tema": "servicio", "confianza": 0.95,
+                "revision_manual": False, "procesada_en": self.ahora.isoformat(),
+            })
+        self.repo.con.commit()
+        texto, nombres, mensajes = self.conversar("ALARMA semana=8 tema=servicio")
+        self.assertEqual(nombres, ["comparar_semana", "emitir_alerta"])
+        observaciones = [json.loads(m["content"]) for m in mensajes if m["role"] == "tool"]
+        self.assertTrue(observaciones[0]["datos"]["servicio"]["alarma"])
+        self.assertTrue(observaciones[1]["ok"], observaciones[1])
+        self.assertEqual(len(self.repo.alertas()), 1)
+        self.assertIn("emitida", texto)
 
     def test_catalogo_tiene_las_7(self):
         nombres = {h["function"]["name"] for h in catalogo_openai()}
