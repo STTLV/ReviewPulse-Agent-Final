@@ -21,7 +21,7 @@ Se listan usos relevantes respaldados por la bitácora original y las verificaci
 | 21/11/2026 | Sara | ChatGPT | Implementar el registro de siete herramientas del agente (Tarea 5). | Se implemento un catalogo Pydantic con dispatcher, manejo seguro de errores, consultas SQLite, CUSUM, alertas condicionadas, reportes y enmascaramiento limitado de nombres. | Pruebas automatizadas en tests/test_herramientas.py y pruebas de regresion del repositorio. |
 | 21/11/2026 | Sara | ChatGPT | Implementar el bucle ReAct del agente (Tarea 6). | Se integró el bucle de percepción, herramientas y observaciones; memoria de sesión, límites de pasos/tokens, control de cifras, trazas sin credenciales y adaptador al cierre semanal. | Pruebas de interacción LLM falso, errores, límites, cifras y cierre en tests/test_bucle.py. |
 
-| 21/11/2026 | Sara | ChatGPT | Preparar datos y validaciones de Tarea 7. | Se generó una muestra sintética ciega reproducible (120 reseñas), reparto 12 comunes + 54 por integrante, guiones de acuerdo y pruebas sin usar etiquetas del simulador. | Etiquetado manual, conciliación, kappa y gold.csv pendientes hasta completar las hojas. |
+| 21/11/2026 | Sara | ChatGPT | Preparar datos y validaciones de Tarea 7. | Se generó una muestra sintética ciega reproducible de 120 reseñas; Sara y Ellen completaron 75 etiquetas cada una, con 30 compartidas y 45 exclusivas por integrante. Se consolidaron las etiquetas humanas sin utilizar las etiquetas del simulador. | Etiquetado y conciliación completados: 120 reseñas únicas en data/gold/gold.csv, 0 desacuerdos, kappa de Cohen de 1,0000 en polaridad y tema (30 comunes), 110 pruebas locales aprobadas y CI exitosa. |
 
 ## Alcance y decisiones del equipo
 
