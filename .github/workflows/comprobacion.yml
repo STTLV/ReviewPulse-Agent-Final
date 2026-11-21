@@ -36,5 +36,8 @@ jobs:
       - name: Ejecutar pruebas
         run: python -m unittest discover -s tests -v
 
-      - name: Comprobar paridad P1
+      - name: Comprobar paridad P1, P2 y P3
         run: python -m unittest tests.test_paridad -v
+
+      - name: Comprobar cierre y SQLite
+        run: python -m unittest tests.test_ciclo -v

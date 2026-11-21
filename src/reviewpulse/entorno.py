@@ -68,6 +68,13 @@ def semana_de(fecha: datetime) -> int:
     return (fecha - INICIO).days // 7
 
 
+def texto_semana(semana: int) -> str:
+    """Etiqueta humana y estable de una semana del simulador."""
+    desde = inicio_semana(semana)
+    hasta = desde + timedelta(days=6)
+    return f"{semana:02d} ({desde:%d/%m}–{hasta:%d/%m/%Y})"
+
+
 def _poisson(rng: random.Random, lam: float) -> int:
     l, k, p = math.exp(-lam), 0, 1.0
     while True:
