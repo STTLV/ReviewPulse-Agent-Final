@@ -138,6 +138,21 @@ class PruebasBucle(unittest.TestCase):
         self.assertEqual(extraer_cifras("Hubo 5,5% y 12 casos"), ["5,5%", "12"])
         self.assertEqual(cifras_sin_respaldo("Se perdieron -5", ["saldo: 5"]), ["-5"])
 
+    def test_redondeo_decimal_respaldado(self):
+        self.assertEqual(cifras_sin_respaldo("CUSUM s_max 5,1", ['{"s_max":5.1234}']), [])
+        self.assertEqual(cifras_sin_respaldo("CUSUM s_max 5.1", ['{"s_max":5.1234}']), [])
+        self.assertEqual(cifras_sin_respaldo("CUSUM s_max 5,3", ['{"s_max":5.1234}']), ["5,3"])
+
+    def test_porcentaje_redondeado_respaldado(self):
+        self.assertEqual(cifras_sin_respaldo("Proporción 24,6 %", ['{"proporcion":0.2459}']), [])
+        self.assertEqual(cifras_sin_respaldo("Proporción 24.6%", ['{"proporcion":0.2459}']), [])
+        self.assertEqual(cifras_sin_respaldo("Proporción 24,7 %", ['{"proporcion":0.2459}']), ["24,7 %"])
+        self.assertEqual(cifras_sin_respaldo("Proporción 26 %", ['{"proporcion":0.2459}']), ["26 %"])
+
+    def test_prompt_identifica_hotel_piloto(self):
+        self.assertIn("Hotel piloto", PROMPT_SISTEMA)
+        self.assertNotIn("hotel ReviewPulse", PROMPT_SISTEMA)
+
     def test_traza_no_contiene_la_llave(self):
         self.ctx.cfg["llm_api_key"] = "secreta"
         ruta = Path(self.tmp.name) / "trazas" / "agente.jsonl"
@@ -174,6 +189,12 @@ class PruebasBucle(unittest.TestCase):
         r = resolver("Muestra una reseña", llm, self.ctx)
         self.assertTrue(r.ok)
         self.assertIn("<resena>", llm.llamadas[-1][-1]["content"])
+
+    def test_manejador_con_falso_operativo_cierra_sin_respaldo(self):
+        from reviewpulse.llm.falso import guion_operativo
+        manejador = ManejadorAgente(LLMFalso([guion_operativo] * 8), lambda ahora: self.ctx)
+        self.assertTrue(manejador.al_cerrar(8, self.ahora, False))
+        self.assertEqual(len(self.repo.reportes()), 1)
 
     def test_manejador_cierre_exige_reporte_real(self):
         manejador = ManejadorAgente(LLMFalso([respuesta_texto("Listo")]), lambda ahora: self.ctx)

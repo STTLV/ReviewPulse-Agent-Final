@@ -65,6 +65,28 @@ def _numero(valor: str) -> Decimal | None:
         return None
 
 
+def _precision_de_cifra(cifra: str) -> Decimal:
+    """Unidad del último decimal mostrado, sin confundir millares con decimales."""
+    limpio = cifra.strip().replace(" ", "").rstrip("%")
+    if "." in limpio and "," in limpio:
+        sep = "," if limpio.rfind(",") > limpio.rfind(".") else "."
+        return Decimal(1).scaleb(-len(limpio.rsplit(sep, 1)[1]))
+    for sep in (",", "."):
+        if sep not in limpio:
+            continue
+        partes = limpio.lstrip("+-").split(sep)
+        # Igual que _numero: grupos de tres son separadores de millares.
+        if (len(partes) > 1 and all(len(p) == 3 for p in partes[1:])
+                and len(partes[0]) <= 3 and partes[0] != "0"):
+            return Decimal("1")
+        return Decimal(1).scaleb(-len(partes[-1]))
+    return Decimal("1")
+
+
+def _equivale_redondeado(valor: Decimal, respaldo: Decimal, precision: Decimal) -> bool:
+    return respaldo.quantize(precision, rounding=ROUND_HALF_UP) == valor
+
+
 def cifras_sin_respaldo(texto: str, observaciones: list[str]) -> list[str]:
     """Comprueba las cifras contra los números aportados por usuario/herramientas.
 
@@ -83,10 +105,11 @@ def cifras_sin_respaldo(texto: str, observaciones: list[str]) -> list[str]:
         es_porcentaje = cifra.rstrip().endswith("%")
         if valor is None:
             continue
-        valido = any(valor == numero for numero in respaldos)
+        precision = _precision_de_cifra(cifra)
+        valido = any(_equivale_redondeado(valor, numero, precision) for numero in respaldos)
         if es_porcentaje and not valido:
             valido = any(
-                (numero * 100).quantize(Decimal("1"), rounding=ROUND_HALF_UP) == valor
+                _equivale_redondeado(valor, numero * 100, precision)
                 for numero in respaldos if 0 <= numero <= 1
             )
         if not valido and cifra not in sin_respaldo:
