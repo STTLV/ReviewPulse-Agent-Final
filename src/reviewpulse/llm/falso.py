@@ -73,32 +73,23 @@ def _resultados_herramientas(mensajes: list[dict]) -> dict[str, str]:
     }
 
 
-def _hubo_alarma(contenido: str) -> bool:
+def _resultado_correcto(contenido: str) -> dict | None:
+    """Lee el sobre de ejecutar() sin confundir ok=True con alarma=True."""
     try:
-        datos = json.loads(contenido)
-    except (TypeError, json.JSONDecodeError):
-        datos = None
+        respuesta = json.loads(contenido)
+    except (TypeError, ValueError):
+        return None
+    if not isinstance(respuesta, dict) or respuesta.get("ok") is not True:
+        return None
+    datos = respuesta.get("datos")
+    return datos if isinstance(datos, dict) else None
 
-    if isinstance(datos, dict):
-        for clave in ("hubo_alarma", "alarma", "alerta"):
-            valor = datos.get(clave)
-            if isinstance(valor, bool):
-                return valor
-            if isinstance(valor, str):
-                valor = valor.strip().lower()
-                if valor in {"true", "si", "sí", "yes", "alarma"}:
-                    return True
-                if valor in {"false", "no", "sin alarma", "ninguna"}:
-                    return False
-        for clave in ("temas_en_alerta", "alarmas", "alertas"):
-            valor = datos.get(clave)
-            if isinstance(valor, list):
-                return bool(valor)
 
-    normalizado = contenido.strip().lower()
-    if any(frase in normalizado for frase in ("sin alarma", "no hubo alarma", "no se emitira alerta")):
-        return False
-    return bool(re.search(r"\b(true|si|sí|yes|hubo alarma|alarma detectada)\b", normalizado))
+def _hubo_alarma(contenido: str, tema: str) -> bool:
+    """Solo acepta la señal booleana del tema solicitado."""
+    datos = _resultado_correcto(contenido)
+    comparacion = datos.get(tema) if datos is not None else None
+    return isinstance(comparacion, dict) and comparacion.get("alarma") is True
 
 
 def guion_operativo(mensajes: list[dict]) -> RespuestaLLM:
@@ -115,43 +106,50 @@ def guion_operativo(mensajes: list[dict]) -> RespuestaLLM:
         semana, tema = alarma.groups()
         comparaciones = [(call_id, name) for call_id, name in llamadas if name == "comparar_semana"]
         if not comparaciones:
-            observaciones = re.search(r"(?:n_)?observaciones\s*=\s*(\d+)", texto_usuario, re.I)
-            argumentos = {"semana": int(semana), "tema": tema}
-            if observaciones:
-                argumentos["observaciones"] = int(observaciones.group(1))
-            return respuesta_herramienta("comparar_semana", **argumentos)
+            return respuesta_herramienta("comparar_semana", semana=int(semana), tema=tema)
 
         comparacion_id, _ = comparaciones[-1]
         if comparacion_id not in resultados:
             return respuesta_texto("La comparación está pendiente; no se emitió ninguna alerta.")
-        if not _hubo_alarma(resultados[comparacion_id]):
+        if not _hubo_alarma(resultados[comparacion_id], tema):
             return respuesta_texto(f"No hubo alarma en la semana {semana}; no se emitió alerta.")
 
         alertas = [(call_id, name) for call_id, name in llamadas if name == "emitir_alerta"]
         if not alertas:
-            return respuesta_herramienta("emitir_alerta", semana=int(semana), tema=tema)
+            return respuesta_herramienta(
+                "emitir_alerta", semana=int(semana), tema=tema,
+                justificacion="CUSUM positivo confirmado con comparar_semana",
+            )
         alerta_id, _ = alertas[-1]
         if alerta_id in resultados:
-            return respuesta_texto(f"Alerta emitida para {tema}, semana {semana}.")
+            datos_alerta = _resultado_correcto(resultados[alerta_id])
+            if datos_alerta is not None and datos_alerta.get("emitida") is True:
+                return respuesta_texto(f"Alerta emitida para {tema}, semana {semana}.")
+            return respuesta_texto("No se pudo emitir la alerta; la herramienta devolvió un error.")
         return respuesta_texto("La alerta fue solicitada.")
 
     cierre = re.search(r"CIERRE\s+semana\s*=\s*(\d+)\s+incompleto\s*=\s*(\d+)", texto_usuario, re.I)
     if cierre:
-        semana, incompleto = cierre.groups()
+        semana, _incompleto = cierre.groups()
         reportes = [(call_id, name) for call_id, name in llamadas if name == "generar_reporte"]
         if not reportes:
-            return respuesta_herramienta(
-                "generar_reporte",
-                semana=int(semana),
-                incompleto=int(incompleto),
-            )
+            return respuesta_herramienta("generar_reporte", semana=int(semana))
         reporte_id, _ = reportes[-1]
         if reporte_id in resultados:
-            return respuesta_texto(f"Reporte de la semana {semana} generado.")
+            datos_reporte = _resultado_correcto(resultados[reporte_id])
+            if datos_reporte is not None and "resumen" in datos_reporte and "ruta" in datos_reporte:
+                return respuesta_texto(f"Reporte de la semana {semana} generado.")
+            return respuesta_texto("No se pudo generar el reporte; la herramienta devolvió un error.")
         return respuesta_texto(f"El reporte de la semana {semana} fue solicitado.")
 
     if re.search(r"(?:genera(?:r)?|generar)\s+(?:el\s+)?reporte", texto_usuario, re.I):
-        if any(name == "generar_reporte" for _, name in llamadas):
-            return respuesta_texto("Reporte generado.")
+        reportes = [(identificador, nombre) for identificador, nombre in llamadas
+                    if nombre == "generar_reporte"]
+        if reportes:
+            ultimo_id, _ = reportes[-1]
+            datos = _resultado_correcto(resultados.get(ultimo_id, ""))
+            if datos is not None and "resumen" in datos and "ruta" in datos:
+                return respuesta_texto("Reporte generado.")
+            return respuesta_texto("No se pudo generar el reporte.")
         return respuesta_herramienta("generar_reporte")
     return respuesta_texto("No hay una tarea operativa reconocida.")
