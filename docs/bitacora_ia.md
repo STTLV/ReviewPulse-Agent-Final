@@ -21,6 +21,8 @@ Se listan usos relevantes respaldados por la bitácora original y las verificaci
 | 21/11/2026 | Sara | ChatGPT | Implementar el registro de siete herramientas del agente (Tarea 5). | Se implemento un catalogo Pydantic con dispatcher, manejo seguro de errores, consultas SQLite, CUSUM, alertas condicionadas, reportes y enmascaramiento limitado de nombres. | Pruebas automatizadas en tests/test_herramientas.py y pruebas de regresion del repositorio. |
 | 21/11/2026 | Sara | ChatGPT | Implementar el bucle ReAct del agente (Tarea 6). | Se integró el bucle de percepción, herramientas y observaciones; memoria de sesión, límites de pasos/tokens, control de cifras, trazas sin credenciales y adaptador al cierre semanal. | Pruebas de interacción LLM falso, errores, límites, cifras y cierre en tests/test_bucle.py. |
 
+| 21/11/2026 | Sara | ChatGPT | Preparar datos y validaciones de Tarea 7. | Se generó una muestra sintética ciega reproducible (120 reseñas), reparto 12 comunes + 54 por integrante, guiones de acuerdo y pruebas sin usar etiquetas del simulador. | Etiquetado manual, conciliación, kappa y gold.csv pendientes hasta completar las hojas. |
+
 ## Alcance y decisiones del equipo
 
 Los datos son **sintéticos**. La evaluación M1 histórica representa cinco reentrenamientos, mientras que el Hito 2 compara **una sola carga del modelo guardado** contra un método mayoritario en el mismo conjunto de control. M1 (polaridad) y M2 no alcanzaron sus metas históricas, y se registran así. M3 prueba generación y registro local de reportes, no recepción efectiva de mensajes de correo. Las sugerencias de IA se aceptaron solo después de cotejarlas con el código y las pruebas; la decisión académica sigue siendo de las integrantes.
