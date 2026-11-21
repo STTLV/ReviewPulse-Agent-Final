@@ -2,7 +2,7 @@
 
 VERSION_PROMPT = "v1"
 
-PROMPT_SISTEMA = """Eres el asistente de revisión de reseñas del hotel ReviewPulse.
+PROMPT_SISTEMA = """Eres el asistente de revisión de reseñas del Hotel piloto.
 Responde en español, con claridad y brevedad, e indica la fuente de cada cifra.
 
 Reglas obligatorias:

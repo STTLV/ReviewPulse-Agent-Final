@@ -108,11 +108,12 @@ class LLMFalsoPrueba(unittest.TestCase):
         reporte = falso.chat([usuario])
         self.assertTrue(reporte.ok)
         self.assertEqual(reporte.llamadas[0].nombre, "generar_reporte")
+        self.assertNotIn('"incompleto"', reporte.llamadas[0].argumentos_crudos)
         mensajes = [
             usuario,
             reporte.mensaje_asistente,
             {"role": "tool", "tool_call_id": reporte.llamadas[0].id,
-             "content": '{"reporte": "listo"}'},
+             "content": '{"ok":true,"datos":{"ruta":"reportes/semana_08.md","resumen":{"semana":8}}}'},
         ]
         final = falso.chat(mensajes)
         self.assertTrue(final.ok)
@@ -131,7 +132,7 @@ class LLMFalsoPrueba(unittest.TestCase):
                     usuario,
                     compara.mensaje_asistente,
                     {"role": "tool", "tool_call_id": compara.llamadas[0].id,
-                     "content": '{"hubo_alarma": ' + str(hubo_alarma).lower() + ', "error": null}'},
+                     "content": '{"ok":true,"datos":{"limpieza":{"alarma":' + str(hubo_alarma).lower() + '}}}'},
                 ]
                 siguiente = falso.chat(mensajes)
                 if not hubo_alarma:
@@ -139,10 +140,11 @@ class LLMFalsoPrueba(unittest.TestCase):
                     self.assertIn("No hubo alarma", siguiente.texto)
                 else:
                     self.assertEqual(siguiente.llamadas[0].nombre, "emitir_alerta")
+                    self.assertIn('"justificacion"', siguiente.llamadas[0].argumentos_crudos)
                     mensajes.extend([
                         siguiente.mensaje_asistente,
                         {"role": "tool", "tool_call_id": siguiente.llamadas[0].id,
-                         "content": "ok"},
+                         "content": '{"ok":true,"datos":{"emitida":true}}'},
                     ])
                     final = falso.chat(mensajes)
                     self.assertEqual(final.llamadas, [])
@@ -164,13 +166,13 @@ class LLMFalsoPrueba(unittest.TestCase):
         usuario = {"role": "user", "content": "ALARMA semana=4 tema=limpieza observaciones=8"}
         compara = guion_operativo([usuario])
         self.assertEqual(compara.llamadas[0].nombre, "comparar_semana")
-        self.assertIn('"observaciones": 8', compara.llamadas[0].argumentos_crudos)
+        self.assertNotIn('"observaciones"', compara.llamadas[0].argumentos_crudos)
 
         mensajes = [
             usuario,
             compara.mensaje_asistente,
             {"role": "tool", "tool_call_id": compara.llamadas[0].id,
-             "content": '{"hubo_alarma": false, "error": null}'},
+             "content": '{"ok":true,"datos":{"limpieza":{"alarma":false}}}'},
         ]
         final = guion_operativo(mensajes)
         self.assertEqual(final.llamadas, [])
@@ -183,13 +185,14 @@ class LLMFalsoPrueba(unittest.TestCase):
             usuario,
             compara.mensaje_asistente,
             {"role": "tool", "tool_call_id": compara.llamadas[0].id,
-             "content": '{"hubo_alarma": true}'},
+             "content": '{"ok":true,"datos":{"limpieza":{"alarma":true}}}'},
         ]
         alerta = guion_operativo(mensajes)
         self.assertEqual(alerta.llamadas[0].nombre, "emitir_alerta")
+        self.assertIn('"justificacion"', alerta.llamadas[0].argumentos_crudos)
         mensajes.extend([
             alerta.mensaje_asistente,
-            {"role": "tool", "tool_call_id": alerta.llamadas[0].id, "content": "ok"},
+            {"role": "tool", "tool_call_id": alerta.llamadas[0].id, "content": '{"ok":true,"datos":{"emitida":true}}'},
         ])
         final = guion_operativo(mensajes)
         self.assertEqual(final.llamadas, [])
@@ -200,13 +203,13 @@ class LLMFalsoPrueba(unittest.TestCase):
         reporte = guion_operativo([usuario])
         self.assertEqual(reporte.llamadas[0].nombre, "generar_reporte")
         self.assertIn('"semana": 7', reporte.llamadas[0].argumentos_crudos)
-        self.assertIn('"incompleto": 2', reporte.llamadas[0].argumentos_crudos)
+        self.assertNotIn('"incompleto"', reporte.llamadas[0].argumentos_crudos)
 
         mensajes = [
             usuario,
             reporte.mensaje_asistente,
             {"role": "tool", "tool_call_id": reporte.llamadas[0].id,
-             "content": '{"reporte":"listo"}'},
+             "content": '{"ok":true,"datos":{"ruta":"reportes/semana_07.md","resumen":{"semana":7}}}'},
         ]
         final = guion_operativo(mensajes)
         self.assertEqual(final.llamadas, [])
