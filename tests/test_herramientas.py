@@ -189,6 +189,33 @@ class PruebasHerramientas(unittest.TestCase):
         self.assertIn("s_max", r["datos"]["servicio"])
         self.assertEqual(self.ctx.sesion.comparaciones_positivas, set())
 
+    def test_cierre_incompleto_sin_resenas_genera_reporte_e11(self):
+        # Semana 9 existe como operación de cierre, aun sin filas de reseñas.
+        self.ctx.sesion.semana_en_cierre = 9
+        self.ctx.sesion.incompleto = True
+        r = self.llamar("generar_reporte", {"semana": 9})
+        self.assertTrue(r["ok"], r)
+        self.assertEqual(r["datos"]["resumen"]["semana"], 9)
+        self.assertTrue(r["datos"]["resumen"]["datos_incompletos"])
+        self.assertEqual(sum(sum(v.values()) for v in
+                             r["datos"]["resumen"]["conteos"].values()), 0)
+        self.assertEqual(self.repo.reportes()[0]["semana"], 9)
+        self.assertTrue(self.repo.reportes()[0]["incompleto"])
+        self.assertIn("Datos incompletos", (Path(self.tmp.name) / "reportes" / "semana_09.md").read_text(encoding="utf-8"))
+
+    def test_cierre_vacio_sin_autorizacion_no_inventa_datos(self):
+        # Una semana vacía no se convierte en válida por preguntar al LLM.
+        r = self.llamar("generar_reporte", {"semana": 9})
+        self.assertFalse(r["ok"])
+        self.assertEqual(r["error"], "sin_datos")
+        self.ctx.sesion.semana_en_cierre = 9
+        r = self.llamar("generar_reporte", {"semana": 40})
+        self.assertEqual(r["error"], "sin_datos")
+        self.ctx.sesion.incompleto = False
+        r = self.llamar("generar_reporte", {"semana": 9})
+        self.assertEqual(r["error"], "sin_datos")
+        self.assertEqual(self.repo.reportes(), [])
+
     def test_generar_reporte_reutiliza_tarea3(self):
         r = self.llamar("generar_reporte", {"semana": 8})
         self.assertTrue(r["ok"], r)
