@@ -106,7 +106,13 @@ def cifras_sin_respaldo(texto: str, observaciones: list[str]) -> list[str]:
         if valor is None:
             continue
         precision = _precision_de_cifra(cifra)
-        valido = any(_equivale_redondeado(valor, numero, precision) for numero in respaldos)
+        if not es_porcentaje and precision == Decimal("1"):
+            # Una cantidad entera no puede inventarse mediante redondeo:
+            # ni 0.1 respalda "0 quejas", ni 5.12 respalda "5 quejas".
+            valido = valor in respaldos
+        else:
+            # Se permite redondear solo decimales o porcentajes explícitos.
+            valido = any(_equivale_redondeado(valor, numero, precision) for numero in respaldos)
         if es_porcentaje and not valido:
             valido = any(
                 _equivale_redondeado(valor, numero * 100, precision)
@@ -307,8 +313,16 @@ class ManejadorAgente:
 
     def al_cerrar(self, semana: int, ahora, incompleto: bool) -> bool:
         ctx = self._contexto(ahora)
+        if ctx.sesion.semana_en_cierre is not None:
+            raise RuntimeError("Ya existe un cierre activo en la sesión.")
         ctx.sesion.incompleto = bool(incompleto)
-        r = resolver(f"CIERRE semana={semana} incompleto={int(incompleto)}", self.llm, ctx)
-        if not r.ok:
-            return False
-        return any(informe.get("semana") == semana for informe in ctx.repo.reportes())
+        # Autoriza el cierre el ciclo de ingesta, no las palabras del LLM.
+        ctx.sesion.semana_en_cierre = semana
+        try:
+            r = resolver(f"CIERRE semana={semana} incompleto={int(incompleto)}", self.llm, ctx)
+            if not r.ok:
+                return False
+            return any(informe.get("semana") == semana for informe in ctx.repo.reportes())
+        finally:
+            # No dejar autorización abierta tras error o respuesta final.
+            ctx.sesion.semana_en_cierre = None
