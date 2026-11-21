@@ -56,3 +56,19 @@ def validar(resena: dict) -> tuple[bool, str, str]:
     if idioma != "es":
         return False, texto, f"idioma_{idioma}"
     return True, texto, ""
+
+
+def enmascarar_nombres(texto: str) -> str:
+    """Oculta nombres propios tras un cargo o título español conocido.
+
+    Alcance limitado por diseño: no detecta nombres aislados. Para datos
+    personales reales se necesita reconocimiento de entidades (NER).
+    """
+    cargos = ("recepcionista|gerente|conserje|meser[oa]|camarer[oa]|"
+              "administrador(?:a)?|señor(?:a|ita)?|sr\\.?|sra\\.?|"
+              "doctor(?:a)?|profesor(?:a)?|emplead[oa]")
+    patron = re.compile(
+        rf"(\b(?i:{cargos})\s+)"
+        r"([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+){0,2})"
+    )
+    return patron.sub(lambda m: m.group(1) + "[nombre]", texto)

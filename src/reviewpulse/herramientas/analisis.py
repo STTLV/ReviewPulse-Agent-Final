@@ -122,3 +122,32 @@ def construir_reporte(
     )
     repo.guardar_reporte(semana, ahora.isoformat(), str(ruta), incompleto)
     return ruta
+
+
+# La herramienta pública es un adaptador del análisis determinista existente.
+from pydantic import BaseModel, ConfigDict, Field
+from .registro import Contexto, ErrorHerramienta, herramienta
+
+
+class Comparar(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    semana: int = Field(ge=0)
+    tema: str | None = None
+
+
+@herramienta("comparar_semana", "Calcula CUSUM y señales de alarma por semana y tema.", Comparar)
+def comparar_semana(entrada: Comparar, ctx: Contexto) -> dict:
+    from .resenas import _existe_semana
+    if not _existe_semana(ctx, entrada.semana):
+        raise ErrorHerramienta("sin_datos", "No hay datos para esa semana.")
+    if entrada.tema is not None and entrada.tema not in TEMAS:
+        raise ErrorHerramienta("argumentos_invalidos", "Tema no reconocido.")
+    resultados = comparar_temas(ctx.repo, entrada.semana, ctx.cfg)
+    if entrada.tema is not None:
+        resultados = {entrada.tema: resultados[entrada.tema]}
+    for tema, comparacion in resultados.items():
+        if comparacion["alarma"]:
+            clave = (entrada.semana, tema)
+            ctx.sesion.comparaciones_positivas.add(clave)
+            ctx.sesion.comparaciones[clave] = dict(comparacion)
+    return resultados
