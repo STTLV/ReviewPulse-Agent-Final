@@ -19,6 +19,7 @@ Se listan usos relevantes respaldados por la bitácora original y las verificaci
 
 | 20/11/2026 | Sara | ChatGPT | Implementar ingesta, cierre y paridad P2-P3 de la Tarea 3. | Revise la migracion del ciclo anterior a consultas SQLite y CUSUM, la generacion de reportes de respaldo y el manejo seguro de fallos y recursos. | Paridad E02 y E11, pruebas de alarmas sin duplicados y pruebas locales de ciclo; pendiente verificacion en GitHub Actions. |
 | 21/11/2026 | Sara | ChatGPT | Implementar el registro de siete herramientas del agente (Tarea 5). | Se implemento un catalogo Pydantic con dispatcher, manejo seguro de errores, consultas SQLite, CUSUM, alertas condicionadas, reportes y enmascaramiento limitado de nombres. | Pruebas automatizadas en tests/test_herramientas.py y pruebas de regresion del repositorio. |
+| 21/11/2026 | Sara | ChatGPT | Implementar el bucle ReAct del agente (Tarea 6). | Se integró el bucle de percepción, herramientas y observaciones; memoria de sesión, límites de pasos/tokens, control de cifras, trazas sin credenciales y adaptador al cierre semanal. | Pruebas de interacción LLM falso, errores, límites, cifras y cierre en tests/test_bucle.py. |
 
 ## Alcance y decisiones del equipo
 
