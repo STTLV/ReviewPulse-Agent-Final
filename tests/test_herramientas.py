@@ -216,6 +216,53 @@ class PruebasHerramientas(unittest.TestCase):
         self.assertEqual(r["error"], "sin_datos")
         self.assertEqual(self.repo.reportes(), [])
 
+    def test_comparacion_positiva_luego_negativa_revoca_permiso_ellen(self):
+        # CUSUM positivo; las reseñas tardías se reclasifican; segundo cálculo
+        # negativo debe revocar el permiso y bloquear emitir_alerta.
+        for semana in range(2, 8):
+            conteos = conteo_vacio()
+            conteos["servicio"]["positiva"] = 19
+            conteos["servicio"]["negativa"] = 1
+            self.repo.cerrar_semana(semana, conteos, False,
+                                    inicio_semana(semana + 1).isoformat(), False)
+        for i in range(24):
+            self.repo.guardar_resena({
+                "id": f"tardia_{i}", "plataforma": "Google",
+                "fecha": "2026-03-02T09:00:00", "semana": 8,
+                "texto": "Mala atención", "calificacion": 1,
+                "polaridad": "negativa", "tema": "servicio", "confianza": 0.95,
+                "revision_manual": False, "procesada_en": self.ahora.isoformat(),
+            })
+        self.repo.con.commit()
+        primera = self.llamar("comparar_semana", {"semana": 8, "tema": "servicio"})
+        self.assertTrue(primera["ok"], primera)
+        self.assertTrue(primera["datos"]["servicio"]["alarma"], primera)
+        self.assertIn((8, "servicio"), self.ctx.sesion.comparaciones_positivas)
+
+        self.repo.con.execute(
+            "UPDATE resenas SET polaridad = 'positiva' WHERE semana = 8 AND tema = 'servicio'"
+        )
+        self.repo.con.commit()
+        segunda = self.llamar("comparar_semana", {"semana": 8, "tema": "servicio"})
+        self.assertTrue(segunda["ok"], segunda)
+        self.assertFalse(segunda["datos"]["servicio"]["alarma"], segunda)
+        self.assertNotIn((8, "servicio"), self.ctx.sesion.comparaciones_positivas)
+        self.assertNotIn((8, "servicio"), self.ctx.sesion.comparaciones)
+        rechazo = self.llamar("emitir_alerta", {
+            "semana": 8, "tema": "servicio", "justificacion": "Alarma anterior, ya obsoleta"
+        })
+        self.assertEqual(rechazo["error"], "rechazada")
+        self.assertEqual(self.repo.alertas(), [])
+
+    def test_comparacion_sin_datos_revoca_permiso_anterior_ellen(self):
+        clave = (40, "servicio")
+        self.ctx.sesion.comparaciones_positivas.add(clave)
+        self.ctx.sesion.comparaciones[clave] = {"alarma": True}
+        resultado = self.llamar("comparar_semana", {"semana": 40, "tema": "servicio"})
+        self.assertEqual(resultado["error"], "sin_datos")
+        self.assertNotIn(clave, self.ctx.sesion.comparaciones_positivas)
+        self.assertNotIn(clave, self.ctx.sesion.comparaciones)
+
     def test_generar_reporte_reutiliza_tarea3(self):
         r = self.llamar("generar_reporte", {"semana": 8})
         self.assertTrue(r["ok"], r)
