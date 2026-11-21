@@ -143,6 +143,23 @@ class PruebasBucle(unittest.TestCase):
         self.assertEqual(cifras_sin_respaldo("CUSUM s_max 5.1", ['{"s_max":5.1234}']), [])
         self.assertEqual(cifras_sin_respaldo("CUSUM s_max 5,3", ['{"s_max":5.1234}']), ["5,3"])
 
+    def test_enteros_exigen_respaldo_exacto_david(self):
+        # Los dos falsos respaldos detectados en la revisión del PR22.
+        self.assertEqual(cifras_sin_respaldo("Hubo 0 quejas", ['{"observacion":0.1}']), ["0"])
+        self.assertEqual(cifras_sin_respaldo("Hubo 5 quejas", ['{"s_max":5.12}']), ["5"])
+        # Si el respaldo es realmente entero, sí puede utilizarse.
+        self.assertEqual(cifras_sin_respaldo("Hubo 0 quejas", ['{"total":0}']), [])
+        self.assertEqual(cifras_sin_respaldo("Hubo 5 quejas", ['{"total":5}']), [])
+        self.assertEqual(cifras_sin_respaldo("Hubo 1.234 quejas", ['{"total":1234}']), [])
+        # Un valor próximo tampoco respalda una cantidad entera inventada.
+        self.assertEqual(cifras_sin_respaldo("Hubo 100 quejas", ['{"total":99.6}']), ["100"])
+
+    def test_porcentaje_entero_puede_redondearse(self):
+        # La excepción de porcentaje sigue vigente aun cuando el porcentaje
+        # mostrado no tiene cifras decimales.
+        self.assertEqual(cifras_sin_respaldo("Proporción 25 %", ['{"proporcion":0.2459}']), [])
+        self.assertEqual(cifras_sin_respaldo("Proporción 24,6 %", ['{"proporcion":0.2459}']), [])
+
     def test_porcentaje_redondeado_respaldado(self):
         self.assertEqual(cifras_sin_respaldo("Proporción 24,6 %", ['{"proporcion":0.2459}']), [])
         self.assertEqual(cifras_sin_respaldo("Proporción 24.6%", ['{"proporcion":0.2459}']), [])
@@ -189,6 +206,29 @@ class PruebasBucle(unittest.TestCase):
         r = resolver("Muestra una reseña", llm, self.ctx)
         self.assertTrue(r.ok)
         self.assertIn("<resena>", llm.llamadas[-1][-1]["content"])
+
+    def test_e11_cierre_vacio_incompleto_por_agente(self):
+        from reviewpulse.llm.falso import guion_operativo
+        manejador = ManejadorAgente(LLMFalso([guion_operativo] * 8), lambda ahora: self.ctx)
+        self.assertTrue(manejador.al_cerrar(9, self.ahora, True))
+        informes = self.repo.reportes()
+        self.assertEqual([r["semana"] for r in informes], [9])
+        self.assertTrue(informes[0]["incompleto"])
+        self.assertIsNone(self.ctx.sesion.semana_en_cierre)
+        resumen = json.loads((Path(self.tmp.name) / "reportes" / "semana_09.json").read_text(encoding="utf-8"))
+        self.assertTrue(resumen["datos_incompletos"])
+        self.assertEqual(sum(sum(v.values()) for v in resumen["conteos"].values()), 0)
+
+    def test_cierre_vacio_no_autorizado_fuera_del_ciclo(self):
+        from reviewpulse.herramientas.registro import ejecutar
+        respuesta = ejecutar("generar_reporte", '{"semana":9}', self.ctx)
+        self.assertEqual(respuesta["error"], "sin_datos")
+        self.assertIsNone(self.ctx.sesion.semana_en_cierre)
+
+    def test_cierre_limpia_autorizacion_si_falla(self):
+        manejador = ManejadorAgente(LLMFalso([respuesta_texto("No generé reporte")]), lambda ahora: self.ctx)
+        self.assertFalse(manejador.al_cerrar(9, self.ahora, True))
+        self.assertIsNone(self.ctx.sesion.semana_en_cierre)
 
     def test_manejador_con_falso_operativo_cierra_sin_respaldo(self):
         from reviewpulse.llm.falso import guion_operativo
