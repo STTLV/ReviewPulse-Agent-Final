@@ -19,7 +19,11 @@ class Generar(BaseModel):
 @herramienta("generar_reporte", "Genera un informe semanal determinista y su resumen JSON.", Generar)
 def generar_reporte(entrada: Generar, ctx: Contexto) -> dict:
     if not _existe_semana(ctx, entrada.semana):
-        raise ErrorHerramienta("sin_datos", "No hay datos para esa semana.")
+        # Antes de guardar el cierre en SQLite puede haber 0 reseñas.
+        # No autorizar semanas inexistentes desde los argumentos del LLM.
+        if (ctx.sesion.semana_en_cierre != entrada.semana
+                or not ctx.sesion.incompleto):
+            raise ErrorHerramienta("sin_datos", "No hay datos para esa semana.")
     ruta = construir_reporte(
         ctx.repo, ctx.reportes, entrada.semana, ctx.ahora,
         ctx.sesion.incompleto, ctx.cfg,

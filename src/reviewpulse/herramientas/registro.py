@@ -13,6 +13,8 @@ from pydantic import BaseModel, ValidationError
 class Sesion:
     comparaciones_positivas: set[tuple[int, str]] = field(default_factory=set)
     incompleto: bool = False
+    # Autorización puntual: solo el manejador del cierre escribe aquí.
+    semana_en_cierre: int | None = None
     # Únicamente el código de comparar_semana escribe en este mapa; no el LLM.
     comparaciones: dict[tuple[int, str], dict] = field(default_factory=dict, repr=False)
 
