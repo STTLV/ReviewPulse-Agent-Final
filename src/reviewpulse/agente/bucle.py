@@ -84,7 +84,12 @@ def _precision_de_cifra(cifra: str) -> Decimal:
 
 
 def _equivale_redondeado(valor: Decimal, respaldo: Decimal, precision: Decimal) -> bool:
-    return respaldo.quantize(precision, rounding=ROUND_HALF_UP) == valor
+    # Un número fuera de la precisión decimal disponible no se verifica.
+    # No debe abortar el bucle ReAct ni convertir la cifra en respaldada.
+    try:
+        return respaldo.quantize(precision, rounding=ROUND_HALF_UP) == valor
+    except (InvalidOperation, ValueError, OverflowError):
+        return False
 
 
 def cifras_sin_respaldo(texto: str, observaciones: list[str]) -> list[str]:
@@ -324,5 +329,7 @@ class ManejadorAgente:
                 return False
             return any(informe.get("semana") == semana for informe in ctx.repo.reportes())
         finally:
-            # No dejar autorización abierta tras error o respuesta final.
+            # La autorización y la marca incompleta pertenecen solo al cierre
+            # activo. No deben contaminar un segundo reporte con el mismo ctx.
             ctx.sesion.semana_en_cierre = None
+            ctx.sesion.incompleto = False
