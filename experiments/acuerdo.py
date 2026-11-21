@@ -41,13 +41,13 @@ def consolidar_gold(raiz: Path = RAIZ) -> dict:
     muestra = leer_csv(carpeta / "muestra.csv", ["id", "texto"])
     sara = leer_csv(carpeta / "etiquetas_sara.csv", ["id", "texto", "polaridad", "tema"])
     ellen = leer_csv(carpeta / "etiquetas_ellen.csv", ["id", "texto", "polaridad", "tema"])
-    if len(muestra) != 120 or len(sara) != 66 or len(ellen) != 66:
-        raise ValueError("Reparto inválido: muestra=120; Sara=66; Ellen=66.")
+    if len(muestra) != 120 or len(sara) != 75 or len(ellen) != 75:
+        raise ValueError("Reparto inválido: muestra=120; Sara=75; Ellen=75.")
     ids = [r["id"] for r in muestra]
-    if set(r["id"] for r in sara) != set(ids[:66]):
-        raise ValueError("Los IDs asignados a Sara no cumplen 12+54.")
-    if set(r["id"] for r in ellen) != (set(ids[:12]) | set(ids[66:])):
-        raise ValueError("Los IDs asignados a Ellen no cumplen 12+54.")
+    if set(r["id"] for r in sara) != set(ids[:75]):
+        raise ValueError("Los IDs asignados a Sara no cumplen 30+45.")
+    if set(r["id"] for r in ellen) != (set(ids[:30]) | set(ids[75:])):
+        raise ValueError("Los IDs asignados a Ellen no cumplen 30+45.")
     por_id = {r["id"]: r for r in muestra}
     pendientes = []
     for nombre, filas in (("Sara", sara), ("Ellen", ellen)):
@@ -61,7 +61,7 @@ def consolidar_gold(raiz: Path = RAIZ) -> dict:
     if pendientes:
         raise RuntimeError(f"Faltan {len(pendientes)} etiquetas humanas completas; ejemplos: {', '.join(pendientes[:6])}. No se creó gold.csv.")
     s, e = ({r["id"]: r for r in filas} for filas in (sara, ellen))
-    comunes = ids[:12]
+    comunes = ids[:30]
     k_polaridad = cohen_kappa([s[i]["polaridad"] for i in comunes], [e[i]["polaridad"] for i in comunes])
     k_tema = cohen_kappa([s[i]["tema"] for i in comunes], [e[i]["tema"] for i in comunes])
     diferencias = [i for i in comunes if s[i]["polaridad"] != e[i]["polaridad"] or s[i]["tema"] != e[i]["tema"]]
@@ -72,7 +72,7 @@ def consolidar_gold(raiz: Path = RAIZ) -> dict:
             with ruta.open("w", encoding="utf-8", newline="") as archivo:
                 w = csv.DictWriter(archivo, fieldnames=["id", "polaridad", "tema", "justificacion"], lineterminator="\n")
                 w.writeheader()
-            raise RuntimeError(f"Hay {len(diferencias)} desacuerdos en los 12 comunes. Conversen, completen {ruta} y vuelvan a ejecutar.")
+            raise RuntimeError(f"Hay {len(diferencias)} desacuerdos en los 30 comunes. Conversen, completen {ruta} y vuelvan a ejecutar.")
         resoluciones = {r["id"]: r for r in leer_csv(ruta, ["id", "polaridad", "tema", "justificacion"])}
         if set(resoluciones) != set(diferencias) or any(
             r["polaridad"] not in POLARIDADES or r["tema"] not in TEMAS or not r["justificacion"].strip()
@@ -95,7 +95,7 @@ def consolidar_gold(raiz: Path = RAIZ) -> dict:
             w = csv.DictWriter(archivo, fieldnames=["id", "texto", "polaridad", "tema"], lineterminator="\n")
             w.writeheader()
             w.writerows(finales)
-    return {"total": len(finales), "comunes": 12, "desacuerdos": len(diferencias), "kappa_polaridad": k_polaridad, "kappa_tema": k_tema, "ruta": destino}
+    return {"total": len(finales), "comunes": 30, "desacuerdos": len(diferencias), "kappa_polaridad": k_polaridad, "kappa_tema": k_tema, "ruta": destino}
 
 
 if __name__ == "__main__":
@@ -104,7 +104,7 @@ if __name__ == "__main__":
     except (ValueError, RuntimeError, FileNotFoundError) as e:
         print("ETIQUETADO PENDIENTE:", e)
         raise SystemExit(1) from e
-    print(f"Kappa polaridad (12 comunes): {resumen['kappa_polaridad']:.4f}")
-    print(f"Kappa tema (12 comunes): {resumen['kappa_tema']:.4f}")
+    print(f"Kappa polaridad (30 comunes): {resumen['kappa_polaridad']:.4f}")
+    print(f"Kappa tema (30 comunes): {resumen['kappa_tema']:.4f}")
     print(f"Desacuerdos resueltos: {resumen['desacuerdos']}")
     print(f"Conjunto gold consolidado: {resumen['ruta']} ({resumen['total']} reseñas)")

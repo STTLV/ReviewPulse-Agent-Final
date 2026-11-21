@@ -32,7 +32,7 @@ def escribir_si_seguro(ruta: Path, cabeceras: list[str], filas: list[dict]) -> N
 
 
 def preparar_gold(raiz: Path = RAIZ, reserva: Path | None = None) -> dict[str, Path]:
-    """Crea 120 reseñas, dos plantillas 12+54 y la verdad FUERA del repositorio."""
+    """Crea 120 reseñas, dos plantillas 30+45 y la verdad FUERA del repositorio."""
     raiz = Path(raiz)
     carpeta = raiz / "data" / "gold"
     reserva = Path(reserva) if reserva is not None else Path.home() / ".reviewpulse" / "verdad_simulador_2026.csv"
@@ -46,8 +46,8 @@ def preparar_gold(raiz: Path = RAIZ, reserva: Path | None = None) -> dict[str, P
     if len({r["id"] for r in muestra}) != 120 or len({r["texto"] for r in muestra}) != 120:
         raise RuntimeError("Se detectaron registros repetidos.")
 
-    para_sara = muestra[:66]              # 12 en común + 54 exclusivos
-    para_ellen = muestra[:12] + muestra[66:]  # 12 en común + 54 exclusivos
+    para_sara = muestra[:75]              # 30 en común + 45 exclusivos
+    para_ellen = muestra[:30] + muestra[75:]  # 30 en común + 45 exclusivos
 
     def vacias(registros: list[dict]) -> list[dict]:
         return [{**r, "polaridad": "", "tema": ""} for r in registros]
@@ -94,7 +94,7 @@ def preparar_gold(raiz: Path = RAIZ, reserva: Path | None = None) -> dict[str, P
 
 if __name__ == "__main__":
     resultado = preparar_gold()
-    print("Muestra ciega: 120 registros; Sara: 66; Ellen: 66; 12 comunes.")
+    print("Muestra ciega: 120 registros; Sara: 75; Ellen: 75; 30 comunes.")
     print("Plantillas sin etiquetas: no se generó gold.csv.")
     print("Verdad del simulador conservada fuera del repositorio:", resultado["verdad_reservada"])
     print("No abrir la verdad reservada hasta terminar el etiquetado humano.")

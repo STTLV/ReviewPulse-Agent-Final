@@ -48,10 +48,12 @@ class PruebasGold(unittest.TestCase):
         self.assertEqual(len(muestra), 120)
         self.assertEqual(set(muestra[0]), {"id", "texto"})
         self.assertEqual(len({r["id"] for r in muestra}), 120)
-        self.assertEqual(len(sara), 66)
-        self.assertEqual(len(ellen), 66)
-        self.assertEqual({r["id"] for r in sara} & {r["id"] for r in ellen}, {r["id"] for r in muestra[:12]})
+        self.assertEqual(len(sara), 75)
+        self.assertEqual(len(ellen), 75)
+        self.assertEqual({r["id"] for r in sara} & {r["id"] for r in ellen}, {r["id"] for r in muestra[:30]})
         self.assertEqual({r["id"] for r in sara} | {r["id"] for r in ellen}, {r["id"] for r in muestra})
+        self.assertEqual({r["id"] for r in sara}, {r["id"] for r in muestra[:75]})
+        self.assertEqual({r["id"] for r in ellen}, {r["id"] for r in muestra[:30]} | {r["id"] for r in muestra[75:]})
         self.assertEqual([r["texto"] for r in muestra], [r["texto"] for r in construir_corpus(120, 2026, "evaluacion", 0.10)])
 
     def test_no_incluye_frases_reservadas_para_entrenamiento(self):
@@ -149,6 +151,32 @@ class PruebasGold(unittest.TestCase):
             finally:
                 reserva.unlink(missing_ok=True)
 
+
+    def test_gold_real_con_30_comunes_y_trazabilidad(self):
+        muestra = filas(RAIZ / "data/gold/muestra.csv")
+        sara = filas(RAIZ / "data/gold/etiquetas_sara.csv")
+        ellen = filas(RAIZ / "data/gold/etiquetas_ellen.csv")
+        gold = filas(RAIZ / "data/gold/gold.csv")
+        s = {r["id"]: r for r in sara}
+        e = {r["id"]: r for r in ellen}
+        comunes = set(s) & set(e)
+        self.assertEqual(len(gold), 120)
+        self.assertEqual(len(s), 75)
+        self.assertEqual(len(e), 75)
+        self.assertEqual(len(comunes), 30)
+        self.assertEqual(set(s) | set(e), {r["id"] for r in muestra})
+        self.assertEqual([r["id"] for r in gold], [r["id"] for r in muestra])
+        for i in comunes:
+            self.assertEqual((s[i]["polaridad"], s[i]["tema"]),
+                             (e[i]["polaridad"], e[i]["tema"]))
+        for row, original in zip(gold, muestra):
+            esperado = s[row["id"]] if row["id"] in s else e[row["id"]]
+            self.assertEqual(row, esperado)
+            self.assertEqual(row["texto"], original["texto"])
+        resultado = consolidar_gold(RAIZ)
+        self.assertEqual(resultado["comunes"], 30)
+        self.assertEqual(resultado["kappa_polaridad"], 1.0)
+        self.assertEqual(resultado["kappa_tema"], 1.0)
 
 if __name__ == "__main__":
     unittest.main()
