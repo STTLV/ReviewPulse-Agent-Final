@@ -4,7 +4,7 @@ from __future__ import annotations
 import json
 import tempfile
 import unittest
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -13,10 +13,12 @@ from reviewpulse.agente import (ManejadorAgente, MemoriaSesion, Traza, cifras_si
                                 extraer_cifras, resolver)
 from reviewpulse.agente.prompts import PROMPT_SISTEMA, VERSION_PROMPT
 from reviewpulse.ciclo.ingesta import CONFIG_DEFECTO
+from reviewpulse.ciclo.cierre import CierreSemanal
+from reviewpulse.entorno import inicio_semana
 from reviewpulse.herramientas.registro import Contexto, Sesion
 from reviewpulse.llm.cliente import LlamadaHerramienta, RespuestaLLM, Uso
 from reviewpulse.llm.falso import LLMFalso, respuesta_herramienta, respuesta_texto
-from reviewpulse.memoria import RepositorioHistorico
+from reviewpulse.memoria import RepositorioHistorico, conteo_vacio
 
 
 class ModeloFalso:
@@ -160,6 +162,21 @@ class PruebasBucle(unittest.TestCase):
         self.assertEqual(cifras_sin_respaldo("Proporción 25 %", ['{"proporcion":0.2459}']), [])
         self.assertEqual(cifras_sin_respaldo("Proporción 24,6 %", ['{"proporcion":0.2459}']), [])
 
+    def test_decimal_muy_largo_no_rompe_verificacion_ellen(self):
+        # Valor reportado por Ellen, supera la precisión por defecto de Decimal.
+        valor = "123456789012345678901234567890.1"
+        fuente = ['{"s_max":123456789012345678901234567890.14}']
+        self.assertEqual(cifras_sin_respaldo("s_max fue " + valor, fuente), [valor])
+        # El agente puede solicitar una corrección y terminar sin excepción.
+        llm = LLMFalso([
+            respuesta_texto("s_max fue " + valor),
+            respuesta_texto("La cifra no pudo verificarse."),
+        ])
+        respuesta = resolver("Evalúa el indicador.", llm, self.ctx)
+        self.assertTrue(respuesta.ok, respuesta)
+        self.assertEqual(respuesta.pasos, 2)
+        self.assertEqual(respuesta.cifras_sin_respaldo, [])
+
     def test_porcentaje_redondeado_respaldado(self):
         self.assertEqual(cifras_sin_respaldo("Proporción 24,6 %", ['{"proporcion":0.2459}']), [])
         self.assertEqual(cifras_sin_respaldo("Proporción 24.6%", ['{"proporcion":0.2459}']), [])
@@ -207,6 +224,45 @@ class PruebasBucle(unittest.TestCase):
         self.assertTrue(r.ok)
         self.assertIn("<resena>", llm.llamadas[-1][-1]["content"])
 
+    def test_e11_ciclo_semanal_real_no_usa_respaldo_ellen(self):
+        # La autorización nace de CierreSemanal.paso, no se asigna a mano.
+        from reviewpulse.llm.falso import guion_operativo
+        ahora = inicio_semana(10) + timedelta(hours=19)
+        self.ctx.ahora = ahora
+        ingesta = SimpleNamespace(
+            semanas_cerradas=set(range(9)),
+            alarmas_de_cierre=lambda semana: [],
+        )
+        eventos = []
+        manejador = ManejadorAgente(LLMFalso([guion_operativo] * 8), lambda fecha: self.ctx)
+        ciclo = CierreSemanal(
+            ingesta, self.repo, manejador, self.ctx.reportes, self.ctx.cfg,
+            lambda fecha, fase, evento, **detalles: eventos.append({"evento": evento, **detalles}),
+        )
+        ciclo.paso(ahora, {"TripAdvisor": False, "Google": False})
+        informes = [r for r in self.repo.reportes() if r["semana"] == 9]
+        self.assertEqual(len(informes), 1)
+        self.assertTrue(informes[0]["incompleto"])
+        self.assertIn(9, ingesta.semanas_cerradas)
+        self.assertFalse(any(e["evento"] == "reporte_respaldo" for e in eventos))
+        datos = json.loads((Path(self.tmp.name) / "reportes" / "semana_09.json").read_text(encoding="utf-8"))
+        self.assertTrue(datos["datos_incompletos"])
+        self.assertEqual(sum(sum(v.values()) for v in datos["conteos"].values()), 0)
+        self.assertIsNone(self.ctx.sesion.semana_en_cierre)
+        self.assertFalse(self.ctx.sesion.incompleto)
+
+    def test_cierre_incompleto_no_contamina_segundo_reporte_ellen(self):
+        from reviewpulse.llm.falso import guion_operativo
+        manejador = ManejadorAgente(LLMFalso([guion_operativo] * 16), lambda fecha: self.ctx)
+        self.assertTrue(manejador.al_cerrar(9, self.ahora, True))
+        self.assertFalse(self.ctx.sesion.incompleto)
+        self.assertIsNone(self.ctx.sesion.semana_en_cierre)
+        self.assertTrue(manejador.al_cerrar(8, self.ahora, False))
+        resumen = json.loads((Path(self.tmp.name) / "reportes" / "semana_08.json").read_text(encoding="utf-8"))
+        self.assertFalse(resumen["datos_incompletos"])
+        self.assertFalse(self.ctx.sesion.incompleto)
+        self.assertIsNone(self.ctx.sesion.semana_en_cierre)
+
     def test_e11_cierre_vacio_incompleto_por_agente(self):
         from reviewpulse.llm.falso import guion_operativo
         manejador = ManejadorAgente(LLMFalso([guion_operativo] * 8), lambda ahora: self.ctx)
@@ -229,6 +285,7 @@ class PruebasBucle(unittest.TestCase):
         manejador = ManejadorAgente(LLMFalso([respuesta_texto("No generé reporte")]), lambda ahora: self.ctx)
         self.assertFalse(manejador.al_cerrar(9, self.ahora, True))
         self.assertIsNone(self.ctx.sesion.semana_en_cierre)
+        self.assertFalse(self.ctx.sesion.incompleto)
 
     def test_manejador_con_falso_operativo_cierra_sin_respaldo(self):
         from reviewpulse.llm.falso import guion_operativo
@@ -245,6 +302,48 @@ class PruebasBucle(unittest.TestCase):
                                              respuesta_texto("Reporte generado.")]),
                                    lambda ahora: self.ctx)
         self.assertTrue(manejador.al_cerrar(8, self.ahora, False))
+
+    def test_react_revoca_alerta_obsoleta_ellen(self):
+        # Compara, cambia datos de reseñas tardías, compara y bloquea emitir.
+        for semana in range(2, 8):
+            conteos = conteo_vacio()
+            conteos["servicio"]["positiva"] = 19
+            conteos["servicio"]["negativa"] = 1
+            self.repo.cerrar_semana(semana, conteos, False,
+                                    inicio_semana(semana + 1).isoformat(), False)
+        for i in range(24):
+            self.repo.guardar_resena({
+                "id": f"tardia_react_{i}", "plataforma": "Google",
+                "fecha": "2026-03-02T09:00:00", "semana": 8,
+                "texto": "Mala atención", "calificacion": 1,
+                "polaridad": "negativa", "tema": "servicio", "confianza": 0.95,
+                "revision_manual": False, "procesada_en": self.ahora.isoformat(),
+            })
+        self.repo.con.commit()
+
+        def comparar():
+            return resolver("Comparar la semana 8", LLMFalso([
+                respuesta_herramienta("comparar_semana", semana=8, tema="servicio"),
+                respuesta_texto("Comparación realizada."),
+            ]), self.ctx)
+
+        self.assertTrue(comparar().ok)
+        self.assertIn((8, "servicio"), self.ctx.sesion.comparaciones_positivas)
+        self.repo.con.execute(
+            "UPDATE resenas SET polaridad='positiva' WHERE semana=8 AND tema='servicio'"
+        )
+        self.repo.con.commit()
+        self.assertTrue(comparar().ok)
+        self.assertNotIn((8, "servicio"), self.ctx.sesion.comparaciones_positivas)
+        llm = LLMFalso([
+            respuesta_herramienta("emitir_alerta", semana=8, tema="servicio",
+                                 justificacion="Resultado antiguo"),
+            respuesta_texto("La alerta no fue emitida."),
+        ])
+        self.assertTrue(resolver("Intenta emitir alerta", llm, self.ctx).ok)
+        observacion = json.loads(llm.llamadas[-1][-1]["content"])
+        self.assertEqual(observacion["error"], "rechazada")
+        self.assertEqual(self.repo.alertas(), [])
 
     def test_manejador_alarma_sin_alerta_provoca_fallback(self):
         manejador = ManejadorAgente(LLMFalso([respuesta_texto("Listo")]), lambda ahora: self.ctx)
