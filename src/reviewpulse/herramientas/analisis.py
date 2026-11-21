@@ -138,6 +138,13 @@ class Comparar(BaseModel):
 @herramienta("comparar_semana", "Calcula CUSUM y señales de alarma por semana y tema.", Comparar)
 def comparar_semana(entrada: Comparar, ctx: Contexto) -> dict:
     from .resenas import _existe_semana
+    # Revocar antes de recalcular: una comparación negativa, un error o
+    # datos ausentes jamás pueden dejar vigente un permiso anterior.
+    temas = (entrada.tema,) if entrada.tema is not None else TEMAS
+    for tema in temas:
+        clave = (entrada.semana, tema)
+        ctx.sesion.comparaciones_positivas.discard(clave)
+        ctx.sesion.comparaciones.pop(clave, None)
     if not _existe_semana(ctx, entrada.semana):
         raise ErrorHerramienta("sin_datos", "No hay datos para esa semana.")
     if entrada.tema is not None and entrada.tema not in TEMAS:
@@ -146,7 +153,7 @@ def comparar_semana(entrada: Comparar, ctx: Contexto) -> dict:
     if entrada.tema is not None:
         resultados = {entrada.tema: resultados[entrada.tema]}
     for tema, comparacion in resultados.items():
-        if comparacion["alarma"]:
+        if comparacion["alarma"] is True:
             clave = (entrada.semana, tema)
             ctx.sesion.comparaciones_positivas.add(clave)
             ctx.sesion.comparaciones[clave] = dict(comparacion)
