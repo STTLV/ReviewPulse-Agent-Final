@@ -9,6 +9,7 @@ import tempfile
 import threading
 import unittest
 from concurrent.futures import ThreadPoolExecutor
+from contextlib import closing
 from datetime import date
 from pathlib import Path
 from unittest.mock import patch
@@ -225,6 +226,45 @@ class PruebasAPI(unittest.TestCase):
         self.assertNotIn("Traceback", error.text)
         self.assertNotIn("fallo sintético privado", error.text)
 
+    def test_chat_sse_no_transmite_credenciales_en_paso_final_ni_error(self):
+        llm = LLMFalso([
+            respuesta_herramienta(
+                "contar_resenas",
+                valor=f"{_API_KEY_PRUEBA} {_CODIGO_PRUEBA}",
+            ),
+            respuesta_texto(
+                f"Respuesta con {_API_KEY_PRUEBA} {_CODIGO_PRUEBA}"
+            ),
+        ])
+        cliente = self.crear_cliente(llm)
+        respuesta = cliente.post(
+            "/api/chat", json={"mensaje": "cuenta las reseñas"}, headers=self.headers
+        )
+
+        self.assertEqual(respuesta.status_code, 200)
+        eventos = self.eventos_sse(respuesta.text)
+        self.assertIn("paso", eventos)
+        self.assertIn("final", eventos)
+        contenido = json.dumps(self.datos_sse(respuesta.text), ensure_ascii=False)
+        for secreto in (_API_KEY_PRUEBA, _CODIGO_PRUEBA):
+            self.assertNotIn(secreto, contenido)
+
+        llm_error = LLMFalso([
+            RuntimeError(f"excepción con {_API_KEY_PRUEBA} {_CODIGO_PRUEBA}")
+        ])
+        cliente_error = self.crear_cliente(llm_error)
+        error = cliente_error.post(
+            "/api/chat", json={"mensaje": "consulta"}, headers=self.headers
+        )
+
+        self.assertEqual(error.status_code, 200)
+        self.assertIn("error", self.eventos_sse(error.text))
+        contenido_error = json.dumps(
+            self.datos_sse(error.text), ensure_ascii=False
+        )
+        for secreto in (_API_KEY_PRUEBA, _CODIGO_PRUEBA):
+            self.assertNotIn(secreto, contenido_error)
+
     def test_chat_concurrente_rechaza_segunda_peticion_y_sqlite_sigue_sana(self):
         iniciada = threading.Event()
         liberar = threading.Event()
@@ -260,7 +300,7 @@ class PruebasAPI(unittest.TestCase):
 
         self.assertEqual(len(llm.llamadas), 1)
         self.assertEqual(cliente.get("/api/semanas").status_code, 200)
-        with sqlite3.connect(self.db_path) as con:
+        with closing(sqlite3.connect(self.db_path)) as con:
             self.assertEqual(
                 con.execute("PRAGMA integrity_check").fetchone()[0], "ok"
             )
@@ -362,7 +402,7 @@ class PruebasAPI(unittest.TestCase):
         reinicio_autorizado = cliente.post("/api/reiniciar", headers=self.headers)
         self.assertEqual(reinicio_autorizado.status_code, 200)
         self.assertEqual(self.leer_historico_sintetico(), historico_antes)
-        with sqlite3.connect(self.db_path) as con:
+        with closing(sqlite3.connect(self.db_path)) as con:
             self.assertEqual(
                 con.execute("PRAGMA integrity_check").fetchone()[0], "ok"
             )

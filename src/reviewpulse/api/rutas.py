@@ -36,8 +36,29 @@ class SolicitudCierre(BaseModel):
     semana: int = Field(ge=0, strict=True)
 
 
-def _evento(nombre: str, datos: dict) -> str:
-    contenido = json.dumps(datos, ensure_ascii=False, default=str)
+def _filtrar_evento_sse(estado: EstadoAPI, valor: object) -> object:
+    if isinstance(valor, str):
+        return estado.texto_seguro(valor)
+    if isinstance(valor, dict):
+        return {
+            (
+                estado.texto_seguro(clave)
+                if isinstance(clave, str)
+                else clave
+            ): _filtrar_evento_sse(estado, elemento)
+            for clave, elemento in valor.items()
+        }
+    if isinstance(valor, (list, tuple)):
+        return [_filtrar_evento_sse(estado, elemento) for elemento in valor]
+    if isinstance(valor, (int, float, bool)) or valor is None:
+        return valor
+    return estado.texto_seguro(str(valor))
+
+
+def _evento(nombre: str, datos: dict, estado: EstadoAPI) -> str:
+    contenido = json.dumps(
+        _filtrar_evento_sse(estado, datos), ensure_ascii=False
+    )
     return f"event: {nombre}\ndata: {contenido}\n\n"
 
 
@@ -78,9 +99,9 @@ def crear_router(estado: EstadoAPI) -> APIRouter:
                         "modo_demo": True,
                     }
                     estado.agregar_evento(paso)
-                    yield _evento("paso", paso)
+                    yield _evento("paso", paso, estado)
                     yield _evento(
-                        "final", {"texto": texto, "modo_demo": True}
+                        "final", {"texto": texto, "modo_demo": True}, estado
                     )
                 finally:
                     estado.candado.release()
@@ -113,7 +134,7 @@ def crear_router(estado: EstadoAPI) -> APIRouter:
             while True:
                 tipo, valor = eventos.get()
                 if tipo == "paso":
-                    yield _evento("paso", {"traza": valor})
+                    yield _evento("paso", {"traza": valor}, estado)
                     continue
                 if tipo == "resultado":
                     resultado = valor
@@ -122,29 +143,29 @@ def crear_router(estado: EstadoAPI) -> APIRouter:
                             "texto": estado.texto_seguro(resultado.texto),
                             "modo_demo": False,
                             "motivo": resultado.motivo,
-                        })
+                        }, estado)
                     elif estado.presupuesto_agotado():
                         yield _evento("paso", {
                             "fase": "SISTEMA",
                             "evento": "modo_demo",
                             "modo_demo": True,
-                        })
+                        }, estado)
                         yield _evento("final", {
                             "texto": estado.texto_seguro(
                                 "El presupuesto diario se agotó; esta respuesta usa modo demo."
                             ),
                             "modo_demo": True,
-                        })
+                        }, estado)
                     else:
                         yield _evento("error", {
                             "error": resultado.motivo,
                             "mensaje": estado.texto_seguro(resultado.texto),
-                        })
+                        }, estado)
                     break
                 yield _evento("error", {
                     "error": "error_interno",
                     "mensaje": "No fue posible completar la solicitud.",
-                })
+                }, estado)
                 break
 
         return StreamingResponse(
