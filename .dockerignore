@@ -1,0 +1,60 @@
+# Secretos y configuración local
+.env
+.env.*
+**/.env
+**/.env.*
+secrets/
+**/secrets/
+.streamlit/
+config/config.json
+*.pem
+*.key
+
+# Git, entornos locales y herramientas
+.git/
+.venv/
+venv/
+**/.venv/
+**/venv/
+.vscode/
+.idea/
+__pycache__/
+**/__pycache__/
+*.py[cod]
+
+# Pruebas y cachés
+tests/
+**/tests/
+.pytest_cache/
+**/.pytest_cache/
+.mypy_cache/
+**/.mypy_cache/
+.ruff_cache/
+**/.ruff_cache/
+.coverage
+coverage.xml
+
+# Datos, bases, resultados y trazas locales
+docs/
+data/
+salidas/
+resultados/
+trazas/
+data/trazas_demo/
+*.sqlite3
+**/*.sqlite3
+*.db
+**/*.db
+*.log
+**/*.log
+*.jsonl
+**/*.jsonl
+*.trace
+**/*.trace
+
+# Archivos personales del sistema/editor
+.DS_Store
+**/.DS_Store
+Thumbs.db
+*.swp
+*~
