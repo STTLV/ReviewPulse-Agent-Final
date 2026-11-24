@@ -176,15 +176,36 @@ def crear_router(estado: EstadoAPI) -> APIRouter:
                 break
 
         def emitir_traza_demo():
-            traza = estado.siguiente_traza_demo()
-            for paso in traza["eventos"]:
+            traza = estado.siguiente_traza_demo(solicitud.mensaje)
+            pregunta_evento = {
+                "fase": "PERCEPCION",
+                "evento": "tarea_recibida",
+                "pregunta": solicitud.mensaje,
+                "modo_demo": True,
+            }
+            eventos = traza["eventos"]
+            if not any(
+                paso.get("evento") == "tarea_recibida" for paso in eventos
+            ):
+                estado.agregar_evento(pregunta_evento)
+                yield _evento("paso", {"traza": pregunta_evento}, estado)
+            for paso in eventos:
                 estado.agregar_evento(paso)
                 yield _evento("paso", {"traza": paso}, estado)
+            respuesta_final = traza.get("respuesta_final") or (
+                "El presupuesto diario se agotó; esta respuesta reproduce "
+                "una traza de demostración."
+            )
+            evento_final = {
+                "fase": "ACCION",
+                "evento": "respuesta_final",
+                "texto": respuesta_final,
+                "modo_demo": True,
+                "traza_demo": traza["id"],
+            }
+            estado.agregar_evento(evento_final)
             yield _evento("final", {
-                "texto": (
-                    "El presupuesto diario se agotó; esta respuesta reproduce "
-                    "una traza de demostración."
-                ),
+                "texto": respuesta_final,
                 "modo_demo": True,
                 "traza_demo": traza["id"],
             }, estado)

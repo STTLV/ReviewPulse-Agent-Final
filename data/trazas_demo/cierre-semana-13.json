@@ -1,37 +1,81 @@
 {
-  "id": "cierre-semana-13",
+  "id": "chat-consulta-semana-40",
   "origen": {
-    "simulador": "ejecutar_simulacion",
+    "tipo": "conversacion_real_agente",
     "escenario": "E03",
-    "semilla": 11
+    "semilla": 11,
+    "modelo": "cx/gpt-6-luna-medium",
+    "solicitudes_proveedor": 2,
+    "grabada_en": "2026-11-24T23:51:44.668407+00:00"
   },
+  "pregunta": "¿Cuántas reseñas hubo en la semana 40?",
+  "disparadores": [
+    "resenas semana 40",
+    "consulta semana 40",
+    "semana 40"
+  ],
+  "herramientas": [
+    "contar_resenas"
+  ],
   "eventos": [
     {
-      "ts_real": "2026-11-24T11:16:09.807",
-      "ts_simulado": "2026-04-13T12:00:00",
       "fase": "PERCEPCION",
-      "evento": "ingesta",
-      "disponibilidad": {
-        "TripAdvisor": true,
-        "Google": true
-      },
-      "nuevas": 0
+      "evento": "tarea_recibida",
+      "pregunta": "¿Cuántas reseñas hubo en la semana 40?"
     },
     {
-      "ts_real": "2026-11-24T11:16:09.810",
-      "ts_simulado": "2026-04-13T12:00:00",
+      "ts": "2026-11-24T23:51:42.766091+00:00",
+      "fase": "DECISION",
+      "evento": "respuesta_llm",
+      "paso": 1,
+      "ok": true,
+      "tokens_entrada": 854,
+      "tokens_salida": 21,
+      "segundos": 3.0287,
+      "llamadas": 1
+    },
+    {
+      "ts": "2026-11-24T23:51:42.766816+00:00",
       "fase": "ACCION",
-      "evento": "cierre_semana",
-      "semana": 13,
-      "incompleto": false,
-      "respaldo": false
+      "evento": "herramienta",
+      "paso": 1,
+      "herramienta": "contar_resenas",
+      "argumentos": {
+        "semana": 40
+      },
+      "resultado": {
+        "ok": false,
+        "error": "sin_datos"
+      },
+      "segundos": 0.0007
     },
     {
-      "ts_real": "2026-11-24T11:16:09.810",
-      "ts_simulado": "2026-04-15T06:00:00",
-      "fase": "SISTEMA",
-      "evento": "fin_ejecucion",
-      "segundos": 2.22
+      "ts": "2026-11-24T23:51:42.766847+00:00",
+      "fase": "OBSERVACION",
+      "evento": "herramientas_observadas",
+      "paso": 1,
+      "cantidad": 1
+    },
+    {
+      "ts": "2026-11-24T23:51:44.667889+00:00",
+      "fase": "DECISION",
+      "evento": "respuesta_llm",
+      "paso": 2,
+      "ok": true,
+      "tokens_entrada": 915,
+      "tokens_salida": 26,
+      "segundos": 1.9011,
+      "llamadas": 0
+    },
+    {
+      "ts": "2026-11-24T23:51:44.668235+00:00",
+      "fase": "ACCION",
+      "evento": "respuesta_final",
+      "paso": 2,
+      "verificada": true,
+      "cifras_evaluadas": 0,
+      "cifras_respaldadas": 0
     }
-  ]
+  ],
+  "respuesta_final": "No hay datos disponibles para la semana 40, así que no puedo determinar cuántas reseñas hubo."
 }

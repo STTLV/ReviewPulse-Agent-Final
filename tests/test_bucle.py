@@ -93,6 +93,23 @@ class PruebasBucle(unittest.TestCase):
         self.assertEqual(final["cifras_evaluadas"], 1)
         self.assertEqual(final["cifras_respaldadas"], 0)
 
+    def test_resumen_herramienta_guarda_metricas_necesarias_sin_texto_libre(self):
+        from reviewpulse.agente.bucle import _resumen_observacion
+
+        resumen = _resumen_observacion({
+            "ok": True,
+            "datos": {
+                "total": 2,
+                "por_tema": {"servicio": 2},
+                "por_polaridad": {"negativa": 1, "positiva": 1},
+                "texto_privado": "no debe persistirse",
+            },
+        })
+
+        self.assertEqual(resumen["datos"]["total"], 2)
+        self.assertEqual(resumen["datos"]["por_tema"], {"servicio": 2})
+        self.assertNotIn("texto_privado", resumen["datos"])
+
     def test_cifra_inventada_se_corrige_una_vez_y_se_marca(self):
         llm = LLMFalso([respuesta_texto("Hubo 999 reseñas."),
                         respuesta_texto("Hubo 999 reseñas.")])

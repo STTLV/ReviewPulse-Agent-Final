@@ -42,8 +42,12 @@ class ClienteLLM(Protocol):
 
 
 class ClienteOpenAI:
-    def __init__(self, ajustes: Ajustes, sdk=None):
+    def __init__(self, ajustes: Ajustes, sdk=None, max_intentos: int | None = None):
+        if max_intentos is not None and max_intentos < 1:
+            raise ValueError("max_intentos debe ser al menos 1")
         self.ajustes = ajustes
+        self.max_intentos = max_intentos or 3
+        self.solicitudes = 0
         if sdk is None:
             if not ajustes.llm_api_key:
                 self.sdk = None
@@ -55,6 +59,10 @@ class ClienteOpenAI:
             parametros = {"api_key": ajustes.llm_api_key}
             if ajustes.llm_base_url:
                 parametros["base_url"] = ajustes.llm_base_url
+            if max_intentos is not None:
+                # En capturas limitadas, desactiva también los reintentos internos
+                # del SDK para que el tope cuente solicitudes HTTP reales.
+                parametros["max_retries"] = 0
             sdk = OpenAI(**parametros)
         self.sdk = sdk
 
@@ -76,8 +84,9 @@ class ClienteOpenAI:
         if herramientas:
             parametros["tools"] = herramientas
         ultimo_error = None
-        for intento in range(1, 4):
+        for intento in range(1, self.max_intentos + 1):
             try:
+                self.solicitudes += 1
                 respuesta = self.sdk.chat.completions.create(**parametros)
             except Exception as exc:
                 ultimo_error = exc
@@ -92,7 +101,7 @@ class ClienteOpenAI:
                     return self._respuesta_error(exc, codigo)
                 if tipo in {"BadRequestError", "ContextLengthExceededError"}:
                     return self._respuesta_error(exc, codigo)
-                if intento < 3:
+                if intento < self.max_intentos:
                     time.sleep(0.5 * intento)
                     continue
                 return self._respuesta_error(exc, codigo)

@@ -1,6 +1,7 @@
 """Contrato HTTP de la API FastAPI: pruebas sintéticas, aisladas y sin red."""
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 import os
@@ -155,6 +156,12 @@ class PruebasAPI(unittest.TestCase):
         reportes = estado.repo_demo.reportes()
         self.assertEqual(len(reportes), 14)
         self.assertTrue(Path(reportes[0]["ruta"]).is_file())
+        with closing(sqlite3.connect(self.db_path)) as con:
+            ruta_persistida = con.execute(
+                "SELECT ruta FROM reportes ORDER BY semana LIMIT 1"
+            ).fetchone()[0]
+        self.assertTrue(Path(ruta_persistida).is_absolute())
+        self.assertTrue(Path(ruta_persistida).is_file())
         self.assertEqual(len(cliente.get("/api/semanas").json()), 14)
 
     def test_chat_sin_iniciar_stream_no_reserva_el_candado(self):
@@ -324,7 +331,9 @@ class PruebasAPI(unittest.TestCase):
             "/api/chat", json={"mensaje": "primera consulta"}, headers=self.headers
         )
         segunda = cliente.post(
-            "/api/chat", json={"mensaje": "segunda consulta"}, headers=self.headers
+            "/api/chat",
+            json={"mensaje": "¿Cuántas reseñas hubo en la semana 40?"},
+            headers=self.headers,
         )
 
         self.assertEqual(primera.status_code, 200)
@@ -332,12 +341,159 @@ class PruebasAPI(unittest.TestCase):
         self.assertTrue(
             any(self.contiene_modo_demo(dato) for dato in self.datos_sse(segunda.text))
         )
-        self.assertIn("traza_demo", segunda.text)
+        datos = self.datos_sse(segunda.text)
+        final = next(
+            dato for dato in datos
+            if isinstance(dato, dict) and dato.get("traza_demo")
+        )
+        self.assertEqual(final["traza_demo"], "chat-consulta-semana-40")
+        self.assertEqual(
+            final["texto"],
+            "No hay datos disponibles para la semana 40, así que no puedo determinar cuántas reseñas hubo.",
+        )
         self.assertTrue(any(
-            dato.get("traza", {}).get("evento") == "cierre_semana"
-            for dato in self.datos_sse(segunda.text)
-            if isinstance(dato, dict)
+            dato.get("traza", {}).get("herramienta") == "contar_resenas"
+            for dato in datos if isinstance(dato, dict)
         ))
+
+    def test_modo_demo_reproduce_chat_correspondiente_con_herramientas_y_respuesta(self):
+        cliente = self.crear_cliente(LLMFalso([]), tope=1)
+        estado = cliente.app.state.estado
+        estado._tokens_dia = 1
+        estado._indice_traza_demo = 2
+        estado._trazas_demo = [
+            {
+                "id": "chat-conteo-semana-08",
+                "pregunta": "¿Cuántas reseñas hubo en la semana 8?",
+                "disparadores": ["cuantas resenas semana 8"],
+                "herramientas": ["contar_resenas"],
+                "eventos": [{
+                    "fase": "ACCION", "evento": "herramienta",
+                    "herramienta": "contar_resenas",
+                    "argumentos": {"semana": 8},
+                    "resultado": {"ok": True, "datos": {"total": 40}},
+                }],
+                "respuesta_final": "En la semana 8 hubo 40 reseñas.",
+            },
+            {
+                "id": "chat-servicio-semana-08",
+                "pregunta": "¿El servicio empeoró en la semana 8?",
+                "disparadores": ["servicio empeoro semana 8"],
+                "herramientas": ["comparar_semana"],
+                "eventos": [{
+                    "fase": "ACCION", "evento": "herramienta",
+                    "herramienta": "comparar_semana",
+                    "argumentos": {"semana": 8, "tema": "servicio"},
+                    "resultado": {"ok": True, "datos": {"servicio": {"alarma": False}}},
+                }],
+                "respuesta_final": "El servicio empeoró en la semana 8.",
+            },
+            {
+                "id": "chat-consulta-semana-40",
+                "pregunta": "¿Cuántas reseñas hubo en la semana 40?",
+                "disparadores": ["resenas semana 40"],
+                "herramientas": ["contar_resenas"],
+                "eventos": [{
+                    "fase": "ACCION", "evento": "herramienta",
+                    "herramienta": "contar_resenas",
+                    "argumentos": {"semana": 40},
+                    "resultado": {"ok": False, "error": "sin_datos"},
+                }],
+                "respuesta_final": "No hay datos para la semana 40.",
+            },
+        ]
+
+        preguntas = (
+            "¿Cuántas reseñas hubo en la semana 8?",
+            "¿El servicio empeoró en la semana 8?",
+            "¿Cuántas reseñas hubo en la semana 40?",
+        )
+        for pregunta, esperado in zip(
+            preguntas,
+            ("chat-conteo-semana-08", "chat-servicio-semana-08", "chat-consulta-semana-40"),
+        ):
+            respuesta = cliente.post(
+                "/api/chat", json={"mensaje": pregunta}, headers=self.headers
+            )
+            datos = self.datos_sse(respuesta.text)
+            self.assertEqual(respuesta.status_code, 200)
+            final = next(item for item in datos if "texto" in item and "modo_demo" in item)
+            self.assertEqual(final["traza_demo"], esperado)
+            self.assertIn("paso", self.eventos_sse(respuesta.text))
+            self.assertIn("final", self.eventos_sse(respuesta.text))
+            self.assertTrue(any(
+                item.get("traza", {}).get("evento") == "herramienta"
+                and "resultado" in item["traza"]
+                for item in datos if isinstance(item, dict)
+            ))
+            self.assertTrue(final["texto"])
+
+        traza = cliente.get("/api/demo").json()["traza"]
+        self.assertTrue(any(e.get("evento") == "respuesta_final" for e in traza))
+        self.assertTrue(any(e.get("pregunta") == preguntas[-1] for e in traza))
+
+    def test_stream_desconectado_mantiene_candado_hasta_terminar_agente_y_luego_libera(self):
+        iniciado = threading.Event()
+        continuar = threading.Event()
+
+        def respuesta_bloqueada(_mensajes):
+            iniciado.set()
+            continuar.wait(timeout=5)
+            return respuesta_texto("Respuesta sintética.")
+
+        cliente = self.crear_cliente(LLMFalso([
+            respuesta_herramienta("contar_resenas", semana=8),
+            respuesta_bloqueada,
+        ]))
+        estado = cliente.app.state.estado
+        ruta_chat = next(
+            ruta for ruta in crear_router(estado).routes
+            if getattr(ruta, "path", None) == "/api/chat"
+        )
+        respuesta = ruta_chat.endpoint(
+            solicitud=SolicitudChat(mensaje="¿Cuántas reseñas hubo en la semana 8?"),
+            codigo=_CODIGO_PRUEBA,
+        )
+
+        async def simular_desconexion():
+            solicitud_enviada = False
+            desconectar = asyncio.Event()
+
+            async def receive():
+                nonlocal solicitud_enviada
+                if not solicitud_enviada:
+                    solicitud_enviada = True
+                    return {"type": "http.request", "body": b"", "more_body": False}
+                await desconectar.wait()
+                return {"type": "http.disconnect"}
+
+            async def send(_mensaje):
+                return None
+
+            scope = {
+                "type": "http", "asgi": {"version": "3.0"},
+                "http_version": "1.1", "method": "POST", "scheme": "http",
+                "path": "/api/chat", "raw_path": b"/api/chat", "query_string": b"",
+                "headers": [], "client": ("test", 123), "server": ("test", 80),
+            }
+            tarea = asyncio.create_task(respuesta(scope, receive, send))
+            self.assertTrue(await asyncio.to_thread(iniciado.wait, 5))
+            self.assertTrue(estado.candado.locked())
+            desconectar.set()
+            await asyncio.sleep(0.05)
+            self.assertTrue(estado.candado.locked())
+            continuar.set()
+            await asyncio.wait_for(tarea, timeout=5)
+
+        try:
+            asyncio.run(simular_desconexion())
+            for _ in range(50):
+                if not estado.candado.locked():
+                    break
+                threading.Event().wait(0.01)
+            self.assertFalse(estado.candado.locked())
+        finally:
+            continuar.set()
 
     def test_tope_diario_se_reinicia_en_un_nuevo_dia_utc(self):
         respuesta = respuesta_texto("Respuesta sintética.")

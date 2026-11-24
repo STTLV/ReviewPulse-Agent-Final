@@ -165,6 +165,28 @@ def _resumen_observacion(datos: dict) -> dict:
         for clave in ("total", "semana", "emitida", "alarma"):
             if clave in valor and isinstance(valor[clave], (int, float, bool)):
                 resumen[clave] = valor[clave]
+        # Datos cuantitativos necesarios para revisar y reproducir chats demo.
+        # No se incluyen textos de reseñas, nombres, rutas ni contenido libre.
+        if "por_tema" in valor and "por_polaridad" in valor:
+            resumen["datos"] = {
+                clave: valor[clave]
+                for clave in ("total", "por_tema", "por_polaridad")
+                if clave in valor
+            }
+        elif all(isinstance(comparacion, dict) for comparacion in valor.values()):
+            campos = (
+                "total", "negativas", "proporcion", "promedio", "p0", "p1",
+                "s_max", "h", "dia_alarma", "alarma", "semanas_historial",
+                "motivos_no_alerta",
+            )
+            resumen["datos"] = {
+                tema: {
+                    clave: comparacion[clave]
+                    for clave in campos
+                    if clave in comparacion
+                }
+                for tema, comparacion in valor.items()
+            }
     elif isinstance(valor, list):
         resumen["elementos"] = len(valor)
     return resumen

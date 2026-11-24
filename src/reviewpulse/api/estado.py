@@ -4,10 +4,12 @@ from __future__ import annotations
 import hmac
 import json
 import os
+import re
 import shutil
 import sqlite3
 import tempfile
 import threading
+import unicodedata
 from contextlib import closing
 from datetime import datetime, timezone
 from pathlib import Path
@@ -26,6 +28,12 @@ from ..modelo import ClasificadorSentimiento
 
 class PresupuestoAgotado(Exception):
     """Señala que no debe iniciarse otra llamada al proveedor hoy."""
+
+
+def _normalizar_consulta(texto: str) -> str:
+    texto = unicodedata.normalize("NFKD", texto.casefold())
+    texto = "".join(caracter for caracter in texto if not unicodedata.combining(caracter))
+    return re.sub(r"[^a-z0-9]+", " ", texto).strip()
 
 
 class _ClienteConPresupuesto:
@@ -93,6 +101,14 @@ class EstadoAPI:
                 or any(not isinstance(evento, dict) for evento in traza["eventos"])
             ):
                 raise ValueError(f"Formato inválido en la traza demo {archivo.name}.")
+            if "respuesta_final" in traza and (
+                not isinstance(traza.get("pregunta"), str)
+                or not isinstance(traza.get("respuesta_final"), str)
+                or not traza["respuesta_final"].strip()
+                or not isinstance(traza.get("disparadores"), list)
+                or not isinstance(traza.get("herramientas"), list)
+            ):
+                raise ValueError(f"Conversación demo incompleta en {archivo.name}.")
             trazas.append(traza)
         return trazas
 
@@ -180,12 +196,25 @@ class EstadoAPI:
             Sesion(),
         )
 
-    def siguiente_traza_demo(self) -> dict:
+    def siguiente_traza_demo(self, pregunta: str | None = None) -> dict:
         with self._traza_lock:
-            traza = self._trazas_demo[self._indice_traza_demo]
-            self._indice_traza_demo = (
-                self._indice_traza_demo + 1
-            ) % len(self._trazas_demo)
+            consulta = _normalizar_consulta(pregunta or "")
+            coincidencias = []
+            for indice, traza in enumerate(self._trazas_demo):
+                disparadores = traza.get("disparadores", [])
+                if not isinstance(disparadores, list):
+                    continue
+                for disparador in disparadores:
+                    normalizado = _normalizar_consulta(str(disparador))
+                    palabras = normalizado.split()
+                    if palabras and all(palabra in consulta.split() for palabra in palabras):
+                        coincidencias.append((len(palabras), len(normalizado), indice))
+            if coincidencias:
+                _cantidad, _longitud, indice = max(coincidencias)
+            else:
+                indice = self._indice_traza_demo
+                self._indice_traza_demo = (indice + 1) % len(self._trazas_demo)
+            traza = self._trazas_demo[indice]
             return json.loads(json.dumps(traza, ensure_ascii=False))
 
     def agregar_evento(self, evento: dict) -> None:

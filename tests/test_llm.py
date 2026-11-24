@@ -250,6 +250,17 @@ class ClienteOpenAIPrueba(unittest.TestCase):
         self.assertEqual(len(sdk.llamadas), 3)
         self.assertEqual([llamada.args[0] for llamada in dormir.call_args_list], [0.5, 1.0])
 
+    def test_limite_de_intentos_uno_no_reintenta(self):
+        ajuste = Ajustes("u", "x", "m", "j", "", 1000)
+        sdk = SdkFalso([Error500(), AssertionError("no debe reintentar")])
+        with patch("reviewpulse.llm.cliente.time.sleep") as dormir:
+            cliente = ClienteOpenAI(ajuste, sdk=sdk, max_intentos=1)
+            respuesta = cliente.chat([])
+        self.assertFalse(respuesta.ok)
+        self.assertEqual(len(sdk.llamadas), 1)
+        self.assertEqual(cliente.solicitudes, 1)
+        dormir.assert_not_called()
+
     def test_parametros_temperature_y_timeout(self):
         ajuste = Ajustes("u", "x", "m", "j", "", 1000)
         respuesta = SimpleNamespace(
