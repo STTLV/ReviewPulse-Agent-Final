@@ -35,6 +35,21 @@ $env:PYTHONPATH="src"
 
 **Trazabilidad:** fuentes `ReviewPulse_Sara_Etiquetado_Gris.xlsx` y `ReviewPulse_Ellen_Etiquetado_Gris (1).xlsx`. La consolidación verificó IDs, texto íntegro, categorías válidas y acuerdos comunes. El desempeño en un corpus sintético no permite inferir el rendimiento en reseñas auténticas.
 
+## Criterios manuales de anotacion y limitaciones de concordancia
+
+**Procedimiento declarado por las integrantes.** Las 120 resenas sinteticas distintas se distribuyeron en dos plantillas: cada integrante etiqueto 75 textos (30 comunes y 45 exclusivos). Las asignaciones humanas suman 150 porque las 30 resenas compartidas fueron anotadas dos veces. Las categorias validas del esquema son `positiva`, `negativa`, `neutra` para polaridad y `limpieza`, `servicio`, `ubicacion`, `precio` para tema.
+
+- **Sara:** leyo individualmente las resenas y asigno la polaridad segun el comentario. Si aparecian varios temas, eligio el primero mencionado en el texto, por ejemplo, `precio` antes que `ubicacion`.
+- **Ellen:** indico que leyo individualmente cada resena, determino la polaridad por el sentimiento general predominante y selecciono la tematica principal segun la relevancia o el enfasis del comentario. Ante varios temas, priorizo el mas destacado, no necesariamente el primero mencionado.
+
+**Concordancia:** en las 30 resenas compartidas se registraron cero desacuerdos tanto para polaridad como para tema, con kappa de Cohen = 1,0000 en ambas variables. Esta medida compara las **dos anotaciones humanas** sobre las 30 compartidas; no debe confundirse con la comparacion externa frente al generador.
+
+**Revision de la procedencia:** en la revision del 22/11/2026, David informo que las 150 asignaciones humanas coinciden con las categorias asociadas a las resenas del simulador. Esta coincidencia es distinta del kappa entre anotadoras. Segun la descripcion del proceso, las etiquetas se asignaron leyendo el texto, no copiando la verdad del generador. La claridad y repetitividad de las plantillas sinteticas y la proximidad entre los criterios humanos y la estructura del generador pueden explicar la concordancia perfecta, pero tambien limitan el valor de esta evidencia para estimar desempeno en resenas reales.
+
+**Limitaciones:** los datos son sinteticos, con patrones y vocabulario estructurados. Los criterios de seleccion de un solo tema en resenas multitematicas no fueron identicos entre las dos anotadoras. La ausencia de desacuerdos en esta muestra no demuestra que la tarea carezca de ambiguedad en datos autenticos; tampoco implica generalizacion a hoteles reales. El conjunto Gold se conserva tal como fue consolidado; no se modifican las etiquetas para alterar las tasas de coincidencia.
+
+**Plantillas de trabajo:** Sara informo que ChatGPT ayudo a preparar dos archivos Excel con `id` y `texto` precargados y las columnas para `polaridad` y `tema` sin completar, para el posterior etiquetado manual. El 24/11/2026 se revisaron los dos Excel originales aportados: cada uno incluye 75 textos con identificador unico, las 30 resenas compartidas tienen el mismo texto, y las columnas `polaridad_manual` y `tema_manual` estaban vacias en ambos archivos (150 filas en conjunto). Sara y Ellen confirmaron que etiquetaron individualmente, sin usar IA y sin consultar etiquetas de la otra integrante ni respuestas del simulador. Las dos plantillas vacias quedan como evidencia para la revision de David.
+
 ## Exploración
 
 `notebooks/exploracion.ipynb` visualiza conteos, longitud de reseñas y, cuando exista el conjunto gold, distribuciones de tema y polaridad. El generador no guarda una plataforma de origen por reseña; esa distribución se marca como *no disponible* y no se inventan plataformas.
