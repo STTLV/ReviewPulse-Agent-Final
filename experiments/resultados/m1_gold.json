@@ -1,0 +1,89 @@
+{
+  "tipo": "evaluacion_adicional_gold_humano_T7",
+  "conjunto": "data/gold/gold.csv",
+  "n": 120,
+  "semillas_reentrenamiento": [
+    71,
+    72,
+    73,
+    74,
+    75
+  ],
+  "modelo": "TF-IDF + regresion logistica",
+  "fuente_entrenamiento": "construir_corpus(4000, conjunto=entrenamiento, prob_ironia=0.10)",
+  "umbral_m1": 0.85,
+  "resultados_por_semilla": [
+    {
+      "semilla": 71,
+      "exactitud": {
+        "polaridad": 0.9,
+        "tema": 0.925
+      },
+      "f1_macro": {
+        "polaridad": 0.8903896674719979,
+        "tema": 0.9227523684045423
+      }
+    },
+    {
+      "semilla": 72,
+      "exactitud": {
+        "polaridad": 0.9166666666666666,
+        "tema": 0.8916666666666667
+      },
+      "f1_macro": {
+        "polaridad": 0.9084832645773487,
+        "tema": 0.885382917735859
+      }
+    },
+    {
+      "semilla": 73,
+      "exactitud": {
+        "polaridad": 0.9166666666666666,
+        "tema": 0.9
+      },
+      "f1_macro": {
+        "polaridad": 0.9084832645773487,
+        "tema": 0.8944521430841541
+      }
+    },
+    {
+      "semilla": 74,
+      "exactitud": {
+        "polaridad": 0.9,
+        "tema": 0.8916666666666667
+      },
+      "f1_macro": {
+        "polaridad": 0.8887912529703574,
+        "tema": 0.885382917735859
+      }
+    },
+    {
+      "semilla": 75,
+      "exactitud": {
+        "polaridad": 0.9166666666666666,
+        "tema": 0.8833333333333333
+      },
+      "f1_macro": {
+        "polaridad": 0.9110926044002596,
+        "tema": 0.8763903478057891
+      }
+    }
+  ],
+  "promedios": {
+    "exactitud": {
+      "polaridad": 0.9099999999999999,
+      "tema": 0.8983333333333334
+    },
+    "f1_macro": {
+      "polaridad": 0.9014480107994626,
+      "tema": 0.8928721389532408
+    }
+  },
+  "cumple_m1": true,
+  "limitaciones": [
+    "Las 120 reseñas son sintéticas, con patrones compartidos con el generador.",
+    "El Gold se utiliza exclusivamente para medir, no para entrenar ni calibrar.",
+    "Esta evaluación complementa M1-C03 histórico, no lo sustituye.",
+    "No se comparó con un proveedor LLM real en esta ejecución."
+  ]
+}

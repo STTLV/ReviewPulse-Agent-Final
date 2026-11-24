@@ -1,7 +1,7 @@
 {
   "umbral_confianza": 0.55,
-  "cusum_delta": 0.25,
-  "cusum_h": 4.0,
+  "cusum_delta": 0.3,
+  "cusum_h": 5.0,
   "cusum_min_negativas": 6,
   "semanas_historial": 6,
   "min_semanas_historial": 3,

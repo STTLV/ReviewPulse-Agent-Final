@@ -1,0 +1,56 @@
+{
+  "calibracion": "M2-M4: CUSUM diario",
+  "solo_escenarios": [
+    "E01",
+    "E02",
+    "E03",
+    "E04",
+    "E05",
+    "E06",
+    "E07",
+    "E08"
+  ],
+  "solo_semillas": [
+    101,
+    102,
+    103,
+    104,
+    105
+  ],
+  "rejilla": {
+    "delta": [
+      0.15,
+      0.2,
+      0.25,
+      0.3
+    ],
+    "h": [
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "min_negativas": [
+      3,
+      4,
+      6
+    ]
+  },
+  "criterio": "maximizar deteccion_24h con tasa_fp estrictamente menor a 0.08",
+  "eleccion": {
+    "delta": 0.3,
+    "h": 5,
+    "min_negativas": 6,
+    "deteccion": 0.5,
+    "tasa_fp": 0.0625,
+    "detectados_24h": 15,
+    "incidentes": 30,
+    "fp": 1,
+    "alertas": 16,
+    "cumple_fp_calibracion": true,
+    "fp_max": 0.08
+  },
+  "advertencia": null,
+  "fuente": "predicciones TF-IDF+LR y calendario de ingesta, sin consultar datos de prueba"
+}

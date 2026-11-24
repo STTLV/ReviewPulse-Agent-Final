@@ -1,0 +1,76 @@
+id,texto,polaridad,tema
+EVAL-001,"Todo muy aseado, cero polvo en los muebles.",positiva,limpieza
+EVAL-002,no es barato pero tampoco caro. estuvo bien.,neutra,precio
+EVAL-003,Nos quedamos cinco días en temporada. Por ese precio esperábamos much omás.,negativa,precio
+EVAL-004,"Barato y cumplidor, ideal para viajar con presupuesto. El paquete con todo incluido salió muy bien de precio. Cinco estrellas.",positiva,precio
+EVAL-005,Muy pendientes del aseo de los pasillos y el lobby. Gracias por todo.,positiva,limpieza
+EVAL-006,"Fuimos en familia el fin de semana. Pedimos aseo varias veces y nadie aparecio. Habia cucarachas en el cuarto, un asco.",negativa,limpieza
+EVAL-007,El aire acondicionado soltaba un olor a moho terrible. Pedimos aseo varias veces y nadie apareció. Qué decepción.,negativa,limpieza
+EVAL-008,Nos quedamos cinco días en temporada. El precio es justo y el desayuno estaba incluido. Muy recomendado.,positiva,precio
+EVAL-009,"Viajé con mi pareja por nuestro aniversario. Barato y cumplidor, ideal para viajar con presupuesto. El paquete con todo incluido salió muy bien de precio. Se llega fácil, aunque no está en el centro. Cinco estrellas.",positiva,precio
+EVAL-010,"Todo muy aseado, cero polvo en los muebles. El cuarto estaba pulcro desde que llegamos. El precio es justo y el desayuno estaba incluido. Gracias por todo.",positiva,limpieza
+EVAL-011,Fuimos en familia el fin de semana. El equipo del hotel siempre estuvo dispuesto a colaborar. Los meseros del restaurante son muy serviciales. El precio fue el que vimos en la página. Volvería sin pensarlo.,positiva,servicio
+EVAL-012,"fue nuestra primera vez en este hotel. muy bien ubicado, cerca de la ciudad amurallada. está a diez minutos del aeropuerto, muy práctico.",positiva,ubicacion
+EVAL-013,"Llegamos un viernes en la tarde. Muy bien ubicado, cerca de la ciudad amurallada. Estás a pasos de los mejores sitios turísticos. Cinco estrellas. 😊",positiva,ubicacion
+EVAL-014,Fuimos en familia el fin de semana. Cobran lo justo por lo que es. El precio fue el que vimos en la página. Estuvo bien.,neutra,precio
+EVAL-015,pedimos aseo varias veces y nadie apareció.,negativa,limpieza
+EVAL-016,Llegamos un viernes en la tarde. Qué maravilla encontrar pelos ajenos de regalo en la almohada. No vuelvo.,negativa,limpieza
+EVAL-017,"Muy pendientes del aseo de los pasillos y el lobby. Todo muy aseado, cero polvo en los muebles. En recepción fueron educados pero distantes. Cinco estrellas.",positiva,limpieza
+EVAL-018,nos quedamos cinco días en temporada. el equipo del hotel siempre estuvo dispuesto a colaborar. cinco estrellas.,positiva,servicio
+EVAL-019,"Viajé con mi pareja por nuestro aniversario. Está a unos veinte minutos del centro. Se llega fácil, aunque no está en el centro. No es barato pero tampoco caro. Nada del otro mundo.",neutra,ubicacion
+EVAL-020,Nos quedamos cinco días en temporada. Un trato de primera por parte de todo el personal. Los meseros del restaurante son muy serviciales.,positiva,servicio
+EVAL-021,"Vine con unos amigos de paseo. Estás a pasos de los mejores sitios turísticos. Está a diez minutos del aeropuerto, muy práctico. En recepción fueron educados pero distantes. Volvería sin pensarlo.",positiva,ubicacion
+EVAL-022,"nos quedamos cinco días en temporada. muy bien ubicado, cerca de la ciudad amurallada. estás a pasos de los mejores sitios turísticos. en recepcóin fueron educados pero distantes. volvería sin pensarlo.",positiva,ubicacion
+EVAL-023,"Estás a pasos de los mejores sitios turísticos. Está a diez minutos del aeropuerto, muy práctico. Cinco estrellas.",positiva,ubicacion
+EVAL-024,"Nos quedamos cinco días en temporada. Había cucarachas en el cuarto, un asco. Muy mala experiencia.",negativa,limpieza
+EVAL-025,vine con unos amigos de paseo. muy pendientes del aseo de los pasillos y el lobby. gracias por todo.,positiva,limpieza
+EVAL-026,Llegamos un viernes en la tarde. Muy pendientes del aseo de los pasillos y el lobby. El cuarto estaba pulcro desde que llegamos. Volveria sin pensarlo.,positiva,limpieza
+EVAL-027,Llegamos un viernes en la tarde. Es un hotel sobrevalorado y costoso. oPr ese precio esperábamos mucho más. Qué decepción.,negativa,precio
+EVAL-028,"llegamos un viernes en la tarde. está a unos veinte minutos del centro. la zona no tiene mucho, pero tampoco es mala.",neutra,ubicacion
+EVAL-029,"Fue nuestra primera vez en este hotel. Hay que tomar taxi para cualquier cosa, muy lejos. La ubicación no corresponde con la que muestran en las fotos. El servicio a la habitación nunca llegó.",negativa,ubicacion
+EVAL-030,"Viajé con mi pareja por nuestro aniversario. Se llega fácil, aunque no está en el centro. Nada del otro mundo.",neutra,ubicacion
+EVAL-076,Myu pendientes del aseo de los pasillos y el lobby.,positiva,limpieza
+EVAL-077,"Nos quedamos cinco dias en temporada. Estas a pasos de los mejores sitios turisticos. Muy bien ubicado, cerca de la ciudad amurallada. Muy pendientes del aseo de los pasillos y el lobby. Volveria sin pensarlo.",positiva,ubicacion
+EVAL-078,Nos quedamos cinco días en temporada. El aseo es promedio para el precio. Cumple.,neutra,limpieza
+EVAL-079,Estuve por trabajo tres noches. Está a unos veinte minutos del centro. Nada del otro mundo.,neutra,ubicacion
+EVAL-080,"Fue nuestra primera vez en este hotel. En recepción fueron educados pero distantes. El servicio estuvo dentro de lo esperado. Se llega fácil, aunque no está en el centro.",neutra,servicio
+EVAL-081,es un hotel sobrevalorado y costoso. por ese precio esperábamos mucho más. la limpieza fue la esperada para un hotel de esta categoría. qué decepción.,negativa,precio
+EVAL-082,Es un hotel sobrevalorado y costoso.,negativa,precio
+EVAL-083,"se llega fácil, aunque no está en el centro.",neutra,ubicacion
+EVAL-084,"viajé con mi pareja por nuestro aniversario. se llega fácil, aunque no está en el centro. estuvo bien.",neutra,ubicacion
+EVAL-085,viaje con mi pareja por nuestro aniversario. los meseros del restaurante son muy serviciales. un trato de primera por parte de todo el personal. volveria sin pensarlo.,positiva,servicio
+EVAL-086,"Fue nuestra primera vez en este hotel. Todo muy aseado, cero polvo en los muebles. Volvería sin pensarlo.",positiva,limpieza
+EVAL-087,viaje con mi pareja por nuestro aniversario. la limpieza de las zonas comunes es regular. el aseo es promedio para el precio.,neutra,limpieza
+EVAL-088,la limpieza fue la esperada para un hotel de esta categoría. estuvo bien. 🙄,neutra,limpieza
+EVAL-089,Fue nuestra primera vez en este hotel. El cuarto estaba pulcro desde que llegamos. Muy recomendado.,positiva,limpieza
+EVAL-090,"Llegamos un viernes en la tarde. El precio es justo y el desayuno estaba incluido. Barato y cumplidor, ideal para viajar con presupuesto. El trato fue neutral, ni cálido ni frío. Volvería sin pensarlo.",positiva,precio
+EVAL-091,Fue nuestra primera vez en este hotel. Pedimos aseo varias veces y nadie apareció. El aire acondicionado soltaba un olor a moho terrible. No lo recomiendo.,negativa,limpieza
+EVAL-092,Pedimos aseo varias veces y nadie apareció. El aire acondicionado soltaba un olor a moho terrible. El servicio estuvo dentro de lo esperado.,negativa,limpieza
+EVAL-093,"Está a diez minutos del aeropuerto, muy práctico. Muy bien ubicado, cerca de la ciudad amurallada. El paquete con todo incluido salió muy bien de precio. Volvería sin pensarlo.",positiva,ubicacion
+EVAL-094,Vine con unos amigos de paseo. Es un hotel sobrevalorado y costoso. Qué decepción.,negativa,precio
+EVAL-095,"Se llega fácil, aunque no está en el centro. La zona no tiene mucho, pero tampoco es amla. El aseo es promedio para el precio. Cumple.",neutra,ubicacion
+EVAL-096,"Nos quedamos cinco días en temporada. El precio es justo y el desayuno estaba incluido. El paquete con todo incluido salió muy bien de precio. Todo muy aseado, cero polvo en los muebles. Gracias por todo.",positiva,precio
+EVAL-097,"Estuve por trabajo tres noches. Todo muy aseado, cero polvo en los muebles. oVlvería sin pensarlo.",positiva,limpieza
+EVAL-098,El paquete con todo incluido salió muy bien de precio. El precio es justo y el desayuno estaba incluido. Gracias por todo.,positiva,precio
+EVAL-099,vine con unos amigos de paseo. el servicio estuvo dentro del o esperado.,neutra,servicio
+EVAL-100,El precio fue el que vimos en la pagina. Cumple.,neutra,precio
+EVAL-101,Fue nuestra primera vez en este hotel. Es un hotel sobrevalorado y costoso. Por ese precio esperábamos mucho más. La limpieza fue la esperada para un hotel de esta categoría. Muy mala experiencia.,negativa,precio
+EVAL-102,"Estuve por trabajo tres noches. Todo muy aseado, cero polv oen los muebles. Muy pendientes del aseo de los pasillos y el lobby. Muy bien ubicado, cerca de la ciudad amurallada.",positiva,limpieza
+EVAL-103,"Llegamos un viernes en la tarde. Está a unos veinte minutos del centro. Se llega fácil, aunque no está en el centro. Cobran lo justo por lo que es.",neutra,ubicacion
+EVAL-104,"Difícil de llegar, ni los taxistas sabían dónde era. Hay que tomar taxi para cualquier cosa, muy lejos. Carísimo y el desayuno no estaba incluido. Qué decepción.",negativa,ubicacion
+EVAL-105,"Estuve por trabajo tres noches. El precio es justo y el desayuno estaba incluido. Barato y cumplidor, ideal para viajar con presupuesto. Está a unos veinte minutos del centro. Cinco estrellas.",positiva,precio
+EVAL-106,Nos quedamos cinco dias en temporada. La limpieza fue la esperada para un hotel de esta categoria. Nada del otro mundo.,neutra,limpieza
+EVAL-107,Estás a pasos de los mejores sitios turísticos. Gracia spor todo.,positiva,ubicacion
+EVAL-108,No es barato pero tampoco caro. Cumple.,neutra,precio
+EVAL-109,"La zona no tiene mucho, pero tampoco esm ala. Estuvo bien. 👎",neutra,ubicacion
+EVAL-110,Fue nuestra primera vez en este hotel. El precio es justo y el desayuno estaba incluido. Muy recomendado.,positiva,precio
+EVAL-111,El cuarto estaba pulcro desde que llegamos. Muy recomendado.,positiva,limpieza
+EVAL-112,Vine con unos amigos de paseo. El precio es justo y el desayuno estaba incluido. Cinco estrellas.,positiva,precio
+EVAL-113,Fue nuestra primera vez en este hotel. El paquete con todo incluido salió muy bien de precio. Gracias por todo.,positiva,precio
+EVAL-114,"viajé con mi pareja por nuestro aniversario. barato y cumplidor, ideal para viajar con presupuesto. el paquete con todo incluido salió muy bien de precio. cinco estrellas.",positiva,precio
+EVAL-115,"Nos quedamos cinco días en temporada. Difícil de llegar, ni los taxistas sabían dónde era. No vuelvo.",negativa,ubicacion
+EVAL-116,Nos quedamos cinco días en temporada. El precio es justo y el desayuno estaba incluido. El paquete con todo incluido salió muy bien de precio. El aseo es promedio para el precio. Gracias por todo.!!,positiva,precio
+EVAL-117,"el check-out fue un caos, nos hicieron esperar demasiado. el servicio a la habitación nunca lleóg. por ese precio esperábamos mucho más. muy mala experiencia.",negativa,servicio
+EVAL-118,Fuimos en familia el fin de semana. Qué maravilla encontrar pelso ajenos de regalo en la almohada. No vuelvo. 😊,negativa,limpieza
+EVAL-119,"Fuimos en familia el fin de semana. Muy pendientes del aseo de los pasillos y el lobby. Todo muy aseado, cero polvo en los muebles. Est aa diez minutos del aeropuerto, muy practico. Volveria sin pensarlo.",positiva,limpieza
+EVAL-120,"Barato y cumplidor, ideal para viajar con presupuesto. Cinco estrellas.",positiva,precio
