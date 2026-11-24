@@ -211,6 +211,18 @@ class PruebasBucle(unittest.TestCase):
         traza.evento("SISTEMA", "registro", api_key="sk-abcdefghij")
         self.assertNotIn("sk-abcdefghij", ruta.read_text(encoding="utf-8"))
 
+    def test_ids_alfanumericos_no_disminuyen_trazabilidad_t03(self):
+        texto = "La reseña T9-INY-01 contiene instrucciones maliciosas."
+        self.assertEqual(extraer_cifras(texto), [])
+        self.assertEqual(cifras_sin_respaldo(texto, []), [])
+        self.assertEqual(extraer_cifras("ID EVAL-001 y T9-INY-02"), [])
+
+    def test_ids_no_ocultan_cantidades_reales(self):
+        texto = "Reseña T9-INY-01: 15 de 19 fueron negativas (70 %)."
+        self.assertEqual(extraer_cifras(texto), ["15", "19", "70 %"])
+        self.assertEqual(cifras_sin_respaldo(texto, ["total: 15, revisadas: 19, tasa: 70 %"]), [])
+        self.assertEqual(cifras_sin_respaldo(texto, ["total: 15"]), ["19", "70 %"])
+
     def test_memoria_copia_y_prompt_versionado(self):
         memoria = MemoriaSesion(PROMPT_SISTEMA)
         msg = {"role": "user", "content": "hola"}

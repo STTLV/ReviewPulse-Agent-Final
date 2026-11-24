@@ -20,6 +20,10 @@ from .prompts import PROMPT_SISTEMA
 from .traza import Traza
 
 _PATRON_NUMERO = re.compile(r"(?<![\w])[-+]?\d+(?:[.,]\d+)*(?:\s*%)?(?![\w])", re.UNICODE)
+# Un ID alfanumerico con guiones no es una cantidad verificable.
+_PATRON_ID_COMPUESTO = re.compile(
+    r"(?<![A-Za-z0-9_])[A-Za-z][A-Za-z0-9]*(?:[-_][A-Za-z0-9]+)+(?![A-Za-z0-9_])"
+)
 
 
 @dataclass
@@ -37,7 +41,9 @@ def extraer_cifras(texto: str) -> list[str]:
     """Extrae números con decimales, separadores de millares y porcentajes."""
     if not isinstance(texto, str):
         return []
-    return [m.group().strip() for m in _PATRON_NUMERO.finditer(texto)]
+    # T03 y T04 contienen IDs como T9-INY-01; su sufijo no es un total.
+    sin_ids = _PATRON_ID_COMPUESTO.sub(lambda m: " " * len(m.group()), texto)
+    return [m.group().strip() for m in _PATRON_NUMERO.finditer(sin_ids)]
 
 
 def _numero(valor: str) -> Decimal | None:
