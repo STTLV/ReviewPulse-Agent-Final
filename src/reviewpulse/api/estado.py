@@ -8,6 +8,7 @@ import shutil
 import sqlite3
 import tempfile
 import threading
+from contextlib import closing
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -129,7 +130,7 @@ class EstadoAPI:
             reportes_destino = self.directorio_salida / "reportes"
             shutil.copytree(reportes_origen, reportes_destino, dirs_exist_ok=True)
 
-            with sqlite3.connect(self.demo_path) as conexion:
+            with closing(sqlite3.connect(self.demo_path)) as conexion, conexion:
                 filas = conexion.execute(
                     "SELECT semana, ruta FROM reportes"
                 ).fetchall()
