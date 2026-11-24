@@ -1,0 +1,67 @@
+{
+  "umbrales_invariables": {
+    "M1_polaridad": 0.85,
+    "M1_tema": 0.85,
+    "M2": 0.9,
+    "M3": 1.0,
+    "M4_max_exclusivo": 0.1
+  },
+  "m1": {
+    "conjunto": "C03: data/evaluacion_manual_holdout.csv",
+    "semillas_entrenamiento": [
+      71,
+      72,
+      73,
+      74,
+      75
+    ],
+    "n": 40,
+    "procedencia": "Conjunto de control histórico manual asistido por IA; gold de Tarea 7 pendiente",
+    "exactitud": {
+      "polaridad": 0.8099999999999999,
+      "tema": 0.875
+    },
+    "f1_macro": {
+      "polaridad": 0.8047340049194937,
+      "tema": 0.8728115743905217
+    },
+    "cumple_m1": false,
+    "gold_manual": "pendiente hasta terminar etiquetado humano",
+    "comparacion_llm_sin_ajuste": "pendiente; no se invocó proveedor"
+  },
+  "v1": {
+    "corridas": 60,
+    "incidentes": 50,
+    "detectados_24h": 26,
+    "alertas": 32,
+    "fp": 1,
+    "reportes_a_tiempo": 840,
+    "semanas_esperadas": 840,
+    "M2": 0.52,
+    "M3": 1.0,
+    "M4": 0.03125,
+    "cumple_M2": false,
+    "cumple_M3": true,
+    "cumple_M4": true
+  },
+  "cusum": {
+    "corridas": 60,
+    "incidentes": 50,
+    "detectados_24h": 19,
+    "alertas": 23,
+    "fp": 1,
+    "reportes_a_tiempo": 840,
+    "semanas_esperadas": 840,
+    "M2": 0.38,
+    "M3": 1.0,
+    "M4": 0.043478260869565216,
+    "cumple_M2": false,
+    "cumple_M3": true,
+    "cumple_M4": true
+  },
+  "origen": {
+    "v1": "experiments/v1/escenarios.csv",
+    "cusum": "ciclo real con LLMFalso de guion, sin red"
+  },
+  "estado": "provisional: gold manual y comparacion LLM pendiente"
+}

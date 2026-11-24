@@ -36,3 +36,7 @@ Los datos son **sintéticos**. La evaluación M1 histórica representa cinco ree
 **Caso de error detectado con apoyo de IA:** al auditar el Hito 2 se identificó que ejecutar el agente completo E02 no era una verdadera *línea base comparativa*. Se corrigió introduciendo un clasificador mayoritario y usando el mismo conjunto de control para ambos sistemas. También se corrigió la sintaxis de `--escenario` y `--semilla` en la documentación.
 
 **Pendientes del proyecto final:** comparación adicional de modelos y ajuste de hiperparámetros, análisis de al menos diez errores, evaluación ética, informe IEEE y defensa oral. Esta bitácora continúa en los próximos hitos.
+
+## Registro complementario T8 (24/11/2026)
+
+Se utilizo ChatGPT para revisar la metodologia, elaborar un script de evaluacion adicional M1 con el Gold ya etiquetado, preparar pruebas automatizadas y redactar la documentacion. La calibracion CUSUM y los resultados historicos de M1-M4 se preservaron. El etiquetado humano original fue realizado por Sara y Ellen independientemente, sin IA ni acceso a las etiquetas del simulador. La medicion M1-Gold se realizo con cinco semillas de entrenamiento separadas del Gold, sin llamadas a un proveedor LLM.
