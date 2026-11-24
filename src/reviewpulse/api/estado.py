@@ -4,20 +4,23 @@ from __future__ import annotations
 import hmac
 import json
 import os
+import shutil
+import sqlite3
 import tempfile
 import threading
 from datetime import datetime, timezone
 from pathlib import Path
-from types import SimpleNamespace
 
 from ..actuadores import GeneradorReporte, Notificador
+from ..ciclo.cierre import ejecutar_simulacion
 from ..ciclo.ingesta import CONFIG_DEFECTO
-from ..entorno import PLATAFORMAS
+from ..entorno import EntornoHotel
+from ..escenarios import ESCENARIOS
 from ..herramientas.registro import Contexto, Sesion
 from ..llm.cliente import ClienteLLM, ClienteOpenAI, RespuestaLLM
 from ..memoria import RepositorioHistorico
-from ..herramientas.analisis import construir_reporte
 from ..config import Ajustes
+from ..modelo import ClasificadorSentimiento
 
 
 class PresupuestoAgotado(Exception):
@@ -42,43 +45,25 @@ class _ClienteConPresupuesto:
         return respuesta
 
 
-class _ModeloDemo:
-    def predecir(self, textos: list[str]) -> list[SimpleNamespace]:
-        return [
-            SimpleNamespace(polaridad="neutra", tema="servicio", confianza=0.5)
-            for _ in textos
-        ]
-
-
-class _EntornoDemo:
-    def disponible(self, plataforma: str, ahora: datetime) -> bool:
-        return plataforma in PLATAFORMAS and ahora.tzinfo is not None
-
-
 class EstadoAPI:
     def __init__(self, ajustes: Ajustes, llm: ClienteLLM | None = None):
         self.ajustes = ajustes
         self.proveedor = llm if llm is not None else ClienteOpenAI(ajustes)
         self.llm = _ClienteConPresupuesto(self, self.proveedor)
+        self.modelo = ClasificadorSentimiento.cargar()
+        self.entorno = EntornoHotel(ESCENARIOS["E03"], 11)
         self.candado = threading.Lock()
         self._presupuesto_lock = threading.Lock()
         self._traza_lock = threading.Lock()
         self._dia_utc = datetime.now(timezone.utc).date()
         self._tokens_dia = 0
         self._trazas: list[dict] = []
+        self._trazas_demo = self._cargar_trazas_demo()
+        self._indice_traza_demo = 0
 
-        raiz = Path(__file__).resolve().parents[3]
         demo_default = Path(tempfile.gettempdir()) / "reviewpulse-demo.sqlite3"
-        historico_default = raiz / "data" / "historico.sqlite3"
         self.demo_path = Path(os.environ.get("REVIEWPULSE_DB_PATH", str(demo_default)))
-        self.historico_path = Path(os.environ.get(
-            "REVIEWPULSE_HISTORICO_DB_PATH", str(historico_default)
-        ))
-        if self.demo_path.resolve() == self.historico_path.resolve():
-            raise ValueError("La base demo y el histórico deben ser archivos separados.")
-
         self.demo_path.parent.mkdir(parents=True, exist_ok=True)
-        self.historico_path.parent.mkdir(parents=True, exist_ok=True)
         self.directorio_salida = self.demo_path.parent / f"{self.demo_path.stem}_salidas"
         self.directorio_salida.mkdir(parents=True, exist_ok=True)
         self.reportes = GeneradorReporte(self.directorio_salida)
@@ -86,45 +71,76 @@ class EstadoAPI:
             self.directorio_salida, "gerente@hotelpiloto.co"
         )
         self.cfg = {**CONFIG_DEFECTO}
-        self.repo_historico = RepositorioHistorico(self.historico_path)
         self.repo_demo = RepositorioHistorico(self.demo_path)
         self._inicializar_demo()
+
+    @staticmethod
+    def _cargar_trazas_demo() -> list[dict]:
+        raiz = Path(__file__).resolve().parents[3]
+        archivos = sorted((raiz / "data" / "trazas_demo").glob("*.json"))
+        if len(archivos) != 3:
+            raise RuntimeError("Se requieren exactamente tres trazas en data/trazas_demo.")
+
+        trazas = []
+        for archivo in archivos:
+            traza = json.loads(archivo.read_text(encoding="utf-8"))
+            if (
+                not isinstance(traza, dict)
+                or not isinstance(traza.get("id"), str)
+                or not isinstance(traza.get("eventos"), list)
+                or not traza["eventos"]
+                or any(not isinstance(evento, dict) for evento in traza["eventos"])
+            ):
+                raise ValueError(f"Formato inválido en la traza demo {archivo.name}.")
+            trazas.append(traza)
+        return trazas
 
     def _inicializar_demo(self) -> None:
         existe = self.repo_demo.con.execute(
             "SELECT 1 FROM semanas LIMIT 1"
         ).fetchone()
         if existe:
-            return
+            ids = {
+                fila["id"]
+                for fila in self.repo_demo.con.execute("SELECT id FROM resenas")
+            }
+            if ids != {"DEMO-001", "DEMO-002", "DEMO-003"}:
+                return
+            self.repo_demo.cerrar()
+            for ruta in (
+                self.demo_path,
+                Path(f"{self.demo_path}-wal"),
+                Path(f"{self.demo_path}-shm"),
+            ):
+                ruta.unlink(missing_ok=True)
+            self.repo_demo = RepositorioHistorico(self.demo_path)
 
-        fecha = "2026-01-05T12:00:00"
-        reseñas = (
-            ("DEMO-001", "Google", "La habitación estaba limpia.", 5, "positiva", "limpieza"),
-            ("DEMO-002", "TripAdvisor", "El servicio fue amable.", 5, "positiva", "servicio"),
-            ("DEMO-003", "Google", "La ubicación era conveniente.", 4, "positiva", "ubicacion"),
-        )
-        for id_, plataforma, texto, calificacion, polaridad, tema in reseñas:
-            self.repo_demo.guardar_resena({
-                "id": id_,
-                "plataforma": plataforma,
-                "fecha": fecha,
-                "semana": 0,
-                "texto": texto,
-                "calificacion": calificacion,
-                "polaridad": polaridad,
-                "tema": tema,
-                "confianza": 0.9,
-                "revision_manual": False,
-                "procesada_en": fecha,
-            })
-        self.repo_demo.con.commit()
-        self.repo_demo.cerrar_semana(
-            0, self.repo_demo.conteos_semana(0), False, fecha, False
-        )
-        construir_reporte(
-            self.repo_demo, self.reportes, 0, datetime.fromisoformat(fecha),
-            False, self.cfg,
-        )
+        self.repo_demo.cerrar()
+        with tempfile.TemporaryDirectory(prefix="reviewpulse-e03-") as temporal:
+            carpeta = Path(temporal) / "simulacion"
+            ejecutar_simulacion(
+                self.entorno,
+                carpeta,
+                cfg=self.cfg,
+                modelo=self.modelo,
+            )
+            shutil.copy2(carpeta / "memoria.db", self.demo_path)
+            reportes_origen = carpeta / "reportes"
+            reportes_destino = self.directorio_salida / "reportes"
+            shutil.copytree(reportes_origen, reportes_destino, dirs_exist_ok=True)
+
+            with sqlite3.connect(self.demo_path) as conexion:
+                filas = conexion.execute(
+                    "SELECT semana, ruta FROM reportes"
+                ).fetchall()
+                for semana, ruta in filas:
+                    destino = reportes_destino / Path(ruta).name
+                    conexion.execute(
+                        "UPDATE reportes SET ruta = ? WHERE semana = ?",
+                        (str(destino), semana),
+                    )
+
+        self.repo_demo = RepositorioHistorico(self.demo_path)
 
     def _rotar_dia_si_corresponde(self) -> None:
         hoy = datetime.now(timezone.utc).date()
@@ -154,14 +170,22 @@ class EstadoAPI:
     def contexto(self) -> Contexto:
         return Contexto(
             self.repo_demo,
-            _ModeloDemo(),
-            _EntornoDemo(),
+            self.modelo,
+            self.entorno,
             self.notificador,
             self.reportes,
             dict(self.cfg),
             datetime.now(timezone.utc),
             Sesion(),
         )
+
+    def siguiente_traza_demo(self) -> dict:
+        with self._traza_lock:
+            traza = self._trazas_demo[self._indice_traza_demo]
+            self._indice_traza_demo = (
+                self._indice_traza_demo + 1
+            ) % len(self._trazas_demo)
+            return json.loads(json.dumps(traza, ensure_ascii=False))
 
     def agregar_evento(self, evento: dict) -> None:
         with self._traza_lock:
@@ -209,4 +233,3 @@ class EstadoAPI:
 
     def cerrar(self) -> None:
         self.repo_demo.cerrar()
-        self.repo_historico.cerrar()

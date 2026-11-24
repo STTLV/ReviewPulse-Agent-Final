@@ -1,0 +1,39 @@
+{
+  "id": "alerta-servicio-semana-08",
+  "origen": {
+    "simulador": "ejecutar_simulacion",
+    "escenario": "E03",
+    "semilla": 11
+  },
+  "eventos": [
+    {
+      "ts_real": "2026-11-24T11:16:08.960",
+      "ts_simulado": "2026-03-04T06:00:00",
+      "fase": "PERCEPCION",
+      "evento": "ingesta",
+      "disponibilidad": {
+        "TripAdvisor": true,
+        "Google": true
+      },
+      "nuevas": 2
+    },
+    {
+      "ts_real": "2026-11-24T11:16:08.961",
+      "ts_simulado": "2026-03-04T06:00:00",
+      "fase": "ACCION",
+      "evento": "alerta",
+      "semana": 8,
+      "tema": "servicio",
+      "tipo": "a_tiempo"
+    },
+    {
+      "ts_real": "2026-11-24T11:16:09.090",
+      "ts_simulado": "2026-03-09T12:00:00",
+      "fase": "ACCION",
+      "evento": "cierre_semana",
+      "semana": 8,
+      "incompleto": false,
+      "respaldo": false
+    }
+  ]
+}

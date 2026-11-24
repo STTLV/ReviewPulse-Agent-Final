@@ -20,7 +20,7 @@ La **Tarea 3** separa el ciclo determinista del razonamiento del futuro agente:
 - `src/reviewpulse/entorno.py`, `escenarios.py`, `evaluacion.py`: simulador y evaluación, sin acceso del agente a las etiquetas reales
 - `src/reviewpulse/modelo.py`: clasificador TF-IDF + léxico + regresión logística; el archivo entrenado está en `data/modelo.joblib`
 
-El código anterior de `agente.py`, `planificador.py` y `ejecutar_agente.py` se retira en esta refactorización. El bucle ReAct con LLM, la API y la interfaz se integran **en tareas posteriores**, no forman parte de esta Tarea 3. Los resultados históricos M1–M4 no se reescriben.
+El código anterior de `agente.py`, `planificador.py` y `ejecutar_agente.py` se retira en esta refactorización. El bucle ReAct con LLM y la API FastAPI se integraron en tareas posteriores; la interfaz web se mantiene como una tarea separada. Los resultados históricos M1–M4 no se reescriben.
 
 ## Instalación y pruebas
 
@@ -82,4 +82,10 @@ Estos valores no sustituyen la evaluación histórica M1–M4. Los archivos y ev
 - No subir `.env`, claves de API ni registros con secretos
 - No utilizar datos de reseñas sintéticas para presentar un despliegue real
 - Los umbrales CUSUM y M1–M4 históricos no se alteran durante esta tarea
-- La integración del agente LLM y la evaluación con juez son posteriores y se revisan en PR separados
+- La interfaz web y la evaluación con juez se revisan en tareas y PR separados
+
+## Datos de demostración de la API
+
+La API inicializa su base demo a partir de una corrida del simulador `E03`, semilla `11`, mediante `ejecutar_simulacion` y el clasificador guardado en `data/modelo.joblib`. La corrida se genera en una carpeta temporal; la API utiliza su SQLite y sus reportes. Son datos sintéticos producidos por el simulador, no reseñas reales de clientes. El reinicio vuelve a generar esta base; no hay un repositorio histórico paralelo en la API.
+
+Las tres trazas de `data/trazas_demo/` son eventos extraídos de esa corrida y se reproducen por SSE cuando se agota el presupuesto diario. La solicitud de chat reserva el candado cuando comienza a ejecutarse la respuesta; si ya está ocupado, conserva la respuesta `429` sin dejar bloqueado un flujo SSE que no se inició.

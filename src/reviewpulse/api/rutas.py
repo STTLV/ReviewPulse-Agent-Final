@@ -8,7 +8,7 @@ import threading
 from pathlib import Path
 
 from fastapi import APIRouter, Header, HTTPException
-from fastapi.responses import StreamingResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from ..agente.bucle import ManejadorAgente, resolver
@@ -72,6 +72,37 @@ def _ocupado(estado: EstadoAPI) -> None:
         raise HTTPException(status_code=429, detail="ocupado")
 
 
+class _RespuestaSSEProtegida(StreamingResponse):
+    def __init__(
+        self,
+        contenido,
+        estado: EstadoAPI,
+        trabajador_iniciado: threading.Event,
+        headers: dict[str, str] | None = None,
+    ):
+        self._estado = estado
+        self._trabajador_iniciado = trabajador_iniciado
+        super().__init__(
+            contenido, media_type="text/event-stream", headers=headers
+        )
+
+    async def __call__(self, scope, receive, send):
+        try:
+            _ocupado(self._estado)
+        except HTTPException as exc:
+            respuesta = JSONResponse(
+                {"detail": exc.detail}, status_code=exc.status_code
+            )
+            await respuesta(scope, receive, send)
+            return
+
+        try:
+            await super().__call__(scope, receive, send)
+        finally:
+            if not self._trabajador_iniciado.is_set():
+                self._estado.candado.release()
+
+
 def crear_router(estado: EstadoAPI) -> APIRouter:
     router = APIRouter(prefix="/api")
 
@@ -85,26 +116,11 @@ def crear_router(estado: EstadoAPI) -> APIRouter:
         codigo: str | None = Header(default=None, alias="X-Codigo-Acceso"),
     ) -> StreamingResponse:
         _autorizar(estado, codigo)
-        _ocupado(estado)
+        trabajador_iniciado = threading.Event()
 
         def transmitir():
             if estado.presupuesto_agotado():
-                try:
-                    texto = estado.texto_seguro(
-                        "El presupuesto diario se agotó; esta respuesta usa modo demo."
-                    )
-                    paso = {
-                        "fase": "SISTEMA",
-                        "evento": "modo_demo",
-                        "modo_demo": True,
-                    }
-                    estado.agregar_evento(paso)
-                    yield _evento("paso", paso, estado)
-                    yield _evento(
-                        "final", {"texto": texto, "modo_demo": True}, estado
-                    )
-                finally:
-                    estado.candado.release()
+                yield from emitir_traza_demo()
                 return
 
             eventos: queue.Queue[tuple[str, object]] = queue.Queue()
@@ -131,6 +147,7 @@ def crear_router(estado: EstadoAPI) -> APIRouter:
 
             trabajador = threading.Thread(target=ejecutar_agente, daemon=True)
             trabajador.start()
+            trabajador_iniciado.set()
             while True:
                 tipo, valor = eventos.get()
                 if tipo == "paso":
@@ -145,17 +162,7 @@ def crear_router(estado: EstadoAPI) -> APIRouter:
                             "motivo": resultado.motivo,
                         }, estado)
                     elif estado.presupuesto_agotado():
-                        yield _evento("paso", {
-                            "fase": "SISTEMA",
-                            "evento": "modo_demo",
-                            "modo_demo": True,
-                        }, estado)
-                        yield _evento("final", {
-                            "texto": estado.texto_seguro(
-                                "El presupuesto diario se agotó; esta respuesta usa modo demo."
-                            ),
-                            "modo_demo": True,
-                        }, estado)
+                        yield from emitir_traza_demo()
                     else:
                         yield _evento("error", {
                             "error": resultado.motivo,
@@ -168,9 +175,24 @@ def crear_router(estado: EstadoAPI) -> APIRouter:
                 }, estado)
                 break
 
-        return StreamingResponse(
+        def emitir_traza_demo():
+            traza = estado.siguiente_traza_demo()
+            for paso in traza["eventos"]:
+                estado.agregar_evento(paso)
+                yield _evento("paso", {"traza": paso}, estado)
+            yield _evento("final", {
+                "texto": (
+                    "El presupuesto diario se agotó; esta respuesta reproduce "
+                    "una traza de demostración."
+                ),
+                "modo_demo": True,
+                "traza_demo": traza["id"],
+            }, estado)
+
+        return _RespuestaSSEProtegida(
             transmitir(),
-            media_type="text/event-stream",
+            estado,
+            trabajador_iniciado,
             headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
         )
 

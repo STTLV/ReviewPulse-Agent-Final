@@ -1,0 +1,37 @@
+{
+  "id": "cierre-semana-13",
+  "origen": {
+    "simulador": "ejecutar_simulacion",
+    "escenario": "E03",
+    "semilla": 11
+  },
+  "eventos": [
+    {
+      "ts_real": "2026-11-24T11:16:09.807",
+      "ts_simulado": "2026-04-13T12:00:00",
+      "fase": "PERCEPCION",
+      "evento": "ingesta",
+      "disponibilidad": {
+        "TripAdvisor": true,
+        "Google": true
+      },
+      "nuevas": 0
+    },
+    {
+      "ts_real": "2026-11-24T11:16:09.810",
+      "ts_simulado": "2026-04-13T12:00:00",
+      "fase": "ACCION",
+      "evento": "cierre_semana",
+      "semana": 13,
+      "incompleto": false,
+      "respaldo": false
+    },
+    {
+      "ts_real": "2026-11-24T11:16:09.810",
+      "ts_simulado": "2026-04-15T06:00:00",
+      "fase": "SISTEMA",
+      "evento": "fin_ejecucion",
+      "segundos": 2.22
+    }
+  ]
+}

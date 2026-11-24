@@ -17,9 +17,12 @@ from unittest.mock import patch
 from fastapi.testclient import TestClient
 
 from reviewpulse.config import Ajustes
+from reviewpulse.api.rutas import SolicitudChat, crear_router
+from reviewpulse.entorno import EntornoHotel
 from reviewpulse.llm.cliente import Uso
 from reviewpulse.llm.falso import LLMFalso, respuesta_herramienta, respuesta_texto
 from reviewpulse.memoria import RepositorioHistorico, conteo_vacio
+from reviewpulse.modelo import ClasificadorSentimiento
 from reviewpulse.api import crear_app
 
 
@@ -42,10 +45,8 @@ class PruebasAPI(unittest.TestCase):
         self.addCleanup(self.tmp.cleanup)
         self.carpeta = Path(self.tmp.name)
         self.db_path = self.carpeta / "demo.sqlite3"
-        self.db_historico_path = self.carpeta / "historico_sintetico.sqlite3"
         self._env = patch.dict(os.environ, {
             "REVIEWPULSE_DB_PATH": str(self.db_path),
-            "REVIEWPULSE_HISTORICO_DB_PATH": str(self.db_historico_path),
         })
         self._env.start()
         self.addCleanup(self._env.stop)
@@ -114,50 +115,6 @@ class PruebasAPI(unittest.TestCase):
         finally:
             repo.cerrar()
 
-    def guardar_historico_sintetico(self) -> None:
-        repo = RepositorioHistorico(self.db_historico_path)
-        try:
-            repo.guardar_resena({
-                "id": "historico-sintetico-1",
-                "plataforma": "Google",
-                "fecha": "2026-11-20T12:00:00",
-                "semana": 1,
-                "texto": "registro histórico sintético",
-                "calificacion": 5,
-                "polaridad": "positiva",
-                "tema": "servicio",
-                "confianza": 0.9,
-                "revision_manual": False,
-                "procesada_en": "2026-11-21T12:00:00",
-            })
-            repo.con.commit()
-            repo.cerrar_semana(
-                1, conteo_vacio(), False, "2026-11-21T12:00:00", False
-            )
-            repo.guardar_reporte(
-                1, "2026-11-21T12:00:00", "reportes/historico_01.md", False
-            )
-        finally:
-            repo.cerrar()
-
-    def leer_historico_sintetico(self) -> tuple:
-        repo = RepositorioHistorico(self.db_historico_path)
-        try:
-            resenas = [(r["id"], r["texto"]) for r in repo.resenas()]
-            semanas = [
-                (r["semana"], r["total"], r["datos_incompletos"])
-                for r in repo.con.execute(
-                    "SELECT semana, total, datos_incompletos FROM semanas ORDER BY semana"
-                )
-            ]
-            reportes = [
-                (r["semana"], r["ruta"], r["incompleto"])
-                for r in repo.reportes()
-            ]
-            return resenas, semanas, reportes
-        finally:
-            repo.cerrar()
-
     def test_salud_devuelve_estado_ok(self):
         cliente = self.crear_cliente(LLMFalso([]))
 
@@ -165,6 +122,56 @@ class PruebasAPI(unittest.TestCase):
 
         self.assertEqual(respuesta.status_code, 200)
         self.assertEqual(respuesta.json(), {"estado": "ok"})
+
+    def test_api_carga_la_simulacion_e03_y_el_clasificador_guardado(self):
+        cliente = self.crear_cliente(LLMFalso([]))
+        estado = cliente.app.state.estado
+
+        self.assertIsInstance(estado.modelo, ClasificadorSentimiento)
+        self.assertIsInstance(estado.entorno, EntornoHotel)
+        self.assertEqual(estado.entorno.escenario.nombre, "E03 Dos incidentes")
+        self.assertIs(estado.contexto().modelo, estado.modelo)
+        self.assertIs(estado.contexto().entorno, estado.entorno)
+        self.assertFalse(hasattr(estado, "repo_historico"))
+        self.assertEqual(len(estado._trazas_demo), 3)
+        self.assertEqual(
+            estado.repo_demo.con.execute("SELECT COUNT(*) FROM semanas").fetchone()[0],
+            14,
+        )
+        self.assertGreater(
+            estado.repo_demo.con.execute("SELECT COUNT(*) FROM resenas").fetchone()[0],
+            400,
+        )
+        self.assertTrue(
+            estado.repo_demo.con.execute(
+                "SELECT 1 FROM resenas WHERE id LIKE 'R%' LIMIT 1"
+            ).fetchone()
+        )
+        self.assertTrue(
+            estado.repo_demo.con.execute(
+                "SELECT 1 FROM alertas WHERE semana = 8 AND tema = 'servicio' LIMIT 1"
+            ).fetchone()
+        )
+        reportes = estado.repo_demo.reportes()
+        self.assertEqual(len(reportes), 14)
+        self.assertTrue(Path(reportes[0]["ruta"]).is_file())
+        self.assertEqual(len(cliente.get("/api/semanas").json()), 14)
+
+    def test_chat_sin_iniciar_stream_no_reserva_el_candado(self):
+        cliente = self.crear_cliente(LLMFalso([]))
+        estado = cliente.app.state.estado
+        ruta_chat = next(
+            ruta for ruta in crear_router(estado).routes
+            if getattr(ruta, "path", None) == "/api/chat"
+        )
+
+        respuesta = ruta_chat.endpoint(
+            solicitud=SolicitudChat(mensaje="consulta sin iniciar"),
+            codigo=_CODIGO_PRUEBA,
+        )
+
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertFalse(estado.candado.locked())
 
     def test_chat_rechaza_codigo_ausente_o_incorrecto_sin_invocar_llm(self):
         llm = LLMFalso([])
@@ -325,6 +332,12 @@ class PruebasAPI(unittest.TestCase):
         self.assertTrue(
             any(self.contiene_modo_demo(dato) for dato in self.datos_sse(segunda.text))
         )
+        self.assertIn("traza_demo", segunda.text)
+        self.assertTrue(any(
+            dato.get("traza", {}).get("evento") == "cierre_semana"
+            for dato in self.datos_sse(segunda.text)
+            if isinstance(dato, dict)
+        ))
 
     def test_tope_diario_se_reinicia_en_un_nuevo_dia_utc(self):
         respuesta = respuesta_texto("Respuesta sintética.")
@@ -370,16 +383,14 @@ class PruebasAPI(unittest.TestCase):
                 for secreto in (_API_KEY_PRUEBA, _CODIGO_PRUEBA):
                     self.assertFalse(secreto.encode() in contenido_archivo)
 
-    def test_cierre_y_reinicio_requieren_codigo_y_reinicio_preserva_historico(self):
-        self.guardar_historico_sintetico()
+    def test_cierre_y_reinicio_requieren_codigo_y_reinicio_restablece_simulacion(self):
         llm = LLMFalso([
             respuesta_herramienta("generar_reporte", semana=77),
             respuesta_texto("Reporte de la semana 77 generado."),
         ])
         cliente = self.crear_cliente(llm)
-        cliente.get("/api/salud")
+        estado = cliente.app.state.estado
         self.guardar_semana(77, incompleto=False)
-        historico_antes = self.leer_historico_sintetico()
 
         for headers in ({}, {"X-Codigo-Acceso": "codigo-incorrecto"}):
             cierre = cliente.post("/api/cierre", json={"semana": 77}, headers=headers)
@@ -397,11 +408,18 @@ class PruebasAPI(unittest.TestCase):
             "/api/cierre", json={"semana": 77}, headers=self.headers
         )
         self.assertEqual(cierre_autorizado.status_code, 200)
-        self.assertEqual(self.leer_historico_sintetico(), historico_antes)
 
         reinicio_autorizado = cliente.post("/api/reiniciar", headers=self.headers)
         self.assertEqual(reinicio_autorizado.status_code, 200)
-        self.assertEqual(self.leer_historico_sintetico(), historico_antes)
+        self.assertEqual(
+            estado.repo_demo.con.execute("SELECT COUNT(*) FROM semanas").fetchone()[0],
+            14,
+        )
+        self.assertGreater(
+            estado.repo_demo.con.execute("SELECT COUNT(*) FROM resenas").fetchone()[0],
+            400,
+        )
+        self.assertIsNone(estado.repo_demo.semana(77))
         with closing(sqlite3.connect(self.db_path)) as con:
             self.assertEqual(
                 con.execute("PRAGMA integrity_check").fetchone()[0], "ok"

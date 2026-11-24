@@ -1,0 +1,30 @@
+{
+  "id": "cierre-semana-00",
+  "origen": {
+    "simulador": "ejecutar_simulacion",
+    "escenario": "E03",
+    "semilla": 11
+  },
+  "eventos": [
+    {
+      "ts_real": "2026-11-24T11:16:07.774",
+      "ts_simulado": "2026-01-12T12:00:00",
+      "fase": "PERCEPCION",
+      "evento": "ingesta",
+      "disponibilidad": {
+        "TripAdvisor": true,
+        "Google": true
+      },
+      "nuevas": 1
+    },
+    {
+      "ts_real": "2026-11-24T11:16:07.776",
+      "ts_simulado": "2026-01-12T12:00:00",
+      "fase": "ACCION",
+      "evento": "cierre_semana",
+      "semana": 0,
+      "incompleto": false,
+      "respaldo": false
+    }
+  ]
+}
