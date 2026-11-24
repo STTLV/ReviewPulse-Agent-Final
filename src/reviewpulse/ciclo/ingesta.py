@@ -3,6 +3,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
+import json
+from pathlib import Path
 
 from ..corpus import TEMAS
 from ..entorno import INICIO, PLATAFORMAS, EntornoHotel, PlataformaNoDisponible, semana_de
@@ -13,9 +15,6 @@ from ..preprocesamiento import validar
 
 CONFIG_DEFECTO: dict = {
     "umbral_confianza": 0.55,
-    "cusum_delta": 0.25,
-    "cusum_h": 4.0,
-    "cusum_min_negativas": 6,
     "semanas_historial": 6,
     "min_semanas_historial": 3,
     "margen_espera_h": 12,
@@ -23,6 +22,26 @@ CONFIG_DEFECTO: dict = {
     "intervalo_h": 6,
     "destinatario": "gerente@hotelpiloto.co",
 }
+
+
+def cargar_cusum_calibrado(ruta: Path | None = None) -> dict:
+    """Carga la calibración fijada en T8. No usa valores antiguos silenciosamente."""
+    ruta = ruta or Path(__file__).resolve().parents[3] / "config" / "config.json"
+    try:
+        cfg = json.loads(ruta.read_text(encoding="utf-8-sig"))
+        delta = float(cfg["cusum_delta"])
+        h = float(cfg["cusum_h"])
+        min_negativas = int(cfg["cusum_min_negativas"])
+    except (OSError, ValueError, TypeError, KeyError) as exc:
+        raise RuntimeError(f"Configuración CUSUM ausente o inválida: {ruta}") from exc
+    if not 0 < delta < 1 or h <= 0 or min_negativas < 1:
+        raise ValueError("La configuración CUSUM contiene parámetros fuera de rango")
+    return {"cusum_delta": delta, "cusum_h": h,
+            "cusum_min_negativas": min_negativas}
+
+
+# Fuente única, carga fija por proceso. Reiniciar la API tras cambios de config.
+CONFIG_DEFECTO.update(cargar_cusum_calibrado())
 
 
 @dataclass(frozen=True)

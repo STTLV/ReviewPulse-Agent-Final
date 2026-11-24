@@ -80,6 +80,19 @@ class PruebasBucle(unittest.TestCase):
         self.assertEqual(len(llm.llamadas), 2)
         self.assertTrue(any(m.get("role") == "tool" for m in llm.llamadas[-1]))
 
+    def test_trazabilidad_distingue_herramientas_de_enunciado_usuario(self):
+        llm = LLMFalso([respuesta_herramienta("contar_resenas", semana=8),
+                        respuesta_texto("Hubo 2 reseñas en la semana 8.")])
+        r = resolver("¿Cuántas reseñas hubo en la semana 8?", llm, self.ctx)
+        eventos = [e for e in r.eventos if e.get("evento") == "respuesta_final"]
+        self.assertEqual(len(eventos), 1)
+        self.assertEqual(eventos[0]["cifras_evaluadas"], 1)
+        self.assertEqual(eventos[0]["cifras_respaldadas"], 1)
+        sin_llamadas = resolver("semana 8", LLMFalso([respuesta_texto("Hubo 8 reseñas")]), self.ctx)
+        final = next(e for e in sin_llamadas.eventos if e.get("evento") == "respuesta_final")
+        self.assertEqual(final["cifras_evaluadas"], 1)
+        self.assertEqual(final["cifras_respaldadas"], 0)
+
     def test_cifra_inventada_se_corrige_una_vez_y_se_marca(self):
         llm = LLMFalso([respuesta_texto("Hubo 999 reseñas."),
                         respuesta_texto("Hubo 999 reseñas.")])

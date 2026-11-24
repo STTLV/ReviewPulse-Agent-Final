@@ -46,7 +46,8 @@ except ModuleNotFoundError:
 RAIZ = Path(__file__).resolve().parents[1]
 CAMPOS = ["sistema", "tarea", "tipo", "repeticion", "estado", "exito", "tokens_entrada",
           "tokens_salida", "segundos", "pasos", "herramientas", "errores_herramienta",
-          "cifras_no_respaldadas", "motivo", "veredicto_juez"]
+          "cifras_no_respaldadas", "motivo", "veredicto_juez",
+          "traza_cifras_evaluadas", "traza_cifras_respaldadas", "trazabilidad_numerica"]
 
 
 def _comprobar_umbrales_fijados() -> None:
@@ -140,7 +141,18 @@ def ejecutar_una(tarea: dict, sistema: str, repeticion: int, base: Path,
                                  ensure_ascii=False) + "\n")
             for ev in eventos:
                 out.write(json.dumps(_seguro(ev), ensure_ascii=False) + "\n")
-        incorrectas = cifras_incorrectas(texto, valores_esperados(tarea, base)) if tarea["tipo"] == "conteo" else []
+        # El éxito del conteo se califica únicamente por la línea final total: N.
+        # Los números explicativos se controlan aparte mediante trazabilidad.
+        linea = texto.strip().splitlines()[-1] if texto.strip() else ""
+        incorrectas = (cifras_incorrectas(linea, valores_esperados(tarea, base))
+                      if tarea["tipo"] == "conteo" else [])
+        # Métrica estrictamente numérica: cada final contiene totales de cifras
+        # y cifras verificadas contra observaciones de herramientas. Si no hubo
+        # respuesta final, o es línea base sin herramientas, es NO EVALUABLE.
+        finales = [e for e in eventos if e.get("evento") == "respuesta_final"]
+        final = finales[-1] if sistema == "agente" and finales else None
+        evaluadas = final.get("cifras_evaluadas", 0) if final is not None else ""
+        respaldadas = final.get("cifras_respaldadas", 0) if final is not None else ""
         return {"sistema": sistema, "tarea": tarea["id"], "tipo": tarea["tipo"],
                 "repeticion": repeticion,
                 "estado": "juez_pendiente" if exito is None else "terminado",
@@ -149,7 +161,41 @@ def ejecutar_una(tarea: dict, sistema: str, repeticion: int, base: Path,
                 "segundos": round(time.monotonic() - tiempo, 3), "pasos": pasos,
                 "herramientas": herramientas, "errores_herramienta": fallos,
                 "cifras_no_respaldadas": len(incorrectas), "motivo": motivo,
-                "veredicto_juez": "" if veredicto is None else json.dumps(_seguro(veredicto), ensure_ascii=False)}
+                "veredicto_juez": "" if veredicto is None else json.dumps(_seguro(veredicto), ensure_ascii=False),
+                "traza_cifras_evaluadas": evaluadas,
+                "traza_cifras_respaldadas": respaldadas,
+                "trazabilidad_numerica": (round(respaldadas / evaluadas, 6)
+                                         if isinstance(evaluadas, int) and evaluadas > 0 else "")}
+
+
+def calcular_trazabilidad(archivo: Path) -> dict:
+    """Mide la fracción global de cifras verificables sustentadas por herramientas.
+
+    Se suma numerador y denominador, NO se promedian porcentajes.
+    Sin cifras evaluables deja la meta como indeterminada, nunca como aprobada.
+    """
+    if not archivo.exists():
+        return {"trazabilidad_numerica": None, "cumple_meta_95": None,
+                "cifras_evaluadas": 0, "cifras_respaldadas": 0}
+    with archivo.open(newline="", encoding="utf-8") as archivo_csv:
+        filas = list(csv.DictReader(archivo_csv))
+    evaluadas = respaldadas = 0
+    for fila in filas:
+        if fila.get("sistema") != "agente":
+            continue
+        n = fila.get("traza_cifras_evaluadas", "")
+        r = fila.get("traza_cifras_respaldadas", "")
+        if n == "" or r == "":
+            continue
+        n, r = int(n), int(r)
+        if n < 0 or r < 0 or r > n:
+            raise ValueError("Conteo de trazabilidad inválido en CSV")
+        evaluadas += n
+        respaldadas += r
+    proporcion = respaldadas / evaluadas if evaluadas else None
+    return {"trazabilidad_numerica": proporcion,
+            "cumple_meta_95": (proporcion >= 0.95) if proporcion is not None else None,
+            "cifras_evaluadas": evaluadas, "cifras_respaldadas": respaldadas}
 
 
 def _leer_hechas(archivo: Path) -> set[tuple[str, str, int]]:
@@ -184,14 +230,16 @@ def ejecutar_lote(sistema: str, repeticiones: int, tareas_ids: list[str],
                     if clave in hechas:
                         continue
                     if limite is not None and nuevas >= limite:
-                        return {"ejecuciones_nuevas": nuevas, "limite_alcanzado": True}
+                        return {"ejecuciones_nuevas": nuevas, "limite_alcanzado": True,
+                                "trazabilidad": calcular_trazabilidad(salida)}
                     fila = ejecutar_una(t, sistema_actual, repeticion, base, cliente,
                                         modelo, juez_modelo, salida.parent / "trazas")
                     writer.writerow(fila)
                     file.flush()
                     nuevas += 1
                     print(f'{sistema_actual} {t["id"]} repetición {repeticion}: {fila["estado"]}', flush=True)
-    return {"ejecuciones_nuevas": nuevas, "limite_alcanzado": False}
+    return {"ejecuciones_nuevas": nuevas, "limite_alcanzado": False,
+            "trazabilidad": calcular_trazabilidad(salida)}
 
 
 def main() -> int:

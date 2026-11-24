@@ -186,6 +186,7 @@ def resolver(
     correccion_pedida = False
     pendientes: list[str] = []
     observaciones = [tarea]
+    observaciones_herramientas: list[str] = []
 
     def registrar(fase: str, evento: str, **datos):
         item = registro.evento(fase, evento, **datos)
@@ -252,6 +253,7 @@ def resolver(
                 resultado = ejecutar(llamada.nombre, llamada.argumentos_crudos, ctx)
                 observacion = json.dumps(resultado, ensure_ascii=False, default=str)
                 observaciones.append(observacion)
+                observaciones_herramientas.append(observacion)
                 sesion.agregar({"role": "tool", "tool_call_id": identificador,
                                "name": llamada.nombre, "content": observacion})
                 registrar("ACCION", "herramienta", paso=paso, herramienta=llamada.nombre,
@@ -262,9 +264,20 @@ def resolver(
             continue
 
         texto = str(respuesta.texto or "")
+        # Indicador T9/T13: cantidades numéricas de la respuesta justificadas
+        # por OBSERVACIONES DE HERRAMIENTAS, no por el texto del usuario.
+        # Se registran sólo conteos, nunca datos originales sensibles.
+        # "semana 8" es el periodo solicitado, no una afirmación cuantitativa.
+        texto_medido = re.sub(r"(?i)\bsemanas?\s+(?:n[úu]mero\s+)?\d+\b", "", texto)
+        cifras_finales = extraer_cifras(texto_medido)
+        no_trazables = cifras_sin_respaldo(texto_medido, observaciones_herramientas)
+        trazabilidad_datos = {
+            "cifras_evaluadas": len(cifras_finales),
+            "cifras_respaldadas": sum(c not in no_trazables for c in cifras_finales),
+        }
         pendientes = cifras_sin_respaldo(texto, observaciones)
         if not pendientes:
-            registrar("ACCION", "respuesta_final", paso=paso, verificada=True)
+            registrar("ACCION", "respuesta_final", paso=paso, verificada=True, **trazabilidad_datos)
             return salida(True, texto, "completado")
         if not correccion_pedida and paso < max_pasos:
             correccion_pedida = True
@@ -276,7 +289,7 @@ def resolver(
             )})
             continue
         texto = texto.rstrip() + "\n[Advertencia: cifra sin respaldo: " + ", ".join(pendientes) + "]"
-        registrar("ACCION", "respuesta_final", paso=paso, verificada=False, cifras=pendientes)
+        registrar("ACCION", "respuesta_final", paso=paso, verificada=False, cifras=pendientes, **trazabilidad_datos)
         return salida(True, texto, "cifra_sin_respaldo", pendientes)
 
     if pendientes:

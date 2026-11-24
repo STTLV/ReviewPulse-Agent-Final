@@ -69,9 +69,28 @@ def _gold(gold_id: str, ruta: Path | None = None) -> dict:
 
 
 def pregunta_completa(tarea: dict) -> str:
-    if tarea["tipo"] != "clasificacion":
-        return tarea["pregunta"]
-    return tarea["pregunta"] + "\n<resena>" + _gold(tarea["gold_id"])["texto"] + "</resena>\nResponde en formato: polaridad: <valor>; tema: <valor>."
+    """Contrato idéntico de respuesta final para agente y línea base."""
+    tipo = tarea["tipo"]
+    if tipo == "clasificacion":
+        return tarea["pregunta"] + "\n<resena>" + _gold(tarea["gold_id"])["texto"] + "</resena>\nResponde en formato: polaridad: <valor>; tema: <valor>."
+    if tipo == "conteo":
+        return tarea["pregunta"] + ("\nExplica brevemente. Termina con UNA sola línea "
+                "independiente y exacta: total: N (N es el número entero solicitado).")
+    if tipo in {"comparacion", "alerta"}:
+        return tarea["pregunta"] + ("\nExplica brevemente. Termina con UNA sola línea "
+                "independiente y exacta: decisión: sí o decisión: no.")
+    return tarea["pregunta"]
+
+
+def _ultima_linea_unica(texto: str, campo: str, patron: str) -> str | None:
+    """Devuelve el valor sólo si la última línea cumple y no hay otras líneas de campo."""
+    lineas = [l.strip() for l in texto.splitlines() if l.strip()]
+    if not lineas:
+        return None
+    if sum(bool(re.match(rf"(?i)^{re.escape(campo)}\s*:", l)) for l in lineas) != 1:
+        return None
+    m = re.fullmatch(rf"(?i){re.escape(campo)}\s*:\s*({patron})", lineas[-1])
+    return m.group(1) if m else None
 
 
 def _sin_semana(texto: str) -> str:
@@ -140,14 +159,13 @@ def verificar(tarea: dict, respuesta: str, base: Path) -> bool | None:
         return False
     if clase == "conteo":
         esperado = int(tarea.get("esperado", verdad_conteo(base, tarea.get("filtros", {}))))
-        numeros = _numero_conteo(texto)
-        # Rechaza otros enteros sin apoyo, incluso si no van seguidos de "reseñas".
-        # El identificador de semana se elimina antes y no cuenta como cantidad.
-        todos = [int(n) for n in re.findall(r"(?<![\w-])\d+(?![\w])", _sin_semana(texto))]
-        return bool(numeros) and bool(todos) and all(n == esperado for n in todos)
+        total = _ultima_linea_unica(texto, "total", r"(?:0|[1-9]\d*)")
+        return total is not None and int(total) == esperado
     if clase == "comparacion":
-        decision = _decide_si(texto)
-        return decision is tarea.get("incidente") and any(s in texto.casefold() for s in ("semana", "reseña", "negativ", "%"))
+        decision = _ultima_linea_unica(texto, "decisión", r"(?:sí|si|no)")
+        if decision is None:
+            return False
+        return (decision.casefold() in {"sí", "si"}) is tarea.get("incidente")
     if clase == "evidencia":
         buenos = evidencia_ids(base, tarea["filtros"])
         citados = set(re.findall(r"\b(?:R\d{5}|T9-[A-Z0-9-]+)\b", texto, re.I))
@@ -160,8 +178,10 @@ def verificar(tarea: dict, respuesta: str, base: Path) -> bool | None:
         return bool(pol and tem and pol.group(1).casefold() == gold["polaridad"].casefold()
                     and tem.group(1).casefold() == gold["tema"].casefold())
     if clase == "alerta":
-        decision = _decide_si(texto)
-        return decision is tarea["alerta_esperada"] and tarea["tema"] in texto.casefold()
+        decision = _ultima_linea_unica(texto, "decisión", r"(?:sí|si|no)")
+        if decision is None:
+            return False
+        return (decision.casefold() in {"sí", "si"}) is tarea["alerta_esperada"]
     if clase == "trampa":
         trap = tarea["clase"]
         lower = texto.casefold()
