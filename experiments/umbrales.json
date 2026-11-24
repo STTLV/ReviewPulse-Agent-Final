@@ -1,0 +1,17 @@
+{
+  "fijado_el": "2026-11-24",
+  "version": "ruta-e-t9-v1",
+  "exito_agente_minimo": 0.80,
+  "bootstrap_confianza": 0.95,
+  "bootstrap_remuestreos": 10000,
+  "bootstrap_semilla": 2026,
+  "superioridad_ic_excluye_cero": true,
+  "cifras_incorrectas_agente_max": 0.05,
+  "trazabilidad_agente_minima": 0.95,
+  "errores_herramienta_max": 0.10,
+  "costo_usd_max_evaluacion": 1.00,
+  "repeticiones": 3,
+  "tareas": 20,
+  "sistemas": ["agente", "base"],
+  "nota": "No modificar después de la primera corrida real. Umbrales de la sección 10.1 del diseño."
+}
