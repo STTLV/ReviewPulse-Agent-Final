@@ -86,6 +86,43 @@ Estos valores no sustituyen la evaluación histórica M1–M4. Los archivos y ev
 
 ## Datos de demostración de la API
 
-La API inicializa su base demo a partir de una corrida del simulador `E03`, semilla `11`, mediante `ejecutar_simulacion` y el clasificador guardado en `data/modelo.joblib`. La corrida se genera en una carpeta temporal; la API utiliza su SQLite y sus reportes. Son datos sintéticos producidos por el simulador, no reseñas reales de clientes. El reinicio vuelve a generar esta base; no hay un repositorio histórico paralelo en la API.
+La API inicializa su base demo a partir de una corrida del simulador `E03`, semilla `11`, mediante `ejecutar_simulacion` y el clasificador guardado en `data/modelo.joblib`. La corrida se genera al inicializar una base ausente; son datos sintéticos, no reseñas reales. En la prueba local del contenedor, `docker restart` conservó SQLite (489 reseñas antes y después). Al retirar ese contenedor y crear otro sin volumen, la base se inicializó de nuevo con 489 reseñas.
 
-Las tres trazas de `data/trazas_demo/` son conversaciones reales del agente: guardan la pregunta, las herramientas y los resultados cuantitativos filtrados, y la respuesta final. Al agotarse el presupuesto, el modo demo reproduce la conversación que coincide con la pregunta por SSE. Se pueden volver a grabar con `PYTHONPATH=src python scripts/capturar_trazas_demo.py`; el capturador requiere `.env`, permite hasta dos solicitudes al proveedor por conversación y desactiva los reintentos. Reemplaza las tres trazas solo cuando todas se capturan correctamente. La solicitud de chat reserva el candado cuando comienza a ejecutarse la respuesta; si ya está ocupado, conserva la respuesta `429` sin dejar bloqueado un flujo SSE que no se inició.
+Las tres trazas de `data/trazas_demo/` son conversaciones reales del agente: guardan la pregunta, las herramientas, resultados cuantitativos filtrados y la respuesta final. Al agotarse el presupuesto, el modo demo reproduce por SSE la conversación coincidente. La solicitud de chat reserva el candado al empezar la respuesta y devuelve `429` si el agente está ocupado.
+
+## Preparación local y contenedor (Tarea 12)
+
+La CI y la imagen usan Python 3.13. Arranque local con proveedor, desde la raíz y en cinco comandos:
+
+```sh
+python3.13 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+export PYTHONPATH=src
+uvicorn --factory reviewpulse.api.main:crear_app_desde_entorno --host 127.0.0.1 --port "${PORT:-8000}" --workers 1
+```
+
+El operador configura `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL`, `LLM_JUEZ_MODEL`, `APP_CODIGO_ACCESO` y `LLM_TOPE_TOKENS_DIA` en el entorno o en el gestor de secretos. `API_CHAT_TIMEOUT_S` es opcional y su valor por defecto es 120 segundos. No se guardan valores de estas variables en el repositorio.
+
+Para ejecutar el modo demo sin proveedor y sin llamadas LLM, usa un código de acceso desechable solo en tu terminal:
+
+```sh
+read -s APP_CODIGO_ACCESO
+export APP_CODIGO_ACCESO
+LLM_TOPE_TOKENS_DIA=0 LLM_BASE_URL= LLM_API_KEY= LLM_MODEL= LLM_JUEZ_MODEL= PYTHONPATH=src uvicorn --factory reviewpulse.api.main:crear_app_desde_entorno --host 127.0.0.1 --port "${PORT:-8000}" --workers 1
+```
+
+La API reproduce las trazas incluidas y no inicia llamadas al proveedor con el tope de tokens en cero.
+
+Construcción y prueba local del contenedor:
+
+```sh
+docker build -t reviewpulse-agent .
+docker run --rm -p "${PORT:-8000}:${PORT:-8000}" -e PORT="${PORT:-8000}" -e LLM_TOPE_TOKENS_DIA=0 -e APP_CODIGO_ACCESO="$APP_CODIGO_ACCESO" reviewpulse-agent
+```
+
+El Dockerfile incluye `config/config.json`, `data/modelo.joblib` y los JSON de `data/trazas_demo/`; excluye `.env`, los CSV de evaluación y resultados locales. La API carga la configuración CUSUM al importar `src/reviewpulse/ciclo/ingesta.py`. La interfaz de T11 aún no está integrada en `v2`; `COPY src ./src` incluirá `src/reviewpulse/web/` cuando exista.
+
+`railway.toml` selecciona el builder Dockerfile y verifica `/api/salud` con timeout de 120 segundos. En la prueba local sin proveedor, `/api/salud` respondió 200, `/api/chat` sin código 401 y `/api/chat` con el código efímero de prueba devolvió un final SSE con `modo_demo=true`. `/api/semanas`, `/api/resultados` y `/api/demo` respondieron 200; `/api/cierre` y `/api/reiniciar` sin código respondieron 401; `/` respondió 404 porque T11 aún no está integrada. El proceso escuchó en `0.0.0.0:$PORT`; `data/modelo.joblib` cargó y los logs no incluyeron el código sintético ni patrones de credenciales.
+
+La API debe operar con **un worker y una réplica**, porque el candado es local al proceso. No se ha conectado despliegue automático ni se ha desplegado en Railway. Sin un volumen persistente, un contenedor nuevo puede regenerar la base demo. Acceso, secretos, volumen y staging requieren autorización de David.
