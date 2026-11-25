@@ -110,7 +110,12 @@ class EstadoAPI:
             ):
                 raise ValueError(f"Conversación demo incompleta en {archivo.name}.")
             trazas.append(traza)
-        return trazas
+        orden = {
+            "chat-conteo-semana-08": 0,
+            "chat-servicio-semana-08": 1,
+            "chat-consulta-semana-40": 2,
+        }
+        return sorted(trazas, key=lambda item: orden.get(item["id"], 99))
 
     def _inicializar_demo(self) -> None:
         existe = self.repo_demo.con.execute(
@@ -214,8 +219,11 @@ class EstadoAPI:
             else:
                 indice = self._indice_traza_demo
                 self._indice_traza_demo = (indice + 1) % len(self._trazas_demo)
-            traza = self._trazas_demo[indice]
-            return json.loads(json.dumps(traza, ensure_ascii=False))
+            traza = json.loads(json.dumps(self._trazas_demo[indice], ensure_ascii=False))
+            # Permite a la interfaz distinguir una respuesta a la pregunta original
+            # de la reproducción de una conversación elegida como ejemplo.
+            traza["coincidencia_demo"] = bool(coincidencias)
+            return traza
 
     def agregar_evento(self, evento: dict) -> None:
         with self._traza_lock:
