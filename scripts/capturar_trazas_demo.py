@@ -21,7 +21,7 @@ TRAZAS = RAIZ / "data" / "trazas_demo"
 CASOS = (
     {
         "id": "chat-conteo-semana-08",
-        "archivo": "cierre-semana-00.json",
+        "archivo": "chat-conteo-semana-08.json",
         "pregunta": "¿Cuántas reseñas hubo en la semana 8?",
         "disparadores": [
             "cuantas resenas semana 8", "conteo de resenas semana 8",
@@ -30,13 +30,13 @@ CASOS = (
     },
     {
         "id": "chat-servicio-semana-08",
-        "archivo": "alerta-servicio-semana-08.json",
+        "archivo": "chat-servicio-semana-08.json",
         "pregunta": "¿El servicio empeoró en la semana 8?",
         "disparadores": ["servicio semana 8", "empeoro servicio semana 8"],
     },
     {
         "id": "chat-consulta-semana-40",
-        "archivo": "cierre-semana-13.json",
+        "archivo": "chat-consulta-semana-40.json",
         "pregunta": "¿Cuántas reseñas hubo en la semana 40?",
         "disparadores": ["resenas semana 40", "consulta semana 40", "semana 40"],
     },
