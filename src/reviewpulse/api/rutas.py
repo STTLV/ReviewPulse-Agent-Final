@@ -230,6 +230,40 @@ def crear_router(estado: EstadoAPI) -> APIRouter:
 
         def emitir_traza_demo():
             traza = estado.siguiente_traza_demo(solicitud.mensaje)
+            if not traza.get("coincidencia_demo", False):
+                # Una pregunta ajena a las grabaciones NO debe provocar una
+                # respuesta o traza de otra consulta, aunque haya un fallback.
+                aviso = (
+                    "Modo demostración: no hay una conversación grabada para "
+                    f"«{solicitud.mensaje.strip()}». "
+                    "Elige una de las preguntas sugeridas para ver su "
+                    "respuesta y traza paso a paso."
+                )
+                yield _evento("final", {
+                    "texto": aviso,
+                    "modo_demo": True,
+                    "coincidencia_demo": False,
+                    "aviso_demo": aviso,
+                }, estado)
+                return
+            pregunta_grabada = traza.get("pregunta", "consulta guardada")
+            aviso_demo = (
+                f"Modo demostración: conversación grabada para «{pregunta_grabada}»"
+            )
+            coincidencia_demo = traza.get("coincidencia_demo", False)
+            # El aviso debe llegar antes de la traza grabada, porque sus pasos
+            # pertenecen a otra conversación cuando la consulta no coincide.
+            aviso_evento = {
+                "fase": "PERCEPCION",
+                "evento": "reproduccion_demo",
+                "modo_demo": True,
+                "aviso_demo": aviso_demo,
+                "pregunta_original": solicitud.mensaje,
+                "pregunta_grabada": pregunta_grabada,
+                "coincidencia_demo": coincidencia_demo,
+            }
+            estado.agregar_evento(aviso_evento)
+            yield _evento("paso", {"traza": aviso_evento}, estado)
             pregunta_evento = {
                 "fase": "PERCEPCION",
                 "evento": "tarea_recibida",
@@ -255,12 +289,18 @@ def crear_router(estado: EstadoAPI) -> APIRouter:
                 "texto": respuesta_final,
                 "modo_demo": True,
                 "traza_demo": traza["id"],
+                "aviso_demo": aviso_demo,
+                "coincidencia_demo": coincidencia_demo,
+                "pregunta_grabada": pregunta_grabada,
             }
             estado.agregar_evento(evento_final)
             yield _evento("final", {
                 "texto": respuesta_final,
                 "modo_demo": True,
                 "traza_demo": traza["id"],
+                "aviso_demo": aviso_demo,
+                "coincidencia_demo": coincidencia_demo,
+                "pregunta_grabada": pregunta_grabada,
             }, estado)
 
         return _RespuestaSSEProtegida(

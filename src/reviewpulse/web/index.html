@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="description" content="ReviewPulse Agent: chat y traza paso a paso de un hotel piloto con datos sintéticos.">
+  <title>ReviewPulse | Agente de reseñas</title>
+  <link rel="stylesheet" href="/assets/styles.css">
+  <script src="/assets/app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#chat-title">Ir al chat</a>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 44 44" fill="none"><rect x="7" y="9" width="30" height="23" rx="10" fill="currentColor" opacity=".12"/><path d="M14 22l5 5 11-12" stroke="currentColor" stroke-width="3.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 32v5l7-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div><p class="brand-eyebrow">HOTEL PILOTO · DATOS SINTÉTICOS</p><h1>ReviewPulse <span>Agent</span></h1></div>
+      </div>
+      <div class="header-status"><span class="status-dot" id="status-dot" aria-hidden="true"></span><span id="status-text" role="status">Comprobando API…</span></div>
+    </header>
+
+    <section class="intro" aria-label="Presentación">
+      <div class="intro-content"><p class="eyebrow">INTELIGENCIA OPERATIVA · REVIEWPULSE 2.0</p><h2>Las reseñas cuentan una historia.<br><span>Pregúntale a tu agente.</span></h2><p>Consulta el comportamiento del hotel y observa cada herramienta utilizada, paso a paso y en tiempo real.</p></div>
+      <div class="intro-ornament" aria-hidden="true"><span class="ornament-circle a"></span><span class="ornament-circle b"></span><span class="ornament-line"></span></div>
+    </section>
+
+    <main class="workspace">
+      <section class="panel chat-panel" aria-labelledby="chat-title">
+        <div class="panel-header"><div><p class="section-kicker">CONVERSACIÓN</p><h2 id="chat-title">Habla con el agente</h2></div><span class="panel-symbol" aria-hidden="true">✦</span></div>
+        <div class="quick-prompts" aria-label="Preguntas de ejemplo">
+          <button type="button" class="prompt-chip" data-prompt="¿Cuántas reseñas hubo en la semana 8?">Reseñas · Semana 8</button>
+          <button type="button" class="prompt-chip" data-prompt="¿El servicio empeoró en la semana 8?">Servicio · Semana 8</button>
+          <button type="button" class="prompt-chip" data-prompt="¿Cuántas reseñas hubo en la semana 40?">Semana 40</button>
+        </div>
+        <div class="chat-messages" id="chat-messages" role="log" aria-live="polite" aria-relevant="additions text" aria-label="Mensajes del chat">
+          <div class="message assistant"><div class="message-avatar" aria-hidden="true">R</div><div class="message-body"><p class="message-author">ReviewPulse</p><div class="message-text">¡Hola! Soy el agente de análisis del hotel piloto. Puedes preguntarme por reseñas, temas y alertas. A tu derecha verás las acciones y resultados de cada paso.</div></div></div>
+        </div>
+        <form id="chat-form" class="chat-form" autocomplete="off">
+          <label for="codigo" class="input-label">Código de acceso</label>
+          <div class="code-control"><input id="codigo" name="codigo" type="password" autocomplete="off" placeholder="Código proporcionado por el equipo" maxlength="256" required><span class="lock-icon" aria-hidden="true">●</span></div>
+          <label for="mensaje" class="input-label">Tu pregunta</label>
+          <textarea id="mensaje" name="mensaje" rows="2" maxlength="2000" placeholder="Escribe aquí tu pregunta sobre el hotel…" required></textarea>
+          <div class="form-bottom"><span class="hint">Ctrl + Enter para enviar · No ingreses claves API</span><div class="form-actions"><button type="button" id="cancelar" class="btn btn-secondary" hidden>Cancelar</button><button type="submit" id="enviar" class="btn btn-primary">Enviar <span aria-hidden="true">↗</span></button></div></div>
+          <p id="form-feedback" class="form-feedback" role="status" aria-live="polite"></p>
+        </form>
+      </section>
+
+      <section class="panel trace-panel" aria-labelledby="trace-title">
+        <div class="panel-header"><div><p class="section-kicker">TRANSPARENCIA DEL PROCESO</p><h2 id="trace-title">Traza paso a paso</h2></div><span class="trace-indicator"><span id="live-dot" class="pulse-dot"></span><span id="trace-state">En espera</span></span></div>
+        <div class="trace-description">Eventos recibidos de la API: etapas, llamadas a herramientas y resultados. Sin mostrar razonamientos privados del modelo.</div>
+        <ol id="trace-list" class="trace-list" aria-live="polite" aria-relevant="additions"><li class="empty-trace" id="trace-empty"><div class="empty-icon" aria-hidden="true">◎</div><strong>Todo listo para analizar</strong><span>Envía una pregunta y aquí aparecerán los pasos de la ejecución.</span></li></ol>
+        <div class="trace-footer"><span id="step-count">0 eventos</span><button type="button" id="clear-trace" class="text-button">Limpiar traza</button></div>
+      </section>
+    </main>
+    <footer class="footer"><span>ReviewPulse Agent · Proyecto académico</span><span>Datos sintéticos · No representan clientes reales</span></footer>
+  </div>
+</body>
+</html>
