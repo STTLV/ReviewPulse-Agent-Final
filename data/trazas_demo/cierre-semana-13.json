@@ -1,0 +1,81 @@
+{
+  "id": "chat-consulta-semana-40",
+  "origen": {
+    "tipo": "conversacion_real_agente",
+    "escenario": "E03",
+    "semilla": 11,
+    "modelo": "cx/gpt-6-luna-medium",
+    "solicitudes_proveedor": 2,
+    "grabada_en": "2026-11-24T23:51:44.668407+00:00"
+  },
+  "pregunta": "¿Cuántas reseñas hubo en la semana 40?",
+  "disparadores": [
+    "resenas semana 40",
+    "consulta semana 40",
+    "semana 40"
+  ],
+  "herramientas": [
+    "contar_resenas"
+  ],
+  "eventos": [
+    {
+      "fase": "PERCEPCION",
+      "evento": "tarea_recibida",
+      "pregunta": "¿Cuántas reseñas hubo en la semana 40?"
+    },
+    {
+      "ts": "2026-11-24T23:51:42.766091+00:00",
+      "fase": "DECISION",
+      "evento": "respuesta_llm",
+      "paso": 1,
+      "ok": true,
+      "tokens_entrada": 854,
+      "tokens_salida": 21,
+      "segundos": 3.0287,
+      "llamadas": 1
+    },
+    {
+      "ts": "2026-11-24T23:51:42.766816+00:00",
+      "fase": "ACCION",
+      "evento": "herramienta",
+      "paso": 1,
+      "herramienta": "contar_resenas",
+      "argumentos": {
+        "semana": 40
+      },
+      "resultado": {
+        "ok": false,
+        "error": "sin_datos"
+      },
+      "segundos": 0.0007
+    },
+    {
+      "ts": "2026-11-24T23:51:42.766847+00:00",
+      "fase": "OBSERVACION",
+      "evento": "herramientas_observadas",
+      "paso": 1,
+      "cantidad": 1
+    },
+    {
+      "ts": "2026-11-24T23:51:44.667889+00:00",
+      "fase": "DECISION",
+      "evento": "respuesta_llm",
+      "paso": 2,
+      "ok": true,
+      "tokens_entrada": 915,
+      "tokens_salida": 26,
+      "segundos": 1.9011,
+      "llamadas": 0
+    },
+    {
+      "ts": "2026-11-24T23:51:44.668235+00:00",
+      "fase": "ACCION",
+      "evento": "respuesta_final",
+      "paso": 2,
+      "verificada": true,
+      "cifras_evaluadas": 0,
+      "cifras_respaldadas": 0
+    }
+  ],
+  "respuesta_final": "No hay datos disponibles para la semana 40, así que no puedo determinar cuántas reseñas hubo."
+}

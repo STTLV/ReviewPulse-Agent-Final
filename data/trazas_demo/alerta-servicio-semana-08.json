@@ -1,0 +1,99 @@
+{
+  "id": "chat-servicio-semana-08",
+  "origen": {
+    "tipo": "conversacion_real_agente",
+    "escenario": "E03",
+    "semilla": 11,
+    "modelo": "cx/gpt-6-luna-medium",
+    "solicitudes_proveedor": 2,
+    "grabada_en": "2026-11-24T23:51:39.733151+00:00"
+  },
+  "pregunta": "¿El servicio empeoró en la semana 8?",
+  "disparadores": [
+    "servicio semana 8",
+    "empeoro servicio semana 8"
+  ],
+  "herramientas": [
+    "comparar_semana"
+  ],
+  "eventos": [
+    {
+      "fase": "PERCEPCION",
+      "evento": "tarea_recibida",
+      "pregunta": "¿El servicio empeoró en la semana 8?"
+    },
+    {
+      "ts": "2026-11-24T23:51:37.176712+00:00",
+      "fase": "DECISION",
+      "evento": "respuesta_llm",
+      "paso": 1,
+      "ok": true,
+      "tokens_entrada": 854,
+      "tokens_salida": 27,
+      "segundos": 2.0232,
+      "llamadas": 1
+    },
+    {
+      "ts": "2026-11-24T23:51:37.178821+00:00",
+      "fase": "ACCION",
+      "evento": "herramienta",
+      "paso": 1,
+      "herramienta": "comparar_semana",
+      "argumentos": {
+        "semana": 8,
+        "tema": "servicio"
+      },
+      "resultado": {
+        "ok": true,
+        "campos": [
+          "servicio"
+        ],
+        "datos": {
+          "servicio": {
+            "total": 19.0,
+            "negativas": 15.0,
+            "proporcion": 0.7894736842105263,
+            "promedio": 0.2234701572936867,
+            "p0": 0.21904761904761905,
+            "p1": 0.519047619047619,
+            "s_max": 5.554199489197401,
+            "h": 5.0,
+            "dia_alarma": 2,
+            "alarma": true,
+            "semanas_historial": 6,
+            "motivos_no_alerta": []
+          }
+        }
+      },
+      "segundos": 0.002
+    },
+    {
+      "ts": "2026-11-24T23:51:37.178894+00:00",
+      "fase": "OBSERVACION",
+      "evento": "herramientas_observadas",
+      "paso": 1,
+      "cantidad": 1
+    },
+    {
+      "ts": "2026-11-24T23:51:39.732335+00:00",
+      "fase": "DECISION",
+      "evento": "respuesta_llm",
+      "paso": 2,
+      "ok": true,
+      "tokens_entrada": 1035,
+      "tokens_salida": 54,
+      "segundos": 2.5535,
+      "llamadas": 0
+    },
+    {
+      "ts": "2026-11-24T23:51:39.733082+00:00",
+      "fase": "ACCION",
+      "evento": "respuesta_final",
+      "paso": 2,
+      "verificada": true,
+      "cifras_evaluadas": 2,
+      "cifras_respaldadas": 2
+    }
+  ],
+  "respuesta_final": "Sí. En la semana 8, el tema **servicio** activó una alarma CUSUM (`alarma=true`): hubo 15 reseñas negativas de 19 en total. Fuente: comparación de la semana 8 para servicio."
+}
