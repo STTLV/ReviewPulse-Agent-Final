@@ -1,13 +1,16 @@
 """Rutas HTTP de ReviewPulse."""
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 import queue
 import threading
+import time
 from pathlib import Path
 
 from fastapi import APIRouter, Header, HTTPException
+from starlette.requests import ClientDisconnect
 from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -78,10 +81,12 @@ class _RespuestaSSEProtegida(StreamingResponse):
         contenido,
         estado: EstadoAPI,
         trabajador_iniciado: threading.Event,
+        cancel_event: threading.Event,
         headers: dict[str, str] | None = None,
     ):
         self._estado = estado
         self._trabajador_iniciado = trabajador_iniciado
+        self._cancel_event = cancel_event
         super().__init__(
             contenido, media_type="text/event-stream", headers=headers
         )
@@ -98,9 +103,21 @@ class _RespuestaSSEProtegida(StreamingResponse):
 
         try:
             await super().__call__(scope, receive, send)
+        except (ClientDisconnect, asyncio.CancelledError, GeneratorExit):
+            self._cancel_event.set()
+            raise
+        except BaseException:
+            self._cancel_event.set()
+            raise
         finally:
             if not self._trabajador_iniciado.is_set():
                 self._estado.candado.release()
+
+    async def listen_for_disconnect(self, receive):
+        try:
+            await super().listen_for_disconnect(receive)
+        finally:
+            self._cancel_event.set()
 
 
 def crear_router(estado: EstadoAPI) -> APIRouter:
@@ -117,17 +134,34 @@ def crear_router(estado: EstadoAPI) -> APIRouter:
     ) -> StreamingResponse:
         _autorizar(estado, codigo)
         trabajador_iniciado = threading.Event()
+        cancel_event = threading.Event()
+        timeout_s = estado.ajustes.api_chat_timeout_s
 
         def transmitir():
             if estado.presupuesto_agotado():
                 yield from emitir_traza_demo()
                 return
 
-            eventos: queue.Queue[tuple[str, object]] = queue.Queue()
+            deadline = time.monotonic() + timeout_s
+            eventos: queue.Queue[tuple[str, object]] = queue.Queue(maxsize=64)
+
+            def publicar(tipo: str, valor: object) -> None:
+                while not cancel_event.is_set():
+                    if time.monotonic() >= deadline:
+                        cancel_event.set()
+                        return
+                    try:
+                        eventos.put((tipo, valor), timeout=0.05)
+                        return
+                    except queue.Full:
+                        continue
 
             def emitir_paso(evento: dict) -> None:
+                if cancel_event.is_set() or time.monotonic() >= deadline:
+                    cancel_event.set()
+                    return
                 estado.agregar_evento(evento)
-                eventos.put(("paso", evento))
+                publicar("paso", evento)
 
             def ejecutar_agente() -> None:
                 try:
@@ -137,19 +171,38 @@ def crear_router(estado: EstadoAPI) -> APIRouter:
                         estado.contexto(),
                         traza=Traza(),
                         al_evento=emitir_paso,
+                        cancel_event=cancel_event,
+                        deadline=deadline,
                     )
-                    eventos.put(("resultado", resultado))
+                    publicar("resultado", resultado)
                 except Exception as exc:
                     _LOG.error("Fallo interno del agente API: %s", type(exc).__name__)
-                    eventos.put(("fallo", None))
+                    publicar("fallo", None)
                 finally:
                     estado.candado.release()
 
             trabajador = threading.Thread(target=ejecutar_agente, daemon=True)
-            trabajador.start()
             trabajador_iniciado.set()
+            try:
+                trabajador.start()
+            except BaseException:
+                trabajador_iniciado.clear()
+                raise
             while True:
-                tipo, valor = eventos.get()
+                restante = deadline - time.monotonic()
+                if restante <= 0:
+                    cancel_event.set()
+                    yield _evento("error", {
+                        "error": "limite_tiempo",
+                        "mensaje": f"La solicitud superó el límite de {timeout_s:g} segundos.",
+                    }, estado)
+                    return
+                if cancel_event.is_set():
+                    return
+                try:
+                    tipo, valor = eventos.get(timeout=min(0.1, restante))
+                except queue.Empty:
+                    continue
                 if tipo == "paso":
                     yield _evento("paso", {"traza": valor}, estado)
                     continue
@@ -214,6 +267,7 @@ def crear_router(estado: EstadoAPI) -> APIRouter:
             transmitir(),
             estado,
             trabajador_iniciado,
+            cancel_event,
             headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
         )
 

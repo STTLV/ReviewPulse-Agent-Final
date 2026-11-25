@@ -432,14 +432,16 @@ class PruebasAPI(unittest.TestCase):
         self.assertTrue(any(e.get("evento") == "respuesta_final" for e in traza))
         self.assertTrue(any(e.get("pregunta") == preguntas[-1] for e in traza))
 
-    def test_stream_desconectado_mantiene_candado_hasta_terminar_agente_y_luego_libera(self):
+    def test_desconexion_cancela_agente_sin_liberar_candado_antes_del_hilo(self):
         iniciado = threading.Event()
         continuar = threading.Event()
+        llamadas = []
 
         def respuesta_bloqueada(_mensajes):
+            llamadas.append(1)
             iniciado.set()
             continuar.wait(timeout=5)
-            return respuesta_texto("Respuesta sintética.")
+            return respuesta_herramienta("contar_resenas", semana=8)
 
         cliente = self.crear_cliente(LLMFalso([
             respuesta_herramienta("contar_resenas", semana=8),
@@ -454,6 +456,7 @@ class PruebasAPI(unittest.TestCase):
             solicitud=SolicitudChat(mensaje="¿Cuántas reseñas hubo en la semana 8?"),
             codigo=_CODIGO_PRUEBA,
         )
+        cancel_event = respuesta._cancel_event
 
         async def simular_desconexion():
             solicitud_enviada = False
@@ -480,7 +483,11 @@ class PruebasAPI(unittest.TestCase):
             self.assertTrue(await asyncio.to_thread(iniciado.wait, 5))
             self.assertTrue(estado.candado.locked())
             desconectar.set()
-            await asyncio.sleep(0.05)
+            for _ in range(50):
+                if cancel_event.is_set():
+                    break
+                await asyncio.sleep(0.01)
+            self.assertTrue(cancel_event.is_set())
             self.assertTrue(estado.candado.locked())
             continuar.set()
             await asyncio.wait_for(tarea, timeout=5)
@@ -492,8 +499,93 @@ class PruebasAPI(unittest.TestCase):
                     break
                 threading.Event().wait(0.01)
             self.assertFalse(estado.candado.locked())
+            self.assertEqual(len(llamadas), 1)
         finally:
             continuar.set()
+
+    def test_limite_total_detiene_stream_y_conserva_candado_hasta_terminar_hilo(self):
+        iniciado = threading.Event()
+        continuar = threading.Event()
+
+        def respuesta_bloqueada(_mensajes):
+            iniciado.set()
+            continuar.wait(timeout=5)
+            return respuesta_texto("Respuesta sintética.")
+
+        cliente = self.crear_cliente(LLMFalso([respuesta_bloqueada]))
+        estado = cliente.app.state.estado
+        estado.ajustes.api_chat_timeout_s = 0.05
+        ruta_chat = next(
+            ruta for ruta in crear_router(estado).routes
+            if getattr(ruta, "path", None) == "/api/chat"
+        )
+        respuesta = ruta_chat.endpoint(
+            solicitud=SolicitudChat(mensaje="consulta"), codigo=_CODIGO_PRUEBA,
+        )
+        enviados = []
+
+        async def simular():
+            primera = True
+
+            async def receive():
+                nonlocal primera
+                if primera:
+                    primera = False
+                    return {"type": "http.request", "body": b"", "more_body": False}
+                await asyncio.Event().wait()
+
+            async def send(mensaje):
+                enviados.append(mensaje)
+
+            scope = {
+                "type": "http", "asgi": {"version": "3.0"},
+                "http_version": "1.1", "method": "POST", "scheme": "http",
+                "path": "/api/chat", "raw_path": b"/api/chat", "query_string": b"",
+                "headers": [], "client": ("test", 123), "server": ("test", 80),
+            }
+            await respuesta(scope, receive, send)
+
+        try:
+            asyncio.run(simular())
+            self.assertTrue(iniciado.is_set())
+            self.assertTrue(respuesta._cancel_event.is_set())
+            self.assertTrue(estado.candado.locked())
+            texto_sse = b"".join(
+                mensaje.get("body", b"") for mensaje in enviados
+            ).decode()
+            self.assertIn('"error": "limite_tiempo"', texto_sse)
+
+            segunda = ruta_chat.endpoint(
+                solicitud=SolicitudChat(mensaje="otra consulta"), codigo=_CODIGO_PRUEBA,
+            )
+
+            async def probar_bloqueo():
+                respuestas = []
+
+                async def receive():
+                    return {"type": "http.request", "body": b"", "more_body": False}
+
+                async def send(mensaje):
+                    respuestas.append(mensaje)
+
+                scope = {
+                    "type": "http", "asgi": {"version": "3.0"},
+                    "http_version": "1.1", "method": "POST", "scheme": "http",
+                    "path": "/api/chat", "raw_path": b"/api/chat", "query_string": b"",
+                    "headers": [], "client": ("test", 123), "server": ("test", 80),
+                }
+                await segunda(scope, receive, send)
+                return respuestas
+
+            bloqueada = asyncio.run(probar_bloqueo())
+            self.assertEqual(bloqueada[0]["status"], 429)
+        finally:
+            continuar.set()
+        for _ in range(100):
+            if not estado.candado.locked():
+                break
+            threading.Event().wait(0.01)
+        self.assertFalse(estado.candado.locked())
 
     def test_tope_diario_se_reinicia_en_un_nuevo_dia_utc(self):
         respuesta = respuesta_texto("Respuesta sintética.")

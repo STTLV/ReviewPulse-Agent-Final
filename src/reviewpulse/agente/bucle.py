@@ -8,6 +8,7 @@ from __future__ import annotations
 import inspect
 import json
 import re
+import threading
 import time
 from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
@@ -201,6 +202,8 @@ def resolver(
     max_pasos: int = 8,
     max_tokens: int = 40000,
     al_evento: Callable | None = None,
+    cancel_event: threading.Event | None = None,
+    deadline: float | None = None,
 ) -> Resultado:
     """Resuelve una tarea: percepción, decisión, herramienta y observación.
 
@@ -229,24 +232,52 @@ def resolver(
     def salida(ok: bool, texto: str, motivo: str, sin_respaldo: list[str] | None = None):
         return Resultado(ok, texto, motivo, pasos, uso, list(sin_respaldo or []), list(registro.eventos))
 
+    def detencion() -> Resultado | None:
+        if deadline is not None and time.monotonic() >= deadline:
+            if cancel_event is not None:
+                cancel_event.set()
+            return salida(False, "Se alcanzó el límite de tiempo de ejecución.", "limite_tiempo")
+        if cancel_event is not None and cancel_event.is_set():
+            return salida(False, "La solicitud fue cancelada.", "cancelado")
+        return None
+
     if not isinstance(tarea, str) or not tarea.strip():
         return salida(False, "No hay una tarea que ejecutar.", "tarea_invalida")
     if max_pasos < 1:
         return salida(False, "Se alcanzó el límite de pasos.", "limite_de_pasos")
     if max_tokens < 1:
         return salida(False, "Se alcanzó el límite de tokens.", "limite_de_tokens")
+    detenido = detencion()
+    if detenido is not None:
+        return detenido
 
     sesion.agregar({"role": "user", "content": tarea})
     registrar("PERCEPCION", "tarea_recibida", longitud=len(tarea))
     catalogo = catalogo_openai()
     for paso in range(1, max_pasos + 1):
+        detenido = detencion()
+        if detenido is not None:
+            return detenido
         pasos = paso
         inicio = time.monotonic()
+        # Segunda comprobación justo antes de cruzar la frontera del proveedor.
+        detenido = detencion()
+        if detenido is not None:
+            return detenido
         try:
             respuesta = llm.chat(sesion.mensajes, herramientas=catalogo)
         except Exception:
+            detenido = detencion()
+            if detenido is not None:
+                return detenido
             registrar("DECISION", "fallo_proveedor", paso=paso, segundos=round(time.monotonic()-inicio, 4))
             return salida(False, "El proveedor no pudo completar la tarea.", "proveedor")
+
+        # Una llamada ya iniciada no se puede interrumpir aquí; al volver, no
+        # se procesan sus herramientas ni se inicia otra solicitud.
+        detenido = detencion()
+        if detenido is not None:
+            return detenido
 
         gasto = respuesta.uso or Uso(0, 0)
         uso.entrada += max(0, int(gasto.entrada or 0))
@@ -276,6 +307,9 @@ def resolver(
         sesion.agregar(mensaje)
         if llamadas:
             for i, llamada in enumerate(llamadas):
+                detenido = detencion()
+                if detenido is not None:
+                    return detenido
                 identificador = llamada.id or f"paso-{paso}-llamada-{i}"
                 inicio_accion = time.monotonic()
                 resultado = ejecutar(llamada.nombre, llamada.argumentos_crudos, ctx)
@@ -320,6 +354,9 @@ def resolver(
         registrar("ACCION", "respuesta_final", paso=paso, verificada=False, cifras=pendientes, **trazabilidad_datos)
         return salida(True, texto, "cifra_sin_respaldo", pendientes)
 
+    detenido = detencion()
+    if detenido is not None:
+        return detenido
     if pendientes:
         texto = "La respuesta quedó sin verificar. [Advertencia: cifra sin respaldo: " + ", ".join(pendientes) + "]"
         return salida(False, texto, "limite_de_pasos", pendientes)
