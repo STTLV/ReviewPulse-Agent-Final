@@ -61,3 +61,11 @@ Las pruebas de T11 usan una API sintética en memoria. No hacen llamadas reales 
 - La UI utiliza `fetch` de mismo origen con política CSP restrictiva. Si Railway tiene proxy con buffering SSE, Ellen deberá revisar esa configuración en T12.
 - Esta tarea **no añade pruebas reales OmniRoute** ni modifica su bitácora. La evidencia histórica de `sara/mover-src` corresponde a un PR documental aparte.
 - No se realizan commits, push ni merge durante la preparación de esta entrega.
+
+## Revision final de David (25-11-2026)
+
+- Se mantiene la paleta aguamarina actual; no se modifica el esquema cromatico de fondo.
+- Los textos secundarios de ayudas, descripciones, trazas y pie utilizan colores mas oscuros sobre superficies claras para mejorar su contraste.
+- El saludo inicial remite a la seccion **Traza paso a paso** sin asumir la ubicacion lateral del panel en celular.
+- **Railway (T12, responsable Ellen):** configurar `APP_CODIGO_ACCESO` con un valor aleatorio y robusto de **16 caracteres como minimo** (recomendado 24 o mas). Guardarlo como variable privada del servicio Railway, nunca en Git, la documentacion, capturas, registros o mensajes. El codigo `t11-prueba-local-2026` sirve exclusivamente para demostraciones locales y no debe utilizarse en Railway.
+- La longitud minima de la clave de Railway es un requisito operativo de despliegue: esta revision no altera la validacion global de codigos en los tests ni cambia credenciales existentes.

@@ -73,6 +73,33 @@ class PruebasInterfaz(unittest.TestCase):
             self.assertNotIn("localStorage.", js.text)
             self.assertNotIn("innerHTML", js.text)
 
+    def test_revision_david_saludo_responsive_y_contraste(self):
+        html = (ROOT / "src/reviewpulse/web/index.html").read_text(encoding="utf-8")
+        css = (ROOT / "src/reviewpulse/web/styles.css").read_text(encoding="utf-8")
+        doc = (ROOT / "docs/T11_Interfaz_y_demostracion.md").read_text(encoding="utf-8")
+        self.assertNotIn("A tu derecha verás", html)
+        self.assertIn("sección «Traza paso a paso»", html)
+        self.assertIn("Revision T11 por David", css)
+        for selector in (
+            ".hint", ".footer", ".trace-description",
+            ".trace-event p", ".message-author",
+            ".code-control input::placeholder",
+        ):
+            self.assertIn(selector, css.split("/* Revision T11 por David")[-1])
+
+        def luminancia(color):
+            canales = [int(color[i:i + 2], 16) / 255 for i in (1, 3, 5)]
+            canales = [c / 12.92 if c <= 0.04045 else ((c + 0.055) / 1.055) ** 2.4
+                       for c in canales]
+            return .2126 * canales[0] + .7152 * canales[1] + .0722 * canales[2]
+
+        # WCAG AA: 4.5:1 para texto normal; blanco es el fondo mas desfavorable
+        # entre las superficies claras donde aparecen estas clases.
+        for color in ("#315a61", "#17636b", "#286369", "#425c63"):
+            self.assertGreaterEqual(1.05 / (luminancia(color) + .05), 4.5)
+        self.assertIn("16 caracteres como minimo", doc)
+        self.assertIn("Railway (T12, responsable Ellen)", doc)
+
     def test_tres_archivos_tienen_nombres_y_ids_coherentes(self):
         carpeta = ROOT / "data" / "trazas_demo"
         archivos = sorted(carpeta.glob("*.json"))
