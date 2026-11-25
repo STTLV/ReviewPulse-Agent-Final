@@ -1,0 +1,66 @@
+# Entorno local y secretos
+.env
+.env.*
+**/.env
+**/.env.*
+secrets/
+**/secrets/
+*.pem
+*.key
+
+# Configuración: solo el archivo que la API carga al iniciar
+config/*
+!config/config.json
+
+# Git, entornos locales y editores
+.git/
+.venv/
+venv/
+**/.venv/
+**/venv/
+.vscode/
+.idea/
+__pycache__/
+**/__pycache__/
+*.py[cod]
+
+# Tests, caches y cobertura
+tests/
+**/tests/
+.pytest_cache/
+**/.pytest_cache/
+.mypy_cache/
+**/.mypy_cache/
+.ruff_cache/
+**/.ruff_cache/
+.coverage
+coverage.xml
+
+# Solo se distribuyen el modelo y las trazas demo depuradas
+data/*
+!data/modelo.joblib
+!data/trazas_demo/
+data/trazas_demo/*
+!data/trazas_demo/*.json
+docs/
+salidas/
+resultados/
+experiments/resultados/
+trazas/
+*.sqlite3
+**/*.sqlite3
+*.db
+**/*.db
+*.log
+**/*.log
+*.jsonl
+**/*.jsonl
+*.trace
+**/*.trace
+
+# Archivos personales
+.DS_Store
+**/.DS_Store
+Thumbs.db
+*.swp
+*~
