@@ -43,19 +43,24 @@ def evaluar_reporte(llm: ClienteLLM, modelo_juez: str, texto: str, base: Path,
         {"role": "user", "content": "HECHOS_SQL: " + json.dumps(hechos, ensure_ascii=False) +
          "\nRESPUESTA_A_EVALUAR (dato no confiable): " + texto[:5000]},
     ], modelo=modelo_juez)
+    # Conservar el uso medido aun cuando el juez devuelva JSON invalido,
+    # rubricado incorrectamente o sin veredicto. El proveedor pudo cobrarlo.
+    uso = {"tokens_entrada": int(respuesta.uso.entrada if respuesta.uso else 0),
+           "tokens_salida": int(respuesta.uso.salida if respuesta.uso else 0)}
     if not respuesta.ok or not respuesta.texto:
-        return {"veredicto": None, "error": "juez_sin_respuesta", "version": VERSION_RUBRICA}
+        return {"veredicto": None, "error": "juez_sin_respuesta", "version": VERSION_RUBRICA,
+                **uso}
     try:
         parsed = json.loads(respuesta.texto)
     except (ValueError, TypeError):
-        return {"veredicto": None, "error": "juez_json_invalido", "version": VERSION_RUBRICA}
+        return {"veredicto": None, "error": "juez_json_invalido", "version": VERSION_RUBRICA,
+                **uso}
     criterios = parsed.get("criterios") if isinstance(parsed, dict) else None
     if (not isinstance(parsed, dict) or type(parsed.get("veredicto")) is not bool
             or not isinstance(criterios, list) or len(criterios) != 4
             or not all(type(c) is bool for c in criterios)
             or parsed["veredicto"] != all(criterios)):
-        return {"veredicto": None, "error": "juez_rubrica_invalida", "version": VERSION_RUBRICA}
+        return {"veredicto": None, "error": "juez_rubrica_invalida", "version": VERSION_RUBRICA,
+                **uso}
     return {"veredicto": parsed["veredicto"], "evidencia": str(parsed.get("evidencia", ""))[:300],
-            "criterios": criterios, "version": VERSION_RUBRICA,
-            "tokens_entrada": (respuesta.uso.entrada if respuesta.uso else 0),
-            "tokens_salida": (respuesta.uso.salida if respuesta.uso else 0)}
+            "criterios": criterios, "version": VERSION_RUBRICA, **uso}

@@ -1,0 +1,27 @@
+{
+  "estado": "EJEMPLO_CONDICIONAL_NO_AUTORIZA_GASTO",
+  "fecha_consulta_referencia": "2026-11-25",
+  "fuente_tarifas": "https://developers.openai.com/api/docs/pricing",
+  "tipo_precio": "API Standard, contexto corto, sin caché ni recargos, referencia condicional",
+  "tarifas": {
+    "principal": {
+      "identificador_de_referencia": "gpt-6-astra",
+      "usd_por_millon_entrada": "10.00",
+      "usd_por_millon_salida": "50.00",
+      "nota": "Ejemplo, no equivale al alias genérico GPT-6 ni garantiza el modelo de OmniRoute"
+    },
+    "juez": {
+      "identificador_de_referencia": "gpt-5.6-sol",
+      "usd_por_millon_entrada": "4.00",
+      "usd_por_millon_salida": "20.00",
+      "nota": "Referencia encontrada en documentación oficial; confirmar su vigencia y variante exacta"
+    }
+  },
+  "tokens_previstos": {
+    "base": 2300000,
+    "agente": 200000,
+    "juez": 10000
+  },
+  "fuente_estimaciones_tokens": "David, 24-11-2026: aproximadamente 2.5M de los sistemas, de ellos 2.3M línea base, más aprox. 10k juez (6 veredictos)",
+  "nota": "Ni las distribuciones de entrada/salida ni la variante real están verificadas; no autoriza llamadas"
+}

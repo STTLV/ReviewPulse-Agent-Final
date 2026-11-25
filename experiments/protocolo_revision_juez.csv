@@ -1,0 +1,7 @@
+sistema,tarea,repeticion,seleccionada_antes_de_resultados,veredicto_juez,veredicto_humano,acuerdo,evidencia_revisada,observaciones
+agente,R01,1,si,,,,,
+agente,R01,2,no,,,,,
+agente,R01,3,no,,,,,
+base,R01,1,no,,,,,
+base,R01,2,si,,,,,
+base,R01,3,no,,,,,

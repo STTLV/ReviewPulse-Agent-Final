@@ -47,7 +47,10 @@ RAIZ = Path(__file__).resolve().parents[1]
 CAMPOS = ["sistema", "tarea", "tipo", "repeticion", "estado", "exito", "tokens_entrada",
           "tokens_salida", "segundos", "pasos", "herramientas", "errores_herramienta",
           "cifras_no_respaldadas", "motivo", "veredicto_juez",
-          "traza_cifras_evaluadas", "traza_cifras_respaldadas", "trazabilidad_numerica"]
+          "traza_cifras_evaluadas", "traza_cifras_respaldadas", "trazabilidad_numerica",
+          "tokens_juez_entrada", "tokens_juez_salida",
+          "tokens_total_entrada", "tokens_total_salida",
+          "modelo_principal", "modelo_juez"]
 
 
 def _comprobar_umbrales_fijados() -> None:
@@ -122,10 +125,11 @@ def ejecutar_una(tarea: dict, sistema: str, repeticion: int, base: Path,
             (texto, entrada, salida, pasos, herramientas, fallos,
              motivo, eventos) = _base(pregunta, cliente, base, modelo_nombre)
         veredicto = None
+        juez_entrada = juez_salida = 0
         if tarea["tipo"] == "reporte" and motivo == "completado":
             veredicto = evaluar_reporte(cliente, juez_modelo, texto, base, tarea["semana"])
-            entrada += int(veredicto.get("tokens_entrada", 0))
-            salida += int(veredicto.get("tokens_salida", 0))
+            juez_entrada = int(veredicto.get("tokens_entrada", 0))
+            juez_salida = int(veredicto.get("tokens_salida", 0))
             exito = veredicto.get("veredicto")
         else:
             exito = verificar(tarea, texto, base) if motivo in {"completado", "cifra_sin_respaldo"} else False
@@ -165,7 +169,15 @@ def ejecutar_una(tarea: dict, sistema: str, repeticion: int, base: Path,
                 "traza_cifras_evaluadas": evaluadas,
                 "traza_cifras_respaldadas": respaldadas,
                 "trazabilidad_numerica": (round(respaldadas / evaluadas, 6)
-                                         if isinstance(evaluadas, int) and evaluadas > 0 else "")}
+                                         if isinstance(evaluadas, int) and evaluadas > 0 else ""),
+                # El juez es un modelo distinto del principal, segun configuracion.
+                # Nunca sumar su consumo a las columnas del sistema evaluado.
+                "tokens_juez_entrada": juez_entrada,
+                "tokens_juez_salida": juez_salida,
+                "tokens_total_entrada": entrada + juez_entrada,
+                "tokens_total_salida": salida + juez_salida,
+                "modelo_principal": modelo_nombre,
+                "modelo_juez": juez_modelo}
 
 
 def calcular_trazabilidad(archivo: Path) -> dict:
@@ -199,13 +211,31 @@ def calcular_trazabilidad(archivo: Path) -> dict:
 
 
 def _leer_hechas(archivo: Path) -> set[tuple[str, str, int]]:
-    if not archivo.exists():
+    if not archivo.exists() or archivo.stat().st_size == 0:
         return set()
-    with archivo.open(encoding="utf-8", newline="") as f:
-        filas = list(csv.DictReader(f))
-    # La reanudación omite todas las claves ya registradas. Los errores no se
-    # reintentan automáticamente para evitar duplicados y gastos inesperados.
-    return {(fila["sistema"], fila["tarea"], int(fila["repeticion"])) for fila in filas}
+    with archivo.open(encoding="utf-8-sig", newline="") as f:
+        lector = csv.DictReader(f)
+        # Nunca agregar filas con nuevas columnas al CSV del esquema antiguo.
+        # Reanudarlo sin migrar mezclaria costos de GPT-6 y GPT-5.6.
+        if lector.fieldnames != CAMPOS:
+            raise ValueError("Esquema CSV incompatible. Conserva el original y usa "
+                             "una nueva --salida; no se realizaron llamadas.")
+        filas = list(lector)
+    # Una clave duplicada hace incierta la contabilización; no continuar.
+    hechas: set[tuple[str, str, int]] = set()
+    for fila in filas:
+        try:
+            rep = int(fila["repeticion"])
+            clave = (fila["sistema"], fila["tarea"], rep)
+        except (KeyError, TypeError, ValueError) as exc:
+            raise ValueError("CSV con identificadores de corrida inválidos.") from exc
+        if clave[0] not in {"agente", "base"} or not clave[1] or rep not in {1, 2, 3}:
+            raise ValueError("CSV con identificadores de corrida fuera del protocolo.")
+        if clave in hechas:
+            raise ValueError("CSV contiene una corrida duplicada; revisar antes de ejecutar.")
+        hechas.add(clave)
+    # Se omiten las corridas ya guardadas, incluyendo las que fallaron.
+    return hechas
 
 
 def ejecutar_lote(sistema: str, repeticiones: int, tareas_ids: list[str],
@@ -218,11 +248,21 @@ def ejecutar_lote(sistema: str, repeticiones: int, tareas_ids: list[str],
     seleccion = [t for t in tareas if not tareas_ids or t["id"] in tareas_ids]
     hechas = _leer_hechas(salida)
     salida.parent.mkdir(parents=True, exist_ok=True)
+    # Un marcador pendiente indica que una llamada pudo cobrarse aunque no
+    # quedara guardada. No se elimina automáticamente ni se vuelve a llamar.
+    marcador = salida.with_name(salida.name + ".pendiente.json")
+    if marcador.exists():
+        raise RuntimeError(
+            f"Ejecución pendiente de conciliación: {marcador}. "
+            "No reanudar sin verificar el CSV y los registros del proveedor."
+        )
     nuevas = 0
     with salida.open("a", newline="", encoding="utf-8") as file:
         writer = csv.DictWriter(file, fieldnames=CAMPOS)
         if salida.stat().st_size == 0:
             writer.writeheader()
+            file.flush()
+            os.fsync(file.fileno())
         for sistema_actual in (["agente", "base"] if sistema == "ambos" else [sistema]):
             for t in seleccion:
                 for repeticion in range(1, repeticiones + 1):
@@ -232,10 +272,23 @@ def ejecutar_lote(sistema: str, repeticiones: int, tareas_ids: list[str],
                     if limite is not None and nuevas >= limite:
                         return {"ejecuciones_nuevas": nuevas, "limite_alcanzado": True,
                                 "trazabilidad": calcular_trazabilidad(salida)}
+                    # Crear y forzar a disco ANTES de invocar cualquier modelo.
+                    # El modo exclusivo impide pisar un marcador existente.
+                    with marcador.open("x", encoding="utf-8") as seguimiento:
+                        json.dump({"sistema": sistema_actual, "tarea": t["id"],
+                                   "repeticion": repeticion,
+                                   "estado": "EN_CURSO_NO_REEJECUTAR_AUTOMATICAMENTE"},
+                                  seguimiento, ensure_ascii=False)
+                        seguimiento.flush()
+                        os.fsync(seguimiento.fileno())
+                    # Si falla la llamada o el CSV, el marcador queda para
+                    # impedir una repetición silenciosa potencialmente facturada.
                     fila = ejecutar_una(t, sistema_actual, repeticion, base, cliente,
                                         modelo, juez_modelo, salida.parent / "trazas")
                     writer.writerow(fila)
                     file.flush()
+                    os.fsync(file.fileno())
+                    marcador.unlink()
                     nuevas += 1
                     print(f'{sistema_actual} {t["id"]} repetición {repeticion}: {fila["estado"]}', flush=True)
     return {"ejecuciones_nuevas": nuevas, "limite_alcanzado": False,
@@ -270,7 +323,8 @@ def main() -> int:
     base = preparar_base(args.base)
     resultado = ejecutar_lote(args.sistema, args.repeticiones, args.tareas,
                               args.limite_ejecuciones, base, args.salida,
-                              ClienteOpenAI(ajustes), ajustes.llm_model, ajustes.llm_juez_model)
+                              ClienteOpenAI(ajustes, max_intentos=1),
+                              ajustes.llm_model, ajustes.llm_juez_model)
     print(json.dumps(resultado, ensure_ascii=False))
     return 0
 
