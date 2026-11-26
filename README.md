@@ -20,7 +20,7 @@ La **Tarea 3** separa el ciclo determinista del razonamiento del futuro agente:
 - `src/reviewpulse/entorno.py`, `escenarios.py`, `evaluacion.py`: simulador y evaluación, sin acceso del agente a las etiquetas reales
 - `src/reviewpulse/modelo.py`: clasificador TF-IDF + léxico + regresión logística; el archivo entrenado está en `data/modelo.joblib`
 
-El código anterior de `agente.py`, `planificador.py` y `ejecutar_agente.py` se retira en esta refactorización. El bucle ReAct con LLM y la API FastAPI se integraron en tareas posteriores; la interfaz web se mantiene como una tarea separada. Los resultados históricos M1–M4 no se reescriben.
+El código anterior de `agente.py`, `planificador.py` y `ejecutar_agente.py` se retira en esta refactorización. El bucle ReAct con LLM, la API FastAPI y la interfaz web T11 se encuentran integrados en la rama `v2`. Los resultados históricos M1–M4 no se reescriben.
 
 ## Instalación y pruebas
 
@@ -82,7 +82,7 @@ Estos valores no sustituyen la evaluación histórica M1–M4. Los archivos y ev
 - No subir `.env`, claves de API ni registros con secretos
 - No utilizar datos de reseñas sintéticas para presentar un despliegue real
 - Los umbrales CUSUM y M1–M4 históricos no se alteran durante esta tarea
-- La interfaz web y la evaluación con juez se revisan en tareas y PR separados
+- La interfaz web T11 y el juez de R01 ya forman parte de V2; la evaluacion experimental T13 y sus limitaciones se documentan por separado
 
 ## Datos de demostración de la API
 
@@ -126,3 +126,7 @@ El Dockerfile incluye `config/config.json`, `data/modelo.joblib` y los JSON de `
 `railway.toml` selecciona el builder Dockerfile y configura `/api/salud` como health check con timeout de 120 segundos. La prueba local de contenedor documentada anteriormente corresponde a una revisión previa: su resultado 404 en `/` ya no describe `v2`, donde la ruta sirve la interfaz T11. En esta revisión no se pudo repetir el build ni las comprobaciones HTTP/SSE/persistencia porque el entorno no permitió acceder al socket del daemon Docker; por tanto, no se certifican aquí para el commit actual.
 
 La API debe operar con **un worker y una réplica**, porque el candado es local al proceso. Aún no se ha realizado un despliegue en vivo en Railway; `railway.toml` configura la construcción y el health check, pero no acredita que el servicio esté desplegado. No se verificó una URL pública ni se modificó Railway durante esta revisión. Sin un volumen persistente, un contenedor nuevo puede regenerar la base demo. Acceso, secretos, volumen, staging y autorización de David siguen pendientes.
+
+## Aclaraciones experimentales posteriores a T13 (26/11/2026)
+
+La evidencia de 120 corridas sigue INTACTA. Las correcciones de análisis, la revisión documental de diez fallos y el costo de referencia constan en `docs/T13_CORRECCIONES_Y_LIMITACIONES.md`. Los subgrupos de errores tipográficos, longitud y tema calculados sobre el Gold con el clasificador guardado se encuentran en `experiments/resultados/gold_subgrupos_responsable/`; NO son subgrupos de éxito ReAct/base. Railway sigue pendiente de validación pública en esta revisión.

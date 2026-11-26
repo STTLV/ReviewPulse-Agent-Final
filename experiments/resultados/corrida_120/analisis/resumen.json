@@ -90,7 +90,13 @@
     "juez_entrada": 5300,
     "juez_salida": 1724,
     "costo_usd_facturado": null,
-    "nota": "Tokens medidos por uso reportado: principal separado del juez. Costos reales y tarifas dependen de OmniRoute; no estimados sin precios."
+    "nota": "Tokens medidos por uso reportado: principal separado del juez. Costos reales y tarifas dependen de OmniRoute; no estimados sin precios.",
+    "costo_usd_referencia": 25.5844,
+    "nota_referencia": "Solo escenario con experimentos/precios_referencia_t13.json; no identifica costo real de los alias OmniRoute.",
+    "costo_referencia_desglose_usd": {
+      "principal": "25.52872",
+      "juez": "0.05568"
+    }
   },
   "comparacion": {
     "diferencia_exito_agente_menos_base": 0.05,
@@ -104,7 +110,8 @@
     "errores_herramienta_agente_meta_10": true,
     "cifras_incorrectas_global_meta_5": null,
     "trazabilidad_global_meta_95": true,
-    "costo_usd_meta_1": null
+    "costo_usd_meta_1": null,
+    "costo_usd_meta_1_tarifa_referencia": false
   },
   "pendientes": [
     "Cifras incorrectas globales: la columna cifras_no_respaldadas solo revisa la ultima linea de tareas de conteo; no es denominador para todas las cifras de todos los tipos.",

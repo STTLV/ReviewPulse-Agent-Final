@@ -42,3 +42,13 @@ Los datos son **sintéticos**. La evaluación M1 histórica representa cinco ree
 ## Registro complementario T8 (24/11/2026)
 
 Se utilizo ChatGPT para revisar la metodologia, elaborar un script de evaluacion adicional M1 con el Gold ya etiquetado, preparar pruebas automatizadas y redactar la documentacion. La calibracion CUSUM y los resultados historicos de M1-M4 se preservaron. El etiquetado humano original fue realizado por Sara y Ellen independientemente, sin IA ni acceso a las etiquetas del simulador. La medicion M1-Gold se realizo con cinco semillas de entrenamiento separadas del Gold, sin llamadas a un proveedor LLM.
+
+
+## Registro de auditoría documental de T13 (26/11/2026)
+
+- **Sara, apoyo de ChatGPT:** se cotejaron los CSV y las trazas de T13 con el PDF IEEE y con la observación técnica de David. Se mantuvieron sin cambios `corridas.csv`, las trazas y los umbrales previos. El análisis de diez fallos se hizo más específico mediante evidencia observable, sin inventar respuestas no retenidas.
+- **Decisiones verificadas:** L02 reproduce una predicción positiva con confianza cercana a 0,47 en EVAL-003; P02/A02 registran S_max=2,5637 frente a h=5, por lo que la herramienta no activa alarma aunque el protocolo exige resultado positivo; R01 conserva el dictamen del juez pero no la salida original para confirmación humana.
+- **Costo:** se aplicaron las tarifas *ilustrativas* de `experiments/precios_referencia_t13.json` a los tokens medidos y resultó US$25,58440 para las 120 corridas. Los alias reales de OmniRoute son diferentes de los modelos de tarifa; no se declara factura ni equivalencia exacta. Bajo esa referencia, no se cumple el umbral de US$1.
+- **IA responsable:** se agruparon 120 reseñas Gold por tema, longitud y permutación tipográfica introducida por el generador reproducible. Se aplicó el clasificador guardado sin nuevas consultas al LLM. Estos resultados NO se atribuyen al contraste de 120 llamadas ReAct/base.
+- **Limitación irreversible del experimento existente:** las respuestas finales históricas no fueron retenidas completas; por ello la comparación humana preseleccionada con el juez no se puede reconstruir retrospectivamente. Se documenta como no evaluable, no como realizada.
+- **Verificación y límites:** resultados cotejados con archivos y herramientas locales. No se acreditó con esta auditoría un despliegue remoto en Railway, ejecución de Docker o factura del proveedor. La carga del modelo persistido generó advertencias de incompatibilidad de versión de scikit-learn en el entorno de auditoría; reconfirmar las predicciones en el entorno fijado.
