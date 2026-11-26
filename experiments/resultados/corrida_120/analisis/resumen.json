@@ -1,0 +1,130 @@
+{
+  "version": "t13-analisis-instrumentado-v2",
+  "estado": "analisis_de_corridas_reales",
+  "matriz": {
+    "tareas": 20,
+    "repeticiones": 3,
+    "sistemas": 2,
+    "ejecuciones": 120,
+    "tareas_tipo": {
+      "alerta": 3,
+      "clasificacion": 3,
+      "comparacion": 3,
+      "conteo": 3,
+      "evidencia": 3,
+      "reporte": 1,
+      "trampa": 4
+    }
+  },
+  "metodo": {
+    "bootstrap": "pareado por tarea (20 clusters), media de 3 repeticiones por sistema",
+    "remuestreos": 10000,
+    "semilla": 2026,
+    "umbrales_version": "ruta-e-t9-v1",
+    "observacion": "Sin ajuste de umbrales posterior a las corridas."
+  },
+  "sistemas": {
+    "agente": {
+      "n": 60,
+      "exito": 0.8,
+      "exitos": 48,
+      "tokens_entrada_total": 131033,
+      "tokens_salida_total": 6667,
+      "tokens_juez_entrada_total": 2102,
+      "tokens_juez_salida_total": 701,
+      "tokens_todos_modelos_entrada_total": 133135,
+      "tokens_todos_modelos_salida_total": 7368,
+      "tiempo_segundos": {
+        "media": 6.208266666666667,
+        "desviacion_estandar": 3.915863412667335
+      },
+      "pasos": {
+        "media": 2.1166666666666667,
+        "desviacion_estandar": 0.3724252474950529
+      },
+      "herramientas_total": 64,
+      "errores_herramienta_total": 6,
+      "tasa_errores_herramienta": 0.09375,
+      "conteos_con_cifra_no_respaldada": 0,
+      "conteos_evaluados": 9,
+      "tasa_conteos_con_cifra_no_respaldada": 0.0
+    },
+    "base": {
+      "n": 60,
+      "exito": 0.75,
+      "exitos": 45,
+      "tokens_entrada_total": 2315859,
+      "tokens_salida_total": 14529,
+      "tokens_juez_entrada_total": 3198,
+      "tokens_juez_salida_total": 1023,
+      "tokens_todos_modelos_entrada_total": 2319057,
+      "tokens_todos_modelos_salida_total": 15552,
+      "tiempo_segundos": {
+        "media": 2.782033333333333,
+        "desviacion_estandar": 6.293030430473863
+      },
+      "pasos": {
+        "media": 1.0,
+        "desviacion_estandar": 0.0
+      },
+      "herramientas_total": 0,
+      "errores_herramienta_total": 0,
+      "tasa_errores_herramienta": null,
+      "conteos_con_cifra_no_respaldada": 3,
+      "conteos_evaluados": 9,
+      "tasa_conteos_con_cifra_no_respaldada": 0.3333333333333333
+    }
+  },
+  "trazabilidad_agente": {
+    "cifras_evaluadas": 156,
+    "cifras_respaldadas": 156,
+    "filas_sin_evento_final": 0,
+    "tasa": 1.0,
+    "interpretacion": "Trazabilidad respecto a observaciones de herramientas; no equivale a tasa global de cifras factualmente incorrectas."
+  },
+  "consumo": {
+    "modelo_principal": "cx/gpt-6-luna-medium",
+    "modelo_juez": "gpt-5.6-luna-medium",
+    "principal_entrada": 2446892,
+    "principal_salida": 21196,
+    "juez_entrada": 5300,
+    "juez_salida": 1724,
+    "costo_usd_facturado": null,
+    "nota": "Tokens medidos por uso reportado: principal separado del juez. Costos reales y tarifas dependen de OmniRoute; no estimados sin precios."
+  },
+  "comparacion": {
+    "diferencia_exito_agente_menos_base": 0.05,
+    "ic_95_bajo": -0.1,
+    "ic_95_alto": 0.2,
+    "ic_excluye_cero": false,
+    "superioridad_agente_significativa": false
+  },
+  "indicadores": {
+    "exito_agente_meta_80": true,
+    "errores_herramienta_agente_meta_10": true,
+    "cifras_incorrectas_global_meta_5": null,
+    "trazabilidad_global_meta_95": true,
+    "costo_usd_meta_1": null
+  },
+  "pendientes": [
+    "Cifras incorrectas globales: la columna cifras_no_respaldadas solo revisa la ultima linea de tareas de conteo; no es denominador para todas las cifras de todos los tipos.",
+    "Costo USD facturado: se requiere importe real de OmniRoute, modelo exacto y/o tarifas verificadas. El techo diario no es limite estricto en el runner.",
+    "Plataforma, longitud, tema y errores de tipeo no están asociados a cada ejecución: subgrupos no evaluables sin instrumentación adicional.",
+    "La revisión humana de 2 dictámenes del juez requiere conservar acceso seguro a la respuesta original; T9 solo exporta trazas redactadas."
+  ],
+  "errores_para_clasificar": 27,
+  "meta_clasificacion_manual_10": true,
+  "revision_juez_manual_preseleccionada": [
+    {
+      "sistema": "agente",
+      "tarea": "R01",
+      "repeticion": 1
+    },
+    {
+      "sistema": "base",
+      "tarea": "R01",
+      "repeticion": 2
+    }
+  ],
+  "referencia_m1_m4": "experiments/resultados/m1_m4.csv (T8; no recalcular ni mezclar)"
+}

@@ -1,0 +1,9 @@
+{"sistema": "agente", "tarea": "R01", "repeticion": 3, "motivo": "completado", "exito": false, "juez": {"veredicto": false, "evidencia": "Identifica la semana 11 y el problema de precio, pero altera el conteo neutro de limpieza a 1,5 e incluye afirmaciones no sustentadas por los hechos SQL.", "criterios": [true, false, true, true], "version": "t9-reporte-2026-11-24-v1", "tokens_entrada": 665, "tokens_salida": 249}}
+{"ts": "2026-11-26T14:35:47.503074+00:00", "fase": "PERCEPCION", "evento": "tarea_recibida", "longitud": 127}
+{"ts": "2026-11-26T14:35:49.541274+00:00", "fase": "DECISION", "evento": "respuesta_llm", "paso": 1, "ok": true, "tokens_entrada": 868, "tokens_salida": 21, "segundos": 2.0331, "llamadas": 1}
+{"ts": "2026-11-26T14:35:49.565823+00:00", "fase": "ACCION", "evento": "herramienta", "paso": 1, "herramienta": "generar_reporte", "argumentos": {"semana": 11}, "resultado": {"ok": true, "campos": ["ruta", "resumen"]}, "segundos": 0.0236}
+{"ts": "2026-11-26T14:35:49.566317+00:00", "fase": "OBSERVACION", "evento": "herramientas_observadas", "paso": 1, "cantidad": 1}
+{"ts": "2026-11-26T14:35:56.985486+00:00", "fase": "DECISION", "evento": "respuesta_llm", "paso": 2, "ok": true, "tokens_entrada": 1652, "tokens_salida": 310, "segundos": 7.4171, "llamadas": 0}
+{"ts": "2026-11-26T14:35:56.989177+00:00", "fase": "VERIFICACION", "evento": "cifras_sin_respaldo", "paso": 2, "cifras": ["33,5"]}
+{"ts": "2026-11-26T14:36:05.680527+00:00", "fase": "DECISION", "evento": "respuesta_llm", "paso": 3, "ok": true, "tokens_entrada": 2005, "tokens_salida": 349, "segundos": 8.6907, "llamadas": 0}
+{"ts": "2026-11-26T14:36:05.683441+00:00", "fase": "ACCION", "evento": "respuesta_final", "paso": 3, "verificada": true, "cifras_evaluadas": 16, "cifras_respaldadas": 16}

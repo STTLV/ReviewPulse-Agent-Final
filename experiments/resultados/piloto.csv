@@ -1,0 +1,5 @@
+sistema,tarea,tipo,repeticion,estado,exito,tokens_entrada,tokens_salida,segundos,pasos,herramientas,errores_herramienta,cifras_no_respaldadas,motivo,veredicto_juez,traza_cifras_evaluadas,traza_cifras_respaldadas,trazabilidad_numerica,tokens_juez_entrada,tokens_juez_salida,tokens_total_entrada,tokens_total_salida,modelo_principal,modelo_juez
+agente,C01,conteo,1,terminado,1,1887,78,6.229,2,1,0,0,completado,,2,2,1.0,0,0,1887,78,cx/gpt-6-luna-medium,gpt-5.6-luna-medium
+agente,A01,alerta,1,terminado,1,3143,174,7.225,3,2,1,0,completado,,5,5,1.0,0,0,3143,174,cx/gpt-6-luna-medium,gpt-5.6-luna-medium
+base,C01,conteo,1,terminado,1,38602,329,14.011,1,0,0,0,completado,,,,,0,0,38602,329,cx/gpt-6-luna-medium,gpt-5.6-luna-medium
+base,A01,alerta,1,terminado,1,38609,109,3.887,1,0,0,0,completado,,,,,0,0,38609,109,cx/gpt-6-luna-medium,gpt-5.6-luna-medium

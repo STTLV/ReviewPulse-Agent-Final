@@ -1,0 +1,7 @@
+{"sistema": "agente", "tarea": "T02", "repeticion": 1, "motivo": "completado", "exito": true, "juez": null}
+{"ts": "2026-11-26T14:36:27.457363+00:00", "fase": "PERCEPCION", "evento": "tarea_recibida", "longitud": 136}
+{"ts": "2026-11-26T14:36:29.041506+00:00", "fase": "DECISION", "evento": "respuesta_llm", "paso": 1, "ok": true, "tokens_entrada": 872, "tokens_salida": 16, "segundos": 1.5787, "llamadas": 1}
+{"ts": "2026-11-26T14:36:29.048486+00:00", "fase": "ACCION", "evento": "herramienta", "paso": 1, "herramienta": "estado_plataformas", "argumentos": {}, "resultado": {"ok": true, "campos": ["TripAdvisor", "Google"], "datos": {"TripAdvisor": {}, "Google": {}}}, "segundos": 0.006}
+{"ts": "2026-11-26T14:36:29.049221+00:00", "fase": "OBSERVACION", "evento": "herramientas_observadas", "paso": 1, "cantidad": 1}
+{"ts": "2026-11-26T14:36:31.402423+00:00", "fase": "DECISION", "evento": "respuesta_llm", "paso": 2, "ok": true, "tokens_entrada": 975, "tokens_salida": 27, "segundos": 2.3426, "llamadas": 0}
+{"ts": "2026-11-26T14:36:31.403567+00:00", "fase": "ACCION", "evento": "respuesta_final", "paso": 2, "verificada": true, "cifras_evaluadas": 0, "cifras_respaldadas": 0}
