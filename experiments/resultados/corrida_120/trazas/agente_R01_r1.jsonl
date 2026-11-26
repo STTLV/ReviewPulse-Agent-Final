@@ -1,0 +1,7 @@
+{"sistema": "agente", "tarea": "R01", "repeticion": 1, "motivo": "completado", "exito": false, "juez": {"veredicto": false, "evidencia": "Identifica la semana 11 y señala correctamente el precio como problema, pero inventa o contradice datos al indicar 1,5 menciones neutras de limpieza y afirmar resultados de CUSUM, completitud e historial no presentes en los hechos.", "criterios": [true, false, true, true], "version": "t9-reporte-2026-11-24-v1", "tokens_entrada": 761, "tokens_salida": 207}}
+{"ts": "2026-11-26T14:35:09.656503+00:00", "fase": "PERCEPCION", "evento": "tarea_recibida", "longitud": 127}
+{"ts": "2026-11-26T14:35:11.767062+00:00", "fase": "DECISION", "evento": "respuesta_llm", "paso": 1, "ok": true, "tokens_entrada": 868, "tokens_salida": 21, "segundos": 2.1044, "llamadas": 1}
+{"ts": "2026-11-26T14:35:11.792197+00:00", "fase": "ACCION", "evento": "herramienta", "paso": 1, "herramienta": "generar_reporte", "argumentos": {"semana": 11}, "resultado": {"ok": true, "campos": ["ruta", "resumen"]}, "segundos": 0.0241}
+{"ts": "2026-11-26T14:35:11.792792+00:00", "fase": "OBSERVACION", "evento": "herramientas_observadas", "paso": 1, "cantidad": 1}
+{"ts": "2026-11-26T14:35:19.303436+00:00", "fase": "DECISION", "evento": "respuesta_llm", "paso": 2, "ok": true, "tokens_entrada": 1652, "tokens_salida": 342, "segundos": 7.509, "llamadas": 0}
+{"ts": "2026-11-26T14:35:19.306586+00:00", "fase": "ACCION", "evento": "respuesta_final", "paso": 2, "verificada": true, "cifras_evaluadas": 23, "cifras_respaldadas": 23}

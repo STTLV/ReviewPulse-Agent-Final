@@ -1,0 +1,7 @@
+{"sistema": "agente", "tarea": "L02", "repeticion": 3, "motivo": "completado", "exito": false, "juez": null}
+{"ts": "2026-11-26T14:33:50.811025+00:00", "fase": "PERCEPCION", "evento": "tarea_recibida", "longitud": 206}
+{"ts": "2026-11-26T14:33:52.991292+00:00", "fase": "DECISION", "evento": "respuesta_llm", "paso": 1, "ok": true, "tokens_entrada": 897, "tokens_salida": 37, "segundos": 2.1721, "llamadas": 1}
+{"ts": "2026-11-26T14:33:53.005980+00:00", "fase": "ACCION", "evento": "herramienta", "paso": 1, "herramienta": "clasificar_resena", "argumentos": {"texto": "[omitido]"}, "resultado": {"ok": true, "campos": ["polaridad", "tema", "confianza", "revision_manual"]}, "segundos": 0.013}
+{"ts": "2026-11-26T14:33:53.006804+00:00", "fase": "OBSERVACION", "evento": "herramientas_observadas", "paso": 1, "cantidad": 1}
+{"ts": "2026-11-26T14:33:54.489543+00:00", "fase": "DECISION", "evento": "respuesta_llm", "paso": 2, "ok": true, "tokens_entrada": 990, "tokens_salida": 13, "segundos": 1.4805, "llamadas": 0}
+{"ts": "2026-11-26T14:33:54.491302+00:00", "fase": "ACCION", "evento": "respuesta_final", "paso": 2, "verificada": true, "cifras_evaluadas": 0, "cifras_respaldadas": 0}

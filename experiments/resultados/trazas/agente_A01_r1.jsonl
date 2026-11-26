@@ -1,0 +1,10 @@
+{"sistema": "agente", "tarea": "A01", "repeticion": 1, "motivo": "completado", "exito": true, "juez": null}
+{"ts": "2026-11-26T13:23:31.980514+00:00", "fase": "PERCEPCION", "evento": "tarea_recibida", "longitud": 219}
+{"ts": "2026-11-26T13:23:33.774309+00:00", "fase": "DECISION", "evento": "respuesta_llm", "paso": 1, "ok": true, "tokens_entrada": 892, "tokens_salida": 27, "segundos": 1.7879, "llamadas": 1}
+{"ts": "2026-11-26T13:23:33.780315+00:00", "fase": "ACCION", "evento": "herramienta", "paso": 1, "herramienta": "comparar_semana", "argumentos": {"semana": 8, "tema": "servicio"}, "resultado": {"ok": true, "campos": ["servicio"], "datos": {"servicio": {"total": 20.0, "negativas": 16.0, "proporcion": 0.8, "promedio": 0.2234701572936867, "p0": 0.21904761904761905, "p1": 0.519047619047619, "s_max": 6.41690597493745, "h": 5.0, "dia_alarma": 2, "alarma": true, "semanas_historial": 6, "motivos_no_alerta": []}}}, "segundos": 0.0052}
+{"ts": "2026-11-26T13:23:33.790905+00:00", "fase": "OBSERVACION", "evento": "herramientas_observadas", "paso": 1, "cantidad": 1}
+{"ts": "2026-11-26T13:23:36.463547+00:00", "fase": "DECISION", "evento": "respuesta_llm", "paso": 2, "ok": true, "tokens_entrada": 1068, "tokens_salida": 75, "segundos": 2.672, "llamadas": 1}
+{"ts": "2026-11-26T13:23:36.466444+00:00", "fase": "ACCION", "evento": "herramienta", "paso": 2, "herramienta": "emitir_alerta", "argumentos": {"semana": 8, "tema": "servicio", "justificacion": "[omitido]"}, "resultado": {"ok": false, "error": "rechazada"}, "segundos": 0.0018}
+{"ts": "2026-11-26T13:23:36.467072+00:00", "fase": "OBSERVACION", "evento": "herramientas_observadas", "paso": 2, "cantidad": 1}
+{"ts": "2026-11-26T13:23:39.089530+00:00", "fase": "DECISION", "evento": "respuesta_llm", "paso": 3, "ok": true, "tokens_entrada": 1183, "tokens_salida": 72, "segundos": 2.622, "llamadas": 0}
+{"ts": "2026-11-26T13:23:39.093239+00:00", "fase": "ACCION", "evento": "respuesta_final", "paso": 3, "verificada": true, "cifras_evaluadas": 5, "cifras_respaldadas": 5}

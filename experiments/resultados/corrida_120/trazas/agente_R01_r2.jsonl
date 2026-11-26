@@ -1,0 +1,12 @@
+{"sistema": "agente", "tarea": "R01", "repeticion": 2, "motivo": "completado", "exito": false, "juez": {"veredicto": false, "evidencia": "Identifica la semana 11 y el problema de precio, pero altera el conteo neutro de limpieza a 1,5 e incluye afirmaciones no sustentadas sobre CUSUM y alertas.", "criterios": [true, false, true, false], "version": "t9-reporte-2026-11-24-v1", "tokens_entrada": 676, "tokens_salida": 245}}
+{"ts": "2026-11-26T14:35:24.794794+00:00", "fase": "PERCEPCION", "evento": "tarea_recibida", "longitud": 127}
+{"ts": "2026-11-26T14:35:26.621503+00:00", "fase": "DECISION", "evento": "respuesta_llm", "paso": 1, "ok": true, "tokens_entrada": 868, "tokens_salida": 21, "segundos": 1.8208, "llamadas": 1}
+{"ts": "2026-11-26T14:35:26.645721+00:00", "fase": "ACCION", "evento": "herramienta", "paso": 1, "herramienta": "generar_reporte", "argumentos": {"semana": 11}, "resultado": {"ok": true, "campos": ["ruta", "resumen"]}, "segundos": 0.023}
+{"ts": "2026-11-26T14:35:26.646241+00:00", "fase": "OBSERVACION", "evento": "herramientas_observadas", "paso": 1, "cantidad": 1}
+{"ts": "2026-11-26T14:35:33.881881+00:00", "fase": "DECISION", "evento": "respuesta_llm", "paso": 2, "ok": true, "tokens_entrada": 1652, "tokens_salida": 340, "segundos": 7.2346, "llamadas": 0}
+{"ts": "2026-11-26T14:35:33.885800+00:00", "fase": "VERIFICACION", "evento": "cifras_sin_respaldo", "paso": 2, "cifras": ["33"]}
+{"ts": "2026-11-26T14:35:35.746937+00:00", "fase": "DECISION", "evento": "respuesta_llm", "paso": 3, "ok": true, "tokens_entrada": 2035, "tokens_salida": 21, "segundos": 1.8604, "llamadas": 1}
+{"ts": "2026-11-26T14:35:35.770039+00:00", "fase": "ACCION", "evento": "herramienta", "paso": 3, "herramienta": "generar_reporte", "argumentos": {"semana": 11}, "resultado": {"ok": true, "campos": ["ruta", "resumen"]}, "segundos": 0.0221}
+{"ts": "2026-11-26T14:35:35.770553+00:00", "fase": "OBSERVACION", "evento": "herramientas_observadas", "paso": 3, "cantidad": 1}
+{"ts": "2026-11-26T14:35:41.493803+00:00", "fase": "DECISION", "evento": "respuesta_llm", "paso": 4, "ok": true, "tokens_entrada": 2819, "tokens_salida": 257, "segundos": 5.7228, "llamadas": 0}
+{"ts": "2026-11-26T14:35:41.497497+00:00", "fase": "ACCION", "evento": "respuesta_final", "paso": 4, "verificada": true, "cifras_evaluadas": 18, "cifras_respaldadas": 18}
