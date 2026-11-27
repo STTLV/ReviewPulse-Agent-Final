@@ -8,6 +8,8 @@ Proyecto de Inteligencia Artificial de la Universidad Tecnológica de Bolívar. 
 - **Plan de implementación:** `docs/superpowers/plans/2026-11-17-reviewpulse-agente-2.md`
 - **Diseño:** `docs/superpowers/specs/2026-11-17-reviewpulse-agente-llm-design.md`
 - **Bitácora de IA:** `docs/bitacora_ia.md`
+- **Evidencia funcional de Railway:** [`docs/evidencias/ReviewPulse_Railway_Pruebas_20261126_220942.txt`](docs/evidencias/ReviewPulse_Railway_Pruebas_20261126_220942.txt)
+- **Video:** `docs/guion_video.md` es el guion **histórico V1**, no utilizar como guion de V2.
 
 ## Estado de la arquitectura
 
@@ -136,7 +138,7 @@ La evidencia de 120 corridas sigue INTACTA. Las correcciones de análisis, la re
 
 **Prototipo V2 (Railway):** https://reviewpulse-agent-production.up.railway.app/
 
-La comprobación pública de Sara se realizó desde PowerShell el **26/11/2026**, con el registro `ReviewPulse_Railway_Pruebas_20261126_220942.txt` conservado como evidencia de entrega. Los endpoints `/`, `/assets/styles.css`, `/assets/app.js`, `/api/salud`, `/api/semanas`, `/api/resultados` y `/api/demo` devolvieron HTTP 200. Una solicitud al chat sin código de acceso recibió HTTP 401, como se esperaba.
+La comprobación pública de Sara se realizó desde PowerShell el **26/11/2026**, con el registro [`docs/evidencias/ReviewPulse_Railway_Pruebas_20261126_220942.txt`](docs/evidencias/ReviewPulse_Railway_Pruebas_20261126_220942.txt) incorporado al repositorio como evidencia de entrega. Los endpoints `/`, `/assets/styles.css`, `/assets/app.js`, `/api/salud`, `/api/semanas`, `/api/resultados` y `/api/demo` devolvieron HTTP 200. Una solicitud al chat sin código de acceso recibió HTTP 401, como se esperaba.
 
 Se enviaron tres consultas autorizadas al chat y se registraron `modo_demo=False`, seis pasos y una herramienta invocada en cada una:
 
