@@ -1,0 +1,48 @@
+{
+  "fecha": "2026-11-26",
+  "objetivo": "Desagregación del clasificador TF-IDF sobre Gold, complementaria e independiente de T13",
+  "n_gold": 120,
+  "modelo": "data/modelo.joblib (modelo guardado de V2)",
+  "sklearn_entorno_auditoria": "1.8.0",
+  "caveat_version": "El joblib generó advertencia de versión diferente de scikit-learn; reconfirmar en entorno fijado del proyecto antes de dar por definitivo.",
+  "advertencias_carga_clases": [
+    "InconsistentVersionWarning"
+  ],
+  "longitud_regla": {
+    "corta": "<=99 caracteres",
+    "media": "100-150 caracteres",
+    "larga": ">150 caracteres",
+    "criterio": "terciles de n=40 del Gold; longitud incluye puntuación y espacios"
+  },
+  "tipeo_regla": "permutación de caracteres realizada por _ruido() reconstruyendo semilla 2026, conjunto evaluacion, prob_ironia 0.10, y validando igualdad exacta con gold.csv; NO incluyen otras perturbaciones (mayúsculas, tildes, emojis)",
+  "n_tipeo_permutado": 18,
+  "totales": {
+    "polaridad_correcta": 111,
+    "tema_correcto": 110,
+    "ambas_correctas": 101
+  },
+  "L02": {
+    "id": "EVAL-003",
+    "polaridad_gold": "negativa",
+    "polaridad_predicha": "positiva",
+    "confianza_polaridad": 0.47005,
+    "tema_predicho": "precio",
+    "contrafactual_corregir_tipeo": {
+      "polaridad": "neutra",
+      "confianza_polaridad": 0.49318
+    },
+    "interpretacion": "La corrección cambia positiva a neutra, NO a la gold negativa; el tipeo afecta la predicción, pero no explica completamente el fallo."
+  },
+  "limitaciones": [
+    "No se atribuyen tasas de Gold a las 120 ejecuciones del LLM ReAct/base.",
+    "Subgrupos pequeños, sin estimación de significancia ni inferencia causal.",
+    "Gold sintético, patrones del generador y un solo clasificador guardado.",
+    "La marca de tipeo corresponde exclusivamente a una transposición según el generador; no cubre todas las variantes ortográficas."
+  ],
+  "fuentes": [
+    "data/gold/gold.csv",
+    "src/reviewpulse/corpus.py",
+    "src/reviewpulse/modelo.py",
+    "data/modelo.joblib"
+  ]
+}

@@ -1,0 +1,10 @@
+﻿dimension,valor,n,aciertos_polaridad,exactitud_polaridad,aciertos_tema,exactitud_tema,aciertos_combinados,exactitud_combinada,alcance
+longitud,corta,40,36,0.900000,36,0.900000,32,0.800000,clasificador guardado sobre Gold; no es la tasa de éxito T13
+longitud,larga,40,38,0.950000,37,0.925000,35,0.875000,clasificador guardado sobre Gold; no es la tasa de éxito T13
+longitud,media,40,37,0.925000,37,0.925000,34,0.850000,clasificador guardado sobre Gold; no es la tasa de éxito T13
+tema,limpieza,36,35,0.972222,33,0.916667,32,0.888889,clasificador guardado sobre Gold; no es la tasa de éxito T13
+tema,precio,29,26,0.896552,29,1.000000,26,0.896552,clasificador guardado sobre Gold; no es la tasa de éxito T13
+tema,servicio,21,21,1.000000,18,0.857143,18,0.857143,clasificador guardado sobre Gold; no es la tasa de éxito T13
+tema,ubicacion,34,29,0.852941,30,0.882353,25,0.735294,clasificador guardado sobre Gold; no es la tasa de éxito T13
+tipeo,con_permutacion,18,16,0.888889,17,0.944444,15,0.833333,clasificador guardado sobre Gold; no es la tasa de éxito T13
+tipeo,sin_permutacion,102,95,0.931373,93,0.911765,86,0.843137,clasificador guardado sobre Gold; no es la tasa de éxito T13

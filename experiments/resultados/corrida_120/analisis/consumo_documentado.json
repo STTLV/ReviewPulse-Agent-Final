@@ -1,28 +1,41 @@
-﻿{
-    "fecha":  "2026-11-26",
-    "estado":  "TOKENS_MEDIDOS_COSTO_FACTURADO_PENDIENTE",
-    "corrida_real":  {
-                         "ejecuciones":  120,
-                         "modelo_principal":  "cx/gpt-6-luna-medium",
-                         "modelo_juez":  "gpt-5.6-luna-medium",
-                         "tokens_principal_entrada":  2446892,
-                         "tokens_principal_salida":  21196,
-                         "tokens_juez_entrada":  5300,
-                         "tokens_juez_salida":  1724,
-                         "tokens_totales_entrada":  2452192,
-                         "tokens_totales_salida":  22920
-                     },
-    "piloto":  {
-                   "ejecuciones":  4,
-                   "tokens_entrada":  82241,
-                   "tokens_salida":  690
-               },
-    "total_piloto_y_corrida":  {
-                                   "tokens_entrada":  2534433,
-                                   "tokens_salida":  23610
-                               },
-    "costo_facturado_usd":  null,
-    "costo_referencia_usd":  null,
-    "nota_costo":  "Facturacion y tarifas de OmniRoute pendientes de verificar. No incluye necesariamente las comprobaciones previas de conectividad.",
-    "autorizacion":  "Corrida autorizada por David el 25/11/2026; costo real a cargo de su cuenta (0 para Sara); al ser un servicio autohosteado, costo de referencia a tarifa publica de OpenAI."
+{
+  "fecha": "2026-11-26",
+  "estado": "TOKENS_MEDIDOS_COSTO_FACTURADO_PENDIENTE",
+  "corrida_real": {
+    "ejecuciones": 120,
+    "modelo_principal": "cx/gpt-6-luna-medium",
+    "modelo_juez": "gpt-5.6-luna-medium",
+    "tokens_principal_entrada": 2446892,
+    "tokens_principal_salida": 21196,
+    "tokens_juez_entrada": 5300,
+    "tokens_juez_salida": 1724,
+    "tokens_totales_entrada": 2452192,
+    "tokens_totales_salida": 22920
+  },
+  "piloto": {
+    "ejecuciones": 4,
+    "tokens_entrada": 82241,
+    "tokens_salida": 690
+  },
+  "total_piloto_y_corrida": {
+    "tokens_entrada": 2534433,
+    "tokens_salida": 23610
+  },
+  "costo_facturado_usd": null,
+  "costo_referencia_usd": 25.5844,
+  "nota_costo": "Tokens medidos de las 120 corridas; costo de referencia calculado con precios ilustrativos de modelos NO idénticos a los alias ejecutados. Costo realmente facturado: sin verificar. La tarifa de referencia excede US$1.",
+  "autorizacion": "Corrida autorizada por David el 25/11/2026; costo real a cargo de su cuenta (0 para Sara); al ser un servicio autohosteado, costo de referencia a tarifa publica de OpenAI.",
+  "costo_referencia_detalle": {
+    "estado": "ESCENARIO_CON_TARIFAS_DE_REFERENCIA_NO_FACTURA",
+    "costo_principal_usd": "25.52872",
+    "costo_juez_usd": "0.05568",
+    "costo_total_usd": "25.58440",
+    "fuente_archivo": "experiments/precios_referencia_t13.json",
+    "fuente_tarifas_reportada": "https://developers.openai.com/api/docs/pricing",
+    "modelo_principal_referencia": "gpt-6-astra",
+    "modelo_juez_referencia": "gpt-5.6-sol",
+    "alias_ejecucion_difieren_de_modelos_referencia": true,
+    "alcanzado_umbral_1_usd_con_tarifa_referencia": false,
+    "nota": "Alias reales de OmniRoute distintos de los modelos usados para valorar el escenario. No inferir factura ni costo exacto; no se incluyen piloto, llamadas previas ni Railway."
+  }
 }
