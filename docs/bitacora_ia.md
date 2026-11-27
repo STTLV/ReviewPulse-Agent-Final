@@ -1,8 +1,8 @@
-# Bitácora humano-IA | Hito 2 | ReviewPulse-Agent
+# Bitácora humano-IA | ReviewPulse-Agent V2 | Hito 3
 
-**Integrantes:** Ellen Nicole Ordoñez Chavez y Sara Bastidas Triana. **Curso:** Inteligencia Artificial, Universidad Tecnológica de Bolívar. **Fecha del corte:** 16 de noviembre de 2026.
+**Integrantes:** Ellen Nicole Ordoñez Chavez y Sara Bastidas Triana. **Curso:** Inteligencia Artificial, Universidad Tecnológica de Bolívar. **Periodo documentado:** octubre–noviembre de 2026. **Última actualización documental:** 26 de noviembre de 2026.
 
-Se listan usos relevantes respaldados por la bitácora original y las verificaciones actuales, no transcripciones literales. **Claude** apoyó la construcción del sistema; **ChatGPT** se utilizó para auditoría y preparación de la comparación de referencia. Ninguna de estas herramientas se consulta durante la ejecución del agente.
+Se listan usos relevantes respaldados por la bitácora original y las verificaciones actuales, no transcripciones literales. **Claude** apoyó la construcción del sistema; **ChatGPT** se utilizó para auditoría y preparación de la comparación de referencia. Claude, ChatGPT, Copilot y Codex se registran como asistentes de desarrollo y revisión. Esto es distinto del **LLM principal que sí utiliza V2 en tiempo de ejecución** y del juez LLM usado en la evaluación R01.
 
 | Fecha | Integrante | Herramienta | Para qué se utilizó | Qué aceptamos, cambiamos o descartamos | Cómo lo verificamos |
 |---|---|---|---|---|---|
@@ -37,7 +37,7 @@ Los datos son **sintéticos**. La evaluación M1 histórica representa cinco ree
 
 **Caso de error detectado con apoyo de IA:** al auditar el Hito 2 se identificó que ejecutar el agente completo E02 no era una verdadera *línea base comparativa*. Se corrigió introduciendo un clasificador mayoritario y usando el mismo conjunto de control para ambos sistemas. También se corrigió la sintaxis de `--escenario` y `--semilla` en la documentación.
 
-**Pendientes del proyecto final:** comparación adicional de modelos y ajuste de hiperparámetros, análisis de al menos diez errores, evaluación ética, informe IEEE y defensa oral. Esta bitácora continúa en los próximos hitos.
+**Nota histórica:** a la fecha del Hito 2 aún quedaban pendientes los experimentos comparativos, el análisis de errores, la evaluación responsable y el informe IEEE. Estos elementos avanzaron posteriormente y se documentan en los registros de T13 y de cierre de Hito 3. No debe leerse esta lista como el estado actual de V2.
 
 ## Registro complementario T8 (24/11/2026)
 
@@ -52,3 +52,24 @@ Se utilizo ChatGPT para revisar la metodologia, elaborar un script de evaluacion
 - **IA responsable:** se agruparon 120 reseñas Gold por tema, longitud y permutación tipográfica introducida por el generador reproducible. Se aplicó el clasificador guardado sin nuevas consultas al LLM. Estos resultados NO se atribuyen al contraste de 120 llamadas ReAct/base.
 - **Limitación irreversible del experimento existente:** las respuestas finales históricas no fueron retenidas completas; por ello la comparación humana preseleccionada con el juez no se puede reconstruir retrospectivamente. Se documenta como no evaluable, no como realizada.
 - **Verificación y límites:** resultados cotejados con archivos y herramientas locales. No se acreditó con esta auditoría un despliegue remoto en Railway, ejecución de Docker o factura del proveedor. La carga del modelo persistido generó advertencias de incompatibilidad de versión de scikit-learn en el entorno de auditoría; reconfirmar las predicciones en el entorno fijado.
+
+
+## Registro de cierre de T13 y Hito 3 (25–26/11/2026)
+
+Los hitos siguientes complementan las entradas históricas; **no alteran corridas ni atribuyen a la IA decisiones tomadas por las integrantes**. Las verificaciones experimentales y operativas son distintas.
+
+| Fecha | Responsable | Herramienta / tecnología | Para qué se utilizó | Qué se aceptó, modificó o descartó | Cómo se verificó |
+|---|---|---|---|---|---|
+| 25/11/2026 | Equipo; corrida autorizada por David | OmniRoute, agente ReAct y juez LLM | Ejecutar el protocolo comparativo de T13: 20 tareas, 3 repeticiones y 2 sistemas. | Se conservaron 120 ejecuciones originales, sin modificar resultados ni umbrales. Se rechazó afirmar superioridad estadística con una diferencia observada de 5 pp. | `experiments/resultados/corrida_120/corridas.csv` y 120 trazas: ReAct 48/60, base 45/60; bootstrap pareado IC95 % [−10,+20] pp. |
+| 26/11/2026 | Sara, revisión documental | ChatGPT | Auditar la observación de David sobre diez errores, juez, costo y subgrupos Gold. | Se precisaron causas respaldadas frente a hipótesis no demostrables, se declaró no evaluable la revisión humana retrospectiva y se calculó US$25,58440 como costo **de referencia**, no facturado. | `docs/T13_CORRECCIONES_Y_LIMITACIONES.md`, `experiments/resultados/corrida_120/analisis/` y `experiments/resultados/gold_subgrupos_responsable/`. |
+| 26/11/2026 | Sara y Ellen; revisión de cambios en GitHub | GitHub / pruebas automáticas y revisión humana | Integrar correcciones documentales y evidencias sin repetir las 120 llamadas al LLM. | Se preparó el PR #35 para complementar los PR #32–34; las integrantes confirman su integración en `v2`. | PR #35, `README.md`, bitácora y archivos de `experiments/`. El estado remoto exacto debe cotejarse con GitHub al preparar la entrega. |
+| 26/11/2026 | Sara; apoyo técnico de David en el despliegue | ChatGPT (script de prueba), PowerShell y Railway | Comprobar la operación pública de la interfaz y API después del despliegue. | Se conservaron sin cambios datos experimentales y credenciales privadas; se probaron tres consultas del agente con `modo_demo=False`. No se reclamó verificación de persistencia entre redespliegues. | Registro `ReviewPulse_Railway_Pruebas_20261126_220942.txt`: HTTP 200 en 7 rutas, HTTP 401 sin código, tres respuestas con 6 pasos y 1 herramienta cada una. |
+| 26/11/2026 | Sara y Ellen | ChatGPT y Claude | Preparar el informe IEEE y la presentación del video contra la rúbrica del Hito 3. | Se corrigieron costos y errores en el informe; la presentación se sometió a una revisión de contenido y quedó por aplicar/validar la plantilla oficial UTB. Los enlaces de video se agregarán cuando existan. | PDF IEEE actualizado, fuente `.tex` y comparación con los criterios 1–8 de la rúbrica. El video aún no se considera publicado en este corte. |
+
+### Límites de la evidencia y contribuciones
+
+- **Evidencias T13:** los datos originales son sintéticos; el experimento compara ReAct y línea base en tareas con LLM. Los subgrupos Gold evalúan el clasificador guardado, no las 120 respuestas del LLM.
+- **Juez LLM:** no se retuvieron las respuestas completas de R01. La revisión humana de esos textos históricos no se pudo realizar y no se declara como realizada.
+- **Despliegue Railway:** el 26/11 se comprobó funcionamiento básico en la URL pública, no la persistencia tras recrear contenedores ni una auditoría de seguridad en producción. El código de acceso debe comunicarse de forma privada al evaluador.
+- **Uso de IA:** los asistentes apoyaron implementación, auditoría, documentación y presentaciones, mientras que las decisiones académicas, selección de evidencia y revisión fueron responsabilidad de Sara y Ellen. David colaboró con revisión técnica, autorización experimental y apoyo al despliegue; no se presenta como una integrante adicional del equipo.
+- **Pendiente a la fecha del corte:** cerrar accesos y video, completar el PDF único con enlaces comprobados y registrar una evidencia del despliegue persistente si se valida.
