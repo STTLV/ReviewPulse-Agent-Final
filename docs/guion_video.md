@@ -1,3 +1,5 @@
+> **AVISO: DOCUMENTO HISTÓRICO DE V1 / HITO 2. NO USAR PARA LA SUSTENTACIÓN FINAL DE V2.** Este guion describe STRIPS/BFS, Streamlit y comandos retirados. La sustentación de Hito 3 corresponde al agente ReAct V2, FastAPI y el despliegue Railway; se conserva este archivo únicamente para trazabilidad del proyecto.
+
 # Guion del video — ReviewPulse-Agent (máximo 20 minutos)
 
 Ambas integrantes con cámara y voz. Integrante A: Ellen Nicole Ordoñez Chavez. Integrante B: Sara Bastidas Triana.

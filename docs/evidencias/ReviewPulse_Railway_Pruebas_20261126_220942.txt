@@ -1,0 +1,19 @@
+﻿[INFO] URL : https://reviewpulse-agent-production.up.railway.app
+[OK] Interfaz / : HTTP 200
+[OK] CSS /assets/styles.css : HTTP 200
+[OK] JavaScript /assets/app.js : HTTP 200
+[OK] API /api/salud : HTTP 200
+[OK] Semanas /api/semanas : HTTP 200
+[INFO] Filas semanas : Detectadas: 1
+[OK] Reportes /api/resultados : HTTP 200
+[INFO] Reportes disponibles : Detectados: 1
+[OK] Estado demostracion /api/demo : HTTP 200
+[INFO] Modo demo (antes) : modo_demo=False; eventos_en_memoria=24
+[OK] Proteccion del chat sin codigo : HTTP 401 (correcto)
+[OK] Respuesta chat : Pregunta: Â¿CuÃ¡ntas reseÃ±as hubo en la semana 8? ; modo_demo=False ; pasos=6 ; herramientas=1 ; respuesta=En la semana 8 hubo **40 reseñas** en total, según el recuento de reseñas sin filtros adicionales.
+[OK] Respuesta chat : Pregunta: Â¿El servicio empeorÃ³ en la semana 8? ; modo_demo=False ; pasos=6 ; herramientas=1 ; respuesta=Sí. La comparación CUSUM confirma una alarma para el servicio en la semana 8: hubo 19 reseñas, 15 negativas (78,9 %) y la señal superó el umbral establecido. Fuente: herramienta de comparación CUSUM, semana 8, tema servicio.
+[OK] Respuesta chat : Pregunta: Â¿CuÃ¡ntas reseÃ±as hubo en la semana 40? ; modo_demo=False ; pasos=6 ; herramientas=1 ; respuesta=No hay datos disponibles para la semana 40, así que no puedo determinar cuántas reseñas hubo.
+[INFO] Modo demo (despues) : modo_demo=False; eventos_en_memoria=42
+
+NOTA: Las pruebas de interfaz y endpoints no garantizan por si solas disponibilidad del proveedor LLM, exactitud semantica, persistencia de volÃºmenes o seguridad de produccion.
+NO se llamo a /api/cierre ni /api/reiniciar. No se guardaron claves.
