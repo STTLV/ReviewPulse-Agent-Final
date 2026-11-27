@@ -1,6 +1,6 @@
 # ReviewPulse-Agent 2.0
 
-Proyecto de Inteligencia Artificial de la Universidad Tecnológica de Bolívar. ReviewPulse procesa reseñas **sintéticas** de un hotel piloto, las clasifica por tema y polaridad, calcula alertas CUSUM y genera resúmenes semanales. El nuevo agente con LLM se integra por tareas y por PR separados.
+Proyecto de Inteligencia Artificial de la Universidad Tecnológica de Bolívar. ReviewPulse procesa reseñas **sintéticas** de un hotel piloto, las clasifica por tema y polaridad, calcula alertas CUSUM y genera resúmenes semanales. La versión V2 integra un agente LLM ReAct con herramientas, una API FastAPI, una interfaz web y evaluación experimental contra una línea base sin herramientas.
 
 **Integrantes:** Ellen Nicole Ordoñez Chavez y Sara Bastidas Triana.
 
@@ -11,7 +11,7 @@ Proyecto de Inteligencia Artificial de la Universidad Tecnológica de Bolívar. 
 
 ## Estado de la arquitectura
 
-La **Tarea 3** separa el ciclo determinista del razonamiento del futuro agente:
+La **Tarea 3** separó el ciclo determinista del razonamiento del agente ReAct:
 
 - `src/reviewpulse/ciclo/ingesta.py`: consulta plataformas cada seis horas simuladas, valida, clasifica y persiste reseñas en SQLite; gestiona retrasos y alertas CUSUM
 - `src/reviewpulse/ciclo/cierre.py`: cierra semanas cuando corresponde, registra eventos JSONL y garantiza el reporte aun si el manejador falla
@@ -125,8 +125,31 @@ El Dockerfile incluye `config/config.json`, `data/modelo.joblib` y los JSON de `
 
 `railway.toml` selecciona el builder Dockerfile y configura `/api/salud` como health check con timeout de 120 segundos. La prueba local de contenedor documentada anteriormente corresponde a una revisión previa: su resultado 404 en `/` ya no describe `v2`, donde la ruta sirve la interfaz T11. En esta revisión no se pudo repetir el build ni las comprobaciones HTTP/SSE/persistencia porque el entorno no permitió acceder al socket del daemon Docker; por tanto, no se certifican aquí para el commit actual.
 
-La API debe operar con **un worker y una réplica**, porque el candado es local al proceso. Aún no se ha realizado un despliegue en vivo en Railway; `railway.toml` configura la construcción y el health check, pero no acredita que el servicio esté desplegado. No se verificó una URL pública ni se modificó Railway durante esta revisión. Sin un volumen persistente, un contenedor nuevo puede regenerar la base demo. Acceso, secretos, volumen, staging y autorización de David siguen pendientes.
+La API debe operar con **un worker y una réplica**, porque el candado es local al proceso. **En la revisión local de T12 del 25/11** todavía no se había confirmado Railway; esta frase describe ese hito histórico y no el estado actual. El despliegue público se validó posteriormente el 26/11, según el apartado siguiente. Sin un volumen persistente, un contenedor nuevo puede regenerar la base demo; la permanencia de datos después de recrear la instancia **sigue sin verificarse**.
 
 ## Aclaraciones experimentales posteriores a T13 (26/11/2026)
 
-La evidencia de 120 corridas sigue INTACTA. Las correcciones de análisis, la revisión documental de diez fallos y el costo de referencia constan en `docs/T13_CORRECCIONES_Y_LIMITACIONES.md`. Los subgrupos de errores tipográficos, longitud y tema calculados sobre el Gold con el clasificador guardado se encuentran en `experiments/resultados/gold_subgrupos_responsable/`; NO son subgrupos de éxito ReAct/base. Railway sigue pendiente de validación pública en esta revisión.
+La evidencia de 120 corridas sigue INTACTA. Las correcciones de análisis, la revisión documental de diez fallos y el costo de referencia constan en `docs/T13_CORRECCIONES_Y_LIMITACIONES.md`. Los subgrupos de errores tipográficos, longitud y tema calculados sobre el Gold con el clasificador guardado se encuentran en `experiments/resultados/gold_subgrupos_responsable/`; NO son subgrupos de éxito ReAct/base. La auditoría documental T13 precedió a las pruebas públicas de Railway; ver el estado posterior indicado abajo.
+
+
+## Despliegue público y verificación funcional (26/11/2026)
+
+**Prototipo V2 (Railway):** https://reviewpulse-agent-production.up.railway.app/
+
+La comprobación pública de Sara se realizó desde PowerShell el **26/11/2026**, con el registro `ReviewPulse_Railway_Pruebas_20261126_220942.txt` conservado como evidencia de entrega. Los endpoints `/`, `/assets/styles.css`, `/assets/app.js`, `/api/salud`, `/api/semanas`, `/api/resultados` y `/api/demo` devolvieron HTTP 200. Una solicitud al chat sin código de acceso recibió HTTP 401, como se esperaba.
+
+Se enviaron tres consultas autorizadas al chat y se registraron `modo_demo=False`, seis pasos y una herramienta invocada en cada una:
+
+| Consulta de prueba | Respuesta registrada |
+|---|---|
+| ¿Cuántas reseñas hubo en la semana 8? | 40 reseñas |
+| ¿El servicio empeoró en la semana 8? | Alarma CUSUM; 19 reseñas de servicio y 15 negativas (78,9 %) |
+| ¿Cuántas reseñas hubo en la semana 40? | No hay datos disponibles para esa semana |
+
+Este resultado prueba una **verificación funcional básica del despliegue**, no una auditoría integral de exactitud semántica, seguridad, disponibilidad del proveedor, facturación o persistencia entre despliegues. Las cifras son respuestas del agente en esas tres consultas; no se verificaron de forma independiente contra toda la base de producción. No se ejecutaron los endpoints de reinicio o cierre durante las comprobaciones.
+
+**Acceso del docente:** el chat requiere un código de acceso, que debe entregarse por un canal privado autorizado, nunca en GitHub, el video, capturas ni un PDF público. Se recomienda verificar el enlace en una ventana privada y comprobar previamente que el docente tenga los permisos necesarios.
+
+**Persistencia:** queda por confirmar con la configuración efectiva de Railway si `REVIEWPULSE_DB_PATH` apunta a un volumen persistente y si la base se conserva al recrear o redesplegar el servicio. El `docker restart` local de T12 no comprueba esa propiedad en producción.
+
+**Reproducibilidad:** las pruebas del proyecto se ejecutan con las versiones fijadas en `requirements.txt`. No se afirma que estas comprobaciones HTTP sustituyan la batería automática ni los 120 registros experimentales de T13.
