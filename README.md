@@ -155,3 +155,8 @@ Este resultado prueba una **verificación funcional básica del despliegue**, no
 **Persistencia:** queda por confirmar con la configuración efectiva de Railway si `REVIEWPULSE_DB_PATH` apunta a un volumen persistente y si la base se conserva al recrear o redesplegar el servicio. El `docker restart` local de T12 no comprueba esa propiedad en producción.
 
 **Reproducibilidad:** las pruebas del proyecto se ejecutan con las versiones fijadas en `requirements.txt`. No se afirma que estas comprobaciones HTTP sustituyan la batería automática ni los 120 registros experimentales de T13.
+## Nota final sobre atribuciones y evidencia histórica (27/11/2026)
+
+El equipo autor de ReviewPulse-Agent V2 está integrado por **Sara Bastidas Triana y Ellen Nicole Ordoñez Chavez**. David figura como **revisor técnico externo de cambios y pull requests**, no como integrante ni autor. Las menciones a autorizaciones, gastos o tareas previstas para terceros en documentos históricos son antecedentes administrativos o de planificación, no pruebas autónomas de quién ejecutó las 120 llamadas, pagó una factura o realizó el despliegue. La bitácora incorpora una aclaración de atribuciones fechada el 27/11/2026; no se han cambiado registros experimentales.
+
+Para revisar los diez errores debe utilizarse `experiments/resultados/corrida_120/analisis/revision_documental_10.csv` como **documentación definitiva**. El archivo `revision_humana_10_borrador.csv` contiene estados preliminares «pendiente» y se preserva únicamente por trazabilidad: la revisión humana de las respuestas originales es **no evaluable retrospectivamente**. La distinción se documenta en [`experiments/resultados/corrida_120/analisis/README.md`](experiments/resultados/corrida_120/analisis/README.md).
